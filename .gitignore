@@ -1,0 +1,7 @@
+localrust/
+rust-nightly-x86_64-unknown-linux-gnu
+**/target/*
+**/rust.tar.gz
+**/rust_bin/*
+GIT_LOG_2
+for-2.txt
