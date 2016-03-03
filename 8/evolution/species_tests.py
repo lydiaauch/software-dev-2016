@@ -20,6 +20,14 @@ class TestSpecies(unittest.TestCase):
         self.species_list = [self.species_2, self.species_4, self.species_3, self.species_5, self.species_1]
 
 
+    def test_can_eat(self):
+        self.assertFalse(self.species_1.can_eat())
+        self.assertTrue(self.species_4.can_eat())
+        fat_tissue = Species(4, 3, 4, [TraitCard("fat-tissue")], 3)
+        self.assertTrue(fat_tissue.can_eat())
+        fat_tissue.fat_storage = 4
+        self.assertFalse(fat_tissue.can_eat())
+
     def test_trait_names(self):
         self.assertEqual(self.defender.trait_names(), [])
         self.assertEqual(self.attacker.trait_names(), ["carnivore"])
