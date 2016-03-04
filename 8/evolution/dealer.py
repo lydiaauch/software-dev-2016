@@ -83,7 +83,7 @@ class Dealer(object):
         if len(hungry_carnivores) == 1 and len(hungry_herbivores) == 0:
             # TODO: targets includes yourself
             targets = Dealer.carnivore_targets(hungry_carnivores[0],
-                                               self.make_list_of_player_states())
+                                               self.opponents())
             target_player = next(player for player in self.make_list_of_player_states() if targets[0] in player.species)
             if len(targets) == 1 and target_player != current_player['state']:
                 return [hungry_carnivores[0], target_player, targets[0]]
