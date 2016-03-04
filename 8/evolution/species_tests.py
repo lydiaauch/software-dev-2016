@@ -6,11 +6,11 @@ from traitcard import TraitCard
 class TestSpecies(unittest.TestCase):
 
     def setUp(self):
-        self.attacker = Species.default()
+        self.attacker = Species()
         self.attacker.traits = [TraitCard("carnivore")]
-        self.defender = Species.default()
-        self.left_neighbor = Species.default()
-        self.right_neighbor = Species.default()
+        self.defender = Species()
+        self.left_neighbor = Species()
+        self.right_neighbor = Species()
 
         self.species_1 = Species(4, 4, 4, [], 0)
         self.species_2 = Species(4, 4, 4, [], 0)

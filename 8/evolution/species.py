@@ -12,7 +12,18 @@ class Species(object):
     """
     A data representation of a Species in the Evolution game
     """
-    def __init__(self, population, food, body, traits, fat_storage):
+    def __init__(self, population=None, food=None, body=None, traits=None, fat_storage=None):
+        if population is None:
+            population = 1
+        if food is None:
+            food = 0
+        if body is None:
+            body = 0
+        if traits is None:
+            traits = []
+        if fat_storage is None:
+            fat_storage = 0
+
         self.population = population
         self.food = food
         self.body = body
@@ -30,10 +41,6 @@ class Species(object):
                     self.body == other.body,
                     self.traits == other.traits,
                     self.fat_storage == other.fat_storage])
-
-    @classmethod
-    def default(cls):
-        return Species(1, 0, 0, [], 0)
 
     def is_attackable(self, attacker, left_neighbor=False, right_neighbor=False):
         """

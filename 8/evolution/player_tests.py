@@ -7,19 +7,19 @@ from player_state import PlayerState
 
 class TestPlayer(unittest.TestCase):
     def setUp(self):
-        self.species_1 = Species(4, 4, 4, [], 0)
-        self.species_2 = Species(4, 4, 4, [], 0)
-        self.species_3 = Species(4, 4, 3, [], 0)
-        self.species_4 = Species(4, 3, 3, [], 0)
-        self.species_5 = Species(3, 1, 3, [], 0)
-        self.species_6 = Species(4, 3, 3, [], 0)
-        self.species_7 = Species(4, 4, 4, [], 0)
+        self.species_1 = Species(4, 4, 4)
+        self.species_2 = Species(4, 4, 4)
+        self.species_3 = Species(4, 4, 3)
+        self.species_4 = Species(4, 3, 3)
+        self.species_5 = Species(3, 1, 3)
+        self.species_6 = Species(4, 3, 3)
+        self.species_7 = Species(4, 4, 4)
         self.species_list = [self.species_2, self.species_4, self.species_3, self.species_5, self.species_1]
-        self.player_1 = PlayerState.default()
+        self.player_1 = PlayerState()
         self.player_1.species = [self.species_4, self.species_5, self.species_6]
-        self.player_2 = PlayerState.default()
+        self.player_2 = PlayerState()
         self.player_2.species = [self.species_1]
-        self.player_3 = PlayerState.default()
+        self.player_3 = PlayerState()
         self.player_3.species = [self.species_2, self.species_3, self.species_7]
 
     def test_feed_fatty(self):
