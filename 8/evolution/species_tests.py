@@ -6,17 +6,17 @@ from traitcard import TraitCard
 class TestSpecies(unittest.TestCase):
 
     def setUp(self):
-        self.attacker = Species()
+        self.attacker = Species.default()
         self.attacker.traits = [TraitCard("carnivore")]
-        self.defender = Species()
-        self.left_neighbor = Species()
-        self.right_neighbor = Species()
+        self.defender = Species.default()
+        self.left_neighbor = Species.default()
+        self.right_neighbor = Species.default()
 
-        self.species_1 = Species(4, 4, 4)
-        self.species_2 = Species(4, 4, 4)
-        self.species_3 = Species(4, 4, 3)
-        self.species_4 = Species(4, 3, 3)
-        self.species_5 = Species(3, 3, 3)
+        self.species_1 = Species(4, 4, 4, [], 0)
+        self.species_2 = Species(4, 4, 4, [], 0)
+        self.species_3 = Species(4, 4, 3, [], 0)
+        self.species_4 = Species(4, 3, 3, [], 0)
+        self.species_5 = Species(3, 3, 3, [], 0)
         self.species_list = [self.species_2, self.species_4, self.species_3, self.species_5, self.species_1]
 
 
