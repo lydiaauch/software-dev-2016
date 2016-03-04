@@ -12,11 +12,11 @@ class TestSpecies(unittest.TestCase):
         self.left_neighbor = Species()
         self.right_neighbor = Species()
 
-        self.species_1 = Species(4, 4, 4, [], 0)
-        self.species_2 = Species(4, 4, 4, [], 0)
-        self.species_3 = Species(4, 4, 3, [], 0)
-        self.species_4 = Species(4, 3, 3, [], 0)
-        self.species_5 = Species(3, 3, 3, [], 0)
+        self.species_1 = Species(4, 4, 4)
+        self.species_2 = Species(4, 4, 4)
+        self.species_3 = Species(4, 4, 3)
+        self.species_4 = Species(4, 3, 3)
+        self.species_5 = Species(3, 3, 3)
         self.species_list = [self.species_2, self.species_4, self.species_3, self.species_5, self.species_1]
 
 
