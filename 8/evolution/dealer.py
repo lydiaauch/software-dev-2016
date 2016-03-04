@@ -2,7 +2,19 @@ from player_state import *
 from species import *
 
 """
-A Dealer Object
+A Dealer Object.
+
+A Feeding is one of:
+- false if the player chooses not to feed.
+- Natural if the herbivore at the given index is being fed.
+- [Natural, Nat+] if a fat-tissue species at the given index is being
+fed the Nat+ amount of food.
+- [Natural, Natural, Natural] if the carnivore at the first index is
+attacking the player at the second index, and defender species at the
+third index.
+
+A Natural is a Natural number >= 0
+A Nat+ is a Natural number > 0
 """
 
 class Dealer(object):
@@ -32,11 +44,35 @@ class Dealer(object):
         executes one step in the feeding cycle and updates the game state accordingly
         """
         current_player = self.list_of_player_sets[self.current_player_index]
-        if self.watering_hole < 0:
+        if self.watering_hole <= 0:
             raise Exception("There is no food in the watering hole")
-        self.next_feed(current_player)
-        # process stuff here
-        # TODO: Scavenge trait
+        feeding = self.next_feed(current_player)
+        #TODO validate given feeding
+        if feeding is not False:
+            if isinstance(feeding, int):
+                species = current_player['state'].species[feeding]
+                self.watering_hole -= 1
+                species.food += 1
+            elif len(feeding) == 2:
+                food_requested = feeding[1]
+                species = current_player['state'].species[feeding[0]]
+                if food_requested > self.watering_hole:
+                    raise Exception("Fat tissue species asked for too much food.")
+                self.watering_hole -= food_requested
+                species.fat_storage += food_requested
+            elif len(feeding) == 3:
+                attacker = current_player['state'].species[feeding[0]]
+                target_player = self.list_of_player_sets[feeding[1]]['state']
+                defender = target_player.species[feeding[2]]
+                defender.population -= 1
+                attacker.food += 1
+                self.watering_hole -= 1
+                self.feed_scavengers()
+                if defender.population == 0:
+                    target_player.species.remove(defender)
+                    self.deal(2, target_player)
+
+        self.current_player_index = (self.current_player_index + 1) % len(self.list_of_player_sets)
 
     def next_feed(self, current_player):
         """
@@ -44,23 +80,12 @@ class Dealer(object):
         :param current_player: the player which is choosing a species to feed
         :return: a Feeding
         """
-        auto_eat = self.auto_eat(current_player['state'].species)
-        if auto_eat:
-            return auto_eat
+        auto_eat = self.auto_eat()
+        if auto_eat is None:
+            return current_player['interface'].next_feeding(current_player['state'],
+                                    self.watering_hole, self.opponents())
         else:
-            current_player['interface'].next_feeding(current_player['interface'], self.watering_hole, self.opponents())
-
-
-    def check_for_hungries(self, list_of_species):
-        """
-        looks for hungry species in a players list of species
-        :return: list of hungry species
-        """
-        hungries = []
-        for species in list_of_species:
-            if species.can_eat():
-                hungries.append(species)
-        return hungries
+            return auto_eat
 
     def auto_eat(self):
         """
@@ -74,20 +99,50 @@ class Dealer(object):
         hungry_carnivores = [species for species in current_player['state'].species
                                 if "carnivore" in species.trait_names() and species.can_eat()]
         if len(hungry_herbivores) == 1 and len(hungry_carnivores) == 0:
+            herbivore_index = current_player['state'].species.index(hungry_herbivores[0])
             if "fat-tissue" in hungry_herbivores[0].trait_names():
                 max_food = hungry_herbivores[0].body - hungry_herbivores[0].fat_storage
                 food_requested = min(self.watering_hole, max_food)
-                return [hungry_herbivores[0], food_requested]
+                return [herbivore_index, food_requested]
             else:
-                return hungry_herbivores[0]
+                return herbivore_index
         if len(hungry_carnivores) == 1 and len(hungry_herbivores) == 0:
-            # TODO: targets includes yourself
+            carnivore_index = current_player['state'].species.index(hungry_carnivores[0])
             targets = Dealer.carnivore_targets(hungry_carnivores[0],
                                                self.opponents())
             target_player = next(player for player in self.make_list_of_player_states() if targets[0] in player.species)
             if len(targets) == 1 and target_player != current_player['state']:
-                return [hungry_carnivores[0], target_player, targets[0]]
+                defender_index = target_player.species.index(targets[0])
+                target_index = self.make_list_of_player_states().index(target_player);
+                return [carnivore_index, target_index, defender_index]
         return None
+
+    def feed_scavengers(self):
+        """
+        Gives one food token to all species with the scavenger trait.
+        """
+        for player in self.make_list_of_player_states():
+            for species in player.species:
+                if "scavenger" in species.trait_names() and species.food < species.population:
+                    species.food += 1
+                    self.watering_hole -= 1
+
+    def deal(self, num_cards, player):
+        """
+        Gives num_cards to the player from the deck.
+        """
+        pass
+
+    def check_for_hungries(self, list_of_species):
+        """
+        looks for hungry species in a players list of species
+        :return: list of hungry species
+        """
+        hungries = []
+        for species in list_of_species:
+            if species.can_eat():
+                hungries.append(species)
+        return hungries
 
     def make_list_of_player_states(self):
         """
@@ -108,7 +163,6 @@ class Dealer(object):
         opponents.pop(self.current_player_index)
         return opponents
 
-    #TODO Is this really what we want?
     @classmethod
     def carnivore_targets(cls, carnivore, list_of_player):
         """

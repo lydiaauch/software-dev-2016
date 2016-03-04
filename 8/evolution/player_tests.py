@@ -90,8 +90,8 @@ class TestPlayer(unittest.TestCase):
         self.species_5.traits = [TraitCard("carnivore")]
         self.species_6.traits = [TraitCard("carnivore")]
         self.assertEqual(Player.next_feeding(self.player_1, 10, [self.player_2, self.player_3]), [0, 0, 0])
-        # Test no attackable species
-        self.assertEqual(Player.next_feeding(self.player_1, 10, [self.player_1]), False)
+        # Test if you can attack your own species.
+        self.assertEqual(Player.next_feeding(self.player_1, 10, [self.player_1]), [0,0,0])
         # Test exception
         with self.assertRaises(Exception):
             Player.next_feeding(self.player_2, 10, [self.player_1])

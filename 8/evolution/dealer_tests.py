@@ -30,6 +30,7 @@ class TestDealer(unittest.TestCase):
         self.dealer.list_of_player_sets[2]['state'].species = [self.species_3]
         self.dealer.list_of_player_sets[3]['state'].species = [self.species_4, self.species_5]
 
+
     def test_check_for_hungries(self):
         hungries = self.dealer.check_for_hungries(self.species_list)
         self.assertEqual(1, len(hungries))
@@ -58,11 +59,11 @@ class TestDealer(unittest.TestCase):
         self.dealer.current_player_index = 2
         self.species_3.traits= [TraitCard("fat-tissue")]
         self.species_3.fat_storage = 0
-        self.assertEqual(self.dealer.auto_eat(), [self.species_3, 3])
+        self.assertEqual(self.dealer.auto_eat(), [0, 3])
 
         self.species_3.traits = []
         self.species_3.food = 2
-        self.assertEqual(self.dealer.auto_eat(), self.species_3)
+        self.assertEqual(self.dealer.auto_eat(), 0)
 
         self.species_3.traits = [TraitCard("carnivore")]
         self.assertIsNone(self.dealer.auto_eat())
@@ -71,14 +72,64 @@ class TestDealer(unittest.TestCase):
         self.species_4.traits = [TraitCard("climbing")]
         self.species_5.traits = [TraitCard("climbing")]
 
-        self.assertEqual(self.dealer.auto_eat(),
-                         [self.species_3,
-                          self.dealer.list_of_player_sets[0]['state'],
-                          self.species_1])
+        self.assertEqual(self.dealer.auto_eat(), [0, 0, 0])
 
         self.species_3.food = 4
         self.assertIsNone(self.dealer.auto_eat())
 
+    def test_feed_1_herbivore(self):
+        # current player has single hungry herbivore -> auto_eat
+        self.species_3.food = 3
+        self.dealer.feed1()
+        self.assertEqual(self.dealer.watering_hole, 9)
+        self.assertEqual(self.dealer.current_player_index, 3)
+        self.assertEqual(self.species_3.food, 4)
+
+    def test_feed_1_fatty(self):
+        # current player is feeding fat-tissue species
+        self.species_3.food = 3
+        self.species_3.traits = [TraitCard("fat-tissue")]
+        self.dealer.feed1()
+        self.assertEqual(self.dealer.watering_hole, 7)
+        self.assertEqual(self.dealer.current_player_index, 3)
+        self.assertEqual(self.species_3.food, 3)
+        self.assertEqual(self.species_3.fat_storage, 3)
+
+    def test_feed_1_carnivore(self):
+        self.species_3.food = 3
+        self.species_3.traits = [TraitCard("carnivore")]
+        self.species_2.traits = [TraitCard("climbing")]
+        self.species_4.traits = [TraitCard("climbing")]
+        self.species_5.traits = [TraitCard("climbing")]
+
+        self.dealer.feed1()
+        self.assertEqual(self.dealer.watering_hole, 9)
+        self.assertEqual(self.dealer.current_player_index, 3)
+        self.assertEqual(self.species_3.food, 4)
+        self.assertEqual(self.species_1.population, 3)
+
+    def test_feed_1_cant_feed(self):
+        self.dealer.feed1()
+        self.assertEqual(self.dealer.current_player_index, 3)
+
+    def test_feed_1_no_wh_food(self):
+        self.dealer.watering_hole = 0
+        with self.assertRaises(Exception):
+            self.dealer.feed1()
+
+    def test_feed_1_scavenger(self):
+        self.species_3.traits.append(TraitCard("carnivore"))
+        self.species_3.food = 3
+        self.species_4.traits.append(TraitCard("scavenger"))
+        self.species_2.traits.append(TraitCard("climbing"))
+        self.species_4.traits.append(TraitCard("climbing"))
+        self.species_5.traits.append(TraitCard("climbing"))
+
+        self.dealer.feed1()
+        self.assertEqual(self.species_3.food, 4)
+        self.assertEqual(self.species_4.food, 4)
+        self.assertEqual(self.species_1.population, 3)
+        self.assertEqual(self.dealer.watering_hole, 8)
 
 if __name__ == '__main__':
     unittest.main()
