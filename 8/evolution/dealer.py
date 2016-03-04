@@ -10,7 +10,8 @@ class Dealer(object):
         """
         create a Dealer object
         :param list_of_player_interfaces: list of player interfaces
-        :param list_of_player_sets: dict of player interfaces and player states -> all player states are set to default
+        :param list_of_player_sets: dict of player interfaces and
+        player states -> all player states are set to default
         :param deck: deck of TraitCards
         :param watering_hole: integer of food tokens
         :param current_player_index: index of current players turn
@@ -53,7 +54,7 @@ class Dealer(object):
         looks for hungry species in a players list of species
         :return: list of hungry species
         """
-
+        return [spec for spec in list_of_species if spec.can_eat()]
 
     def auto_eat(self, list_of_species):
         """
@@ -68,7 +69,12 @@ class Dealer(object):
         get the player states of all non-current player
         :return: a list of player states
         """
-        pass
+        opponents = []
+        for i in range(0, len(self.list_of_player_sets)):
+            if i != self.current_player_index:
+                opponents.append(self.list_of_player_sets[i]['state'])
+
+        return opponents
 
 
 

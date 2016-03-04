@@ -5,3 +5,5 @@ rust-nightly-x86_64-unknown-linux-gnu
 **/rust_bin/*
 GIT_LOG_2
 for-2.txt
+
+**/*.pyc
