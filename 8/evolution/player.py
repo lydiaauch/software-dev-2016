@@ -2,6 +2,8 @@ import os
 import sys
 
 from species import Species
+from dealer import Dealer
+
 globals_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                             "..%s" % os.sep)
 sys.path.append(globals_path)
@@ -100,16 +102,7 @@ class Player(object):
         """
         sorted_carnivores = Species.sort_lex(hungry_carnivores)
         for carnivore in sorted_carnivores:
-            targets = []
-            for player in list_of_player:
-                if player == player_state:
-                    continue
-                for i in range(0, len(player.species)):
-                    defender = player.species[i]
-                    left_neighbor = (False if i == 0 else player.species[i - 1])
-                    right_neighbor = (False if i == len(player.species) - 1 else player.species[i + 1])
-                    if defender.is_attackable(carnivore, left_neighbor, right_neighbor):
-                        targets.append(defender)
+            targets = Dealer.carnivore_targets(carnivore, list_of_player)
             if targets:
                 sorted_targets = Species.sort_lex(targets)
                 target = sorted_targets[0]
