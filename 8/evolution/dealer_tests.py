@@ -43,16 +43,16 @@ class TestDealer(unittest.TestCase):
         self.assertEqual(0, len(opponents_name_2))
 
     def test_carnivore_targets(self):
-        list_of_player = self.dealer.make_list_of_player_states()
+        list_of_opponents = self.dealer.opponents()
         self.species_3.traits = [TraitCard("carnivore")]
         self.species_2.traits = [TraitCard("climbing")]
         self.species_4.traits = [TraitCard("climbing")]
         self.species_5.traits = [TraitCard("climbing")]
 
-        self.assertEqual(Dealer.carnivore_targets(self.species_3, list_of_player), [self.species_1])
+        self.assertEqual(Dealer.carnivore_targets(self.species_3, list_of_opponents), [self.species_1])
 
         self.species_1.traits = [TraitCard("climbing")]
-        self.assertEqual(Dealer.carnivore_targets(self.species_3, list_of_player), None)
+        self.assertEqual(Dealer.carnivore_targets(self.species_3, list_of_opponents), [])
 
     def test_auto_eat(self):
         self.dealer.current_player_index = 2
@@ -73,7 +73,7 @@ class TestDealer(unittest.TestCase):
 
         self.assertEqual(self.dealer.auto_eat(),
                          [self.species_3,
-                          self.dealer.list_of_player_sets[2]['state'],
+                          self.dealer.list_of_player_sets[0]['state'],
                           self.species_1])
 
         self.species_3.food = 4
