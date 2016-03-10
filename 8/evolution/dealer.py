@@ -19,60 +19,77 @@ A Nat+ is a Natural number > 0
 
 class Dealer(object):
 
-    def __init__(self, list_of_player_interfaces):
+    def __init__(self, player_interfaces):
         """
         create a Dealer object
-        :param list_of_player_interfaces: list of player interfaces
-        :param list_of_player_sets: dict of player interfaces and
+        :param player_interfaces: list of player interfaces
+        :param player_sets: dict of player interfaces and
         player states -> all player states are set to default
         :param deck: deck of TraitCards
         :param watering_hole: integer of food tokens
         :param current_player_index: index of current players turn
         """
-        self.list_of_player_interfaces = list_of_player_interfaces
-        self.list_of_player_sets = []
+        self.player_sets = []
         self.deck = []
         self.watering_hole = 0
         self.current_player_index = 0
 
-        for player in list_of_player_interfaces:
+        for player in player_interfaces:
             player_set = {'interface': player, 'state': PlayerState()}
-            self.list_of_player_sets.append(player_set)
+            self.player_sets.append(player_set)
 
     def feed1(self):
         """
         executes one step in the feeding cycle and updates the game state accordingly
         """
-        current_player = self.list_of_player_sets[self.current_player_index]
+        # TODO: traits Foraging, Horns
+        current_player = self.player_sets[self.current_player_index]['state']
         if self.watering_hole <= 0:
             raise Exception("There is no food in the watering hole")
         feeding = self.next_feed()
         #TODO validate given feeding
         if feeding is not False:
             if isinstance(feeding, int):
-                species = current_player['state'].species[feeding]
-                self.watering_hole -= 1
-                species.food += 1
+                species = current_player.species[feeding]
+                self.feed(current_player, species)
             elif len(feeding) == 2:
                 food_requested = feeding[1]
-                species = current_player['state'].species[feeding[0]]
+                species = current_player.species[feeding[0]]
                 if food_requested > self.watering_hole:
                     raise Exception("Fat tissue species asked for too much food.")
                 self.watering_hole -= food_requested
                 species.fat_storage += food_requested
             elif len(feeding) == 3:
-                attacker = current_player['state'].species[feeding[0]]
-                target_player = self.list_of_player_sets[feeding[1]]['state']
+                attacker = current_player.species[feeding[0]]
+                target_player = self.player_sets[feeding[1]]['state']
                 defender = target_player.species[feeding[2]]
                 defender.population -= 1
-                attacker.food += 1
-                self.watering_hole -= 1
+                if "horns" in defender.trait_names():
+                    attacker.population -= 1
+                self.feed(current_player, attacker)
                 self.feed_scavengers()
                 if defender.population == 0:
                     target_player.species.remove(defender)
                     self.deal(2, target_player)
 
-        self.current_player_index = (self.current_player_index + 1) % len(self.list_of_player_sets)
+        self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
+
+    def feed(self, player, species):
+        if ("foraging" in species.trait_names() and
+                species.population - species.food >= 2 and
+                self.watering_hole >= 2):
+            species.food += 2
+            self.watering_hole -= 2
+        elif (species.population - species.food >= 1 and
+                self.watering_hole >= 1):
+            species.food += 1
+            self.watering_hole -= 1
+
+        species_index = player.species.index(species)
+        right_neighbor = (False if species_index == len(player.species) - 1
+                                else player.species[species_index + 1])
+        if right_neighbor:
+            self.feed(player, right_neighbor)
 
     def next_feed(self):
         """
@@ -81,7 +98,7 @@ class Dealer(object):
         is present, or by asking the interface of the current player
         """
         auto_eat = self.auto_eat()
-        current_player = self.list_of_player_sets[self.current_player_index]
+        current_player = self.player_sets[self.current_player_index]
         if auto_eat is None:
             return current_player['interface'].next_feeding(current_player['state'],
                                     self.watering_hole, self.opponents())
@@ -132,8 +149,7 @@ class Dealer(object):
         for player in self.player_states():
             for species in player.species:
                 if "scavenger" in species.trait_names() and species.food < species.population:
-                    species.food += 1
-                    self.watering_hole -= 1
+                    self.feed(player, species)
 
     def deal(self, num_cards, player):
         """
@@ -158,7 +174,7 @@ class Dealer(object):
         :param: i The index of the player's state
         :return: A PlayerState object representing the ith player.
         """
-        return self.list_of_player_sets[i]['state']
+        return self.player_sets[i]['state']
 
     def player_states(self):
         """
@@ -166,8 +182,8 @@ class Dealer(object):
         :return: A List of the player_state objects.
         """
         states = []
-        for i in range(0, len(self.list_of_player_sets)):
-            states.append(self.list_of_player_sets[i]['state'])
+        for i in range(0, len(self.player_sets)):
+            states.append(self.player_sets[i]['state'])
         return states
 
     def opponents(self):
