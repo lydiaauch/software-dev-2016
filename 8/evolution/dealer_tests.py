@@ -155,7 +155,8 @@ class TestDealer(unittest.TestCase):
         self.species_3.traits.append(TraitCard("carnivore"))
         self.species_3.food = 3
         self.species_5.food = 2
-        self.species_4.traits = [TraitCard("climbing"), TraitCard("cooperation")]
+        self.species_4.traits.append(TraitCard("climbing"))
+        self.species_4.traits.append(TraitCard("cooperation"))
         self.species_4.traits.append(TraitCard("scavenger"))
         self.species_2.traits.append(TraitCard("climbing"))
         self.species_5.traits.append(TraitCard("climbing"))
@@ -180,10 +181,11 @@ class TestDealer(unittest.TestCase):
 
     def test_feed_1_carnivore_foraging(self):
         self.species_3.food = 0
-        self.species_3.traits = [TraitCard("carnivore"), TraitCard("foraging")]
-        self.species_2.traits = [TraitCard("climbing")]
-        self.species_4.traits = [TraitCard("climbing")]
-        self.species_5.traits = [TraitCard("climbing")]
+        self.species_3.traits.append(TraitCard("carnivore"))
+        self.species_3.traits.append(TraitCard("foraging"))
+        self.species_2.traits.append(TraitCard("climbing"))
+        self.species_4.traits.append(TraitCard("climbing"))
+        self.species_5.traits.append(TraitCard("climbing"))
 
         self.dealer.feed1()
         self.assertEqual(self.species_3.food, 2)
