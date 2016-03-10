@@ -16,7 +16,7 @@ class TestDealer(unittest.TestCase):
 
         self.species_1 = Species(4, 4, 4)
         self.species_2 = Species(4, 4, 4)
-        self.species_3 = Species(4, 4, 3)
+        self.species_3 = Species(4, 3, 3)
         self.species_4 = Species(4, 3, 3)
         self.species_5 = Species(3, 3, 3)
         self.species_list = [self.species_1,
@@ -33,7 +33,7 @@ class TestDealer(unittest.TestCase):
 
     def test_check_for_hungries(self):
         hungries = self.dealer.check_for_hungries(self.species_list)
-        self.assertEqual(1, len(hungries))
+        self.assertEqual(2, len(hungries))
         self.assertEqual(self.species_4, hungries[0])
 
     def test_opponents(self):
@@ -79,7 +79,6 @@ class TestDealer(unittest.TestCase):
 
     def test_feed_1_herbivore(self):
         # current player has single hungry herbivore -> auto_eat
-        self.species_3.food = 3
         self.dealer.feed1()
         self.assertEqual(self.dealer.watering_hole, 9)
         self.assertEqual(self.dealer.current_player_index, 3)
@@ -87,7 +86,6 @@ class TestDealer(unittest.TestCase):
 
     def test_feed_1_fatty(self):
         # current player is feeding fat-tissue species
-        self.species_3.food = 3
         self.species_3.traits = [TraitCard("fat-tissue")]
         self.dealer.feed1()
         self.assertEqual(self.dealer.watering_hole, 7)
@@ -96,7 +94,6 @@ class TestDealer(unittest.TestCase):
         self.assertEqual(self.species_3.fat_storage, 3)
 
     def test_feed_1_carnivore(self):
-        self.species_3.food = 3
         self.species_3.traits = [TraitCard("carnivore")]
         self.species_2.traits = [TraitCard("climbing")]
         self.species_4.traits = [TraitCard("climbing")]
@@ -119,7 +116,6 @@ class TestDealer(unittest.TestCase):
 
     def test_feed_1_scavenger(self):
         self.species_3.traits.append(TraitCard("carnivore"))
-        self.species_3.food = 3
         self.species_4.traits.append(TraitCard("scavenger"))
         self.species_2.traits.append(TraitCard("climbing"))
         self.species_4.traits.append(TraitCard("climbing"))
@@ -153,17 +149,15 @@ class TestDealer(unittest.TestCase):
 
     def test_feed_1_scavenger_cooperation(self):
         self.species_3.traits.append(TraitCard("carnivore"))
-        self.species_3.food = 3
-        self.species_5.food = 2
         self.species_4.traits.append(TraitCard("climbing"))
         self.species_4.traits.append(TraitCard("cooperation"))
         self.species_4.traits.append(TraitCard("scavenger"))
         self.species_2.traits.append(TraitCard("climbing"))
         self.species_5.traits.append(TraitCard("climbing"))
+        self.species_5.food = 2
 
         self.dealer.feed1()
         self.assertTrue("cooperation" in self.species_4.trait_names())
-        self.assertEqual(self.species_3.food, 4)
         self.assertEqual(self.species_4.food, 4)
         self.assertEqual(self.species_5.food, 3)
 

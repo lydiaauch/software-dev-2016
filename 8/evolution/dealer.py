@@ -40,10 +40,18 @@ class Dealer(object):
 
     def feed1(self):
         """
-        executes one step in the feeding cycle and updates the game state accordingly
+        Executes one step in the feeding cycle and updates the game state accordingly
+        :return: False if the current player cannot feed.
+        True if the player is auto fed or makes a feeding decision
+        :raises: Raises an exception if the watering hole starts at 0.
         """
         # TODO: traits Foraging, Horns
         current_player = self.player_sets[self.current_player_index]['state']
+        hungries = [species for species in current_player.species if species.can_eat()]
+        if len(hungries) == 0:
+            self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
+            return False
+
         if self.watering_hole <= 0:
             raise Exception("There is no food in the watering hole")
         feeding = self.next_feed()
@@ -73,6 +81,7 @@ class Dealer(object):
                     self.deal(2, target_player)
 
         self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
+        return True
 
     def feed(self, player, species):
         if ("foraging" in species.trait_names() and
