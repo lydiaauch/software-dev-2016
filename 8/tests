@@ -1,0 +1,10 @@
+#!/bin/bash 
+
+cd evolution
+
+for f in *_tests.py; do
+    echo $f
+    python $f
+done
+
+exit 0
