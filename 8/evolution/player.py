@@ -10,6 +10,7 @@ sys.path.append(globals_path)
 
 from globals import *
 
+
 class Player(object):
     """
     A data representation of a Player in the Evolution game
@@ -29,16 +30,25 @@ class Player(object):
         hungry_fatties = [species for species in player.species
                           if "fat-tissue" in species.trait_names()
                           and species.fat_storage < species.body]
+
         if hungry_fatties:
+            # TODO: I'm confused. feed_fatty takes a single fatty species
+            # but we're giving it list?
             feeding = cls.feed_fatty(hungry_fatties, food_available)
             return [player.species.index(feeding[0]), feeding[1]]
 
         # Checks sequencing constraints
-        hungry_species = [species for species in player.species if species.can_eat()]
-        hungry_carnivores = [species for species in hungry_species if "carnivore" in species.trait_names()]
-        if(len(hungry_species) < MIN_HUNGRY_SPECIES and not any(hungry_carnivores)) or food_available <= 0:
-            raise Exception("Must have food available, one hungry carnivore, or two hungry herbivores to choose")
+        hungry_species = [species for species in player.species
+                            if species.can_eat()]
 
+        hungry_carnivores = [species for species in hungry_species
+                                if "carnivore" in species.trait_names()]
+
+        if(len(hungry_species) < MIN_HUNGRY_SPECIES
+            and not any(hungry_carnivores)) or food_available <= 0:
+
+            raise Exception("Must have food available, one hungry carnivore, \
+                or two hungry herbivores to choose")
 
         hungry_herbivores = cls.find_hungry_herbs(hungry_species, hungry_carnivores)
         if hungry_herbivores:
@@ -51,14 +61,17 @@ class Player(object):
                 attacking_species_index = player.species.index(feeding[0])
                 defending_player_index = list_of_players.index(feeding[1])
                 defending_species_index = feeding[1].species.index(feeding[2])
-                return [attacking_species_index, defending_player_index, defending_species_index]
+                return [attacking_species_index,
+                        defending_player_index,
+                        defending_species_index]
 
         return False
 
     @classmethod
     def find_hungry_herbs(cls, hungry_species, hungry_carnivores):
         """
-        Creates a list of hungry herbivores from a list of hungry species and hungry carnivores
+        Filters all carnivores from the hungry_carnivores list out of the
+        given hungry_species list.
         :param hungry_species: list of hungry species
         :param hungry_carnivores: list of hungry carnivores
         :return: list of hungry herbivores
@@ -72,14 +85,16 @@ class Player(object):
     @classmethod
     def feed_fatty(cls, fat_tissue_species, food_available):
         """
-        Feeds a species with the fat-tissue trait
-        :param fat_tissue_species: species with a fat-tissue trait
+        Creates a Feeding for the given fat_tissue_species.
+        :param fat_tissue_species: species with a fat-tissue trait to feed.
         :param food_available: food on the watering_hole_board
-        :return: list of [Species, int] where Species is the fat_tissue_species and int is the requested food
+        :return: A Feeding [Species, int] where Species is the
+        fat_tissue_species and int is the requested food
         """
         fatty = Species.largest_fatty_need(fat_tissue_species)
         food_needed = fatty.body - fatty.fat_storage
-        food_requested = (food_needed if food_needed < food_available else food_available)
+        food_requested = (food_needed if food_needed < food_available
+                                      else food_available)
         return [fatty, food_requested]
 
     @classmethod
@@ -106,7 +121,8 @@ class Player(object):
             if targets:
                 sorted_targets = Species.sort_lex(targets)
                 target = sorted_targets[0]
-                target_player = next(player for player in list_of_player if target in player.species)
+                target_player = next(player for player in list_of_player
+                                        if target in player.species)
                 return [carnivore, target_player, target]
 
         return False
