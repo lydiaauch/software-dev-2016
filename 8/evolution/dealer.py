@@ -45,10 +45,8 @@ class Dealer(object):
         True if the player is auto fed or makes a feeding decision
         :raises: Raises an exception if the watering hole starts at 0.
         """
-        # TODO: traits Foraging, Horns
         current_player = self.player_sets[self.current_player_index]['state']
-        hungries = [species for species in current_player.species if species.can_eat()]
-        if len(hungries) == 0:
+        if not self.player_can_feed(current_player):
             self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
             return False
 
@@ -61,6 +59,7 @@ class Dealer(object):
                 species = current_player.species[feeding]
                 self.feed(current_player, species)
             elif len(feeding) == 2:
+                # Does a fat tissue storing food trigger cooperation?
                 food_requested = feeding[1]
                 species = current_player.species[feeding[0]]
                 if food_requested > self.watering_hole:
@@ -69,21 +68,53 @@ class Dealer(object):
                 species.fat_storage += food_requested
             elif len(feeding) == 3:
                 attacker = current_player.species[feeding[0]]
-                target_player = self.player_sets[feeding[1]]['state']
+                target_player = self.player_state(feeding[1])
                 defender = target_player.species[feeding[2]]
-                defender.population -= 1
                 if "horns" in defender.trait_names():
-                    attacker.population -= 1
+                    self.kill(current_player, attacker)
                 self.feed(current_player, attacker)
+                self.kill(target_player, defender)
                 self.feed_scavengers()
-                if defender.population == 0:
-                    target_player.species.remove(defender)
-                    self.deal(2, target_player)
-
         self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
         return True
 
+    def kill(self, player, species):
+        """
+        Removes one population token from the given species. If that species
+        goes extinct 2 cards are dealt to the player.
+        :param player: The player whose species is being killed.
+        :param species: The species who is being killed.
+        """
+        species.population -= 1
+        if species.population == 0:
+            player.species.remove(species)
+            self.deal(2, player)
+
+
+    def player_can_feed(self, player):
+        """
+        Checks if any of the given player's species can eat. Checks either for
+        herbivore species who can eat from the watering hole, or carnivores
+        which have valid targets.
+        :param player: The player whose options are being checked for valid Feedings.
+        :return: True if the player has at least one valid Feeding, otherwise false.
+        """
+        hungries = [species for species in player.species if species.can_eat()]
+        non_feedable_carnivores = \
+            [carnivore for carnivore in hungries if
+                "carnivore" in carnivore.trait_names() and
+                len(Dealer.carnivore_targets(carnivore, self.player_states())) == 0]
+
+        return len(hungries) >= 0 or len(hungries) != len(non_feedable_carnivores)
+
+
     def feed(self, player, species):
+        """
+        Feeds the given species food tokens from the watering hole. Accounts for
+        foraging food amounts as well as cooperation feeding.
+        :param player: The player who owns the given species.
+        :sparam species: The species to be fed.
+        """
         if ("foraging" in species.trait_names() and
                 species.population - species.food >= 2 and
                 self.watering_hole >= 2):

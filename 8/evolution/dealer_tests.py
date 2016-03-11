@@ -184,6 +184,30 @@ class TestDealer(unittest.TestCase):
         self.dealer.feed1()
         self.assertEqual(self.species_3.food, 2)
 
+    def test_feed_1_horns(self):
+        self.species_3.food = 0
+        self.species_3.traits.append(TraitCard("carnivore"))
+        self.species_1.traits.append(TraitCard("horns"))
+        self.species_2.traits.append(TraitCard("climbing"))
+        self.species_4.traits.append(TraitCard("climbing"))
+        self.species_5.traits.append(TraitCard("climbing"))
+
+        self.dealer.feed1()
+        self.assertEqual(self.species_3.population, 3)
+        self.assertEqual(self.species_3.food, 1)
+
+    def test_feed_1_horns_no_food(self):
+        self.species_3.traits.append(TraitCard("carnivore"))
+        self.species_1.traits.append(TraitCard("horns"))
+        self.species_2.traits.append(TraitCard("climbing"))
+        self.species_4.traits.append(TraitCard("climbing"))
+        self.species_5.traits.append(TraitCard("climbing"))
+
+        self.dealer.feed1()
+        self.assertEqual(self.species_3.population, 3)
+        self.assertEqual(self.species_3.food, 3)
+
+
 
 if __name__ == '__main__':
     unittest.main()
