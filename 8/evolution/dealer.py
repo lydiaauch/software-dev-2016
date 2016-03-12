@@ -136,7 +136,7 @@ class Dealer(object):
         species_index = player.species.index(species)
         right_neighbor = (False if species_index == len(player.species) - 1
                                 else player.species[species_index + 1])
-        if right_neighbor:
+        if "cooperation" in species.trait_names() and right_neighbor:
             self.feed(player, right_neighbor)
 
     def next_feed(self):
