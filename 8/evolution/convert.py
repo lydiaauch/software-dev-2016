@@ -85,8 +85,7 @@ class Convert(object):
                     json_player[0][1] > 0,
                     json_player[1][0] == "species",
                     json_player[2][0] == "bag",
-                    json_player[2][1] > 0])
-
+                    json_player[2][1] >= 0])
 
     @classmethod
     def player_to_json(cls, player):
@@ -94,7 +93,13 @@ class Convert(object):
         json_species = []
         for species_obj in player.species:
             json_species.append(cls.species_to_json(species_obj))
-        return [["id", player.name], ["species", json_species], ["bag", player.food_bag]]
+        json = [["id", player.name], ["species", json_species], ["bag", player.food_bag]]
+        if len(player.hand) != 0:
+            json_cards = []
+            for card in player.hand:
+                json_cards.append(cls.trait_card_to_json(card))
+            json.append(["cards", json_cards])
+        return json
 
     @classmethod
     def json_to_species(cls, json_species):

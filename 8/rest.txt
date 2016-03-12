@@ -1,0 +1,50 @@
+class Player(object):
+    """
+    A data representation of a Player in the Evolution game
+    """
+    def __init__(self):
+        pass
+
+    def choose_food(self, hand):
+        """
+        Given a list of cards the player picks a card to add to the watering hole
+        food amount
+        :param hand: list of TraitCards which is the players entire hand
+        :return: TraitCard to add to the watering hole board
+        """
+
+    """
+    A Play is one of:
+    - ["new-board", ("left" or "right"), used_card] if the player would like to
+      discard the used_card `TraitCard` in order to add a new species board to their list at
+      the given placement.
+    - ["inc-pop", species_index, used_card] to discard the used_card `TraitCard` to increase
+      the population of the species at the given species_index by one.
+    - ["inc-body", species_index, used_card] to discard the used_card `TraitCard` to increase
+      the body size of the species at the given species_index by one.
+    - ["evolve", species_index, trait_card] plays the `TraitCard` on the species
+      at the given species_index. This species must have less than 3 traits.
+    - ["evolve", species_index, new_trait, old_trait] replaces the old trait
+      with the new `TraitCard` for the species at the given index.
+    - [] if the player would not like to make a play.
+    """
+    def make_play(self, player, food_available, list_of_players):
+        """
+        Returns a 'Play' the player would like to take.
+        :param player: The `PlayerState` of the current player.
+        :param food_available: The number of food tokens in the watering hole.
+        :param: list_of_players: A list of the opponents' `PlayerState`s.
+        :return: A `Play` the player would like to make with the current game state.
+        """
+
+    @classmethod
+    def next_feeding(cls, player, food_available, list_of_players):
+        """
+        Determines a players next feeding species
+        :param player: the PlayerState of the player who is feeding
+        :param food_available: the amount of food on the watering hole board
+        :param list_of_players: the PlayerStates of other players in the game
+        :return: feeding action for the next species to feed
+        """
+
+       

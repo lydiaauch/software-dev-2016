@@ -97,7 +97,6 @@ class Dealer(object):
             player.species.remove(species)
             self.deal(2, player)
 
-
     def player_can_feed(self, player):
         """
         Checks if any of the given player's species can eat. Checks either for
@@ -184,7 +183,7 @@ class Dealer(object):
 
             if len(targets) == 1 and target_player.species != cur_player_species:
                 defender_index = target_player.species.index(targets[0])
-                target_index = self.player_states().index(target_player);
+                target_index = self.opponents().index(target_player)
                 return [carnivore_index, target_index, defender_index]
         return None
 
@@ -201,7 +200,9 @@ class Dealer(object):
         """
         Gives num_cards to the player from the deck.
         """
-        pass
+        for i in range(num_cards):
+            card = self.deck.pop(0)
+            player.hand.append(card)
 
     def check_for_hungries(self, list_of_species):
         """
