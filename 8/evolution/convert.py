@@ -1,6 +1,8 @@
 from species import Species
 from traitcard import TraitCard
 from player_state import PlayerState
+from player import Player
+from dealer import Dealer
 
 class Convert(object):
     """
@@ -10,19 +12,35 @@ class Convert(object):
         pass
 
     @classmethod
-    def configuration_to_dealer(cls, config):
+    def json_to_dealer(cls, json_config):
         """
         Converts a Configuration json input into a dealer with the game as
         described in the Configuration object.
-        :param config: A Configuration [LOP, Natural, LOC], where LOP is a
+        :param json_config: A Configuration [LOP, Natural, LOC], where LOP is a
         list of 3 to 8 Players, the Natural represents food in the watering hole,
         and the LOC is the deck of cards in the order they will appear.
-        :return: A Dealer with the game configured properly to the given config.
+        :return: A Dealer with the game configured properly to the given json_config.
         """
-        pass
+        assert(cls.validate_configuration_json(json_config))
+        players_interfaces = []
+        num_players = len(json_config[0])
+        for i in range(num_players):
+            players_interfaces.append(Player())
+        dealer = Dealer(players_interfaces)
+        for i in range(num_players):
+            dealer.player_sets[i]['state'] = cls.json_to_player(json_config[0][i])
+        dealer.watering_hole = json_config[1]
+        deck = []
+        for i in range(len(json_config[2])):
+            deck.append(cls.json_to_trait_card(json_config[2][i]))
+        dealer.deck = deck
+        return dealer
 
+    @classmethod
     def validate_configuration_json(cls, config_json):
         return all([len(config_json) == 3,
+                    len(config_json[0]) <= 8,
+                    len(config_json[0]) >= 3,
                     config_json[1] > 0])
 
     @classmethod
@@ -36,7 +54,7 @@ class Convert(object):
         for json_species in json_player[1][1]:
             species.append(cls.json_to_species(json_species))
         if len(json_player) == 4:
-            for json_card in json_player[4][1]:
+            for json_card in json_player[3][1]:
                 hand.append(cls.json_to_trait_card(json_card))
         return PlayerState(name=name,
                            food_bag=food_bag,
@@ -47,8 +65,8 @@ class Convert(object):
     def validate_player_json(cls, json_player):
         return all([len(json_player) == 3 or
                    (len(json_player) == 4 and
-                        json_player[4][0] == "cards" and
-                        len(json_player[4][1]) > 0),
+                        json_player[3][0] == "cards" and
+                        len(json_player[3][1]) > 0),
                     json_player[0][0] == "id",
                     json_player[0][1] > 0,
                     json_player[1][0] == "species",
@@ -63,7 +81,6 @@ class Convert(object):
         for species_obj in player.species:
             json_species.append(cls.species_to_json(species_obj))
         return [["id", player.name], ["species", json_species], ["bag", player.food_bag]]
-
 
     @classmethod
     def json_to_species(cls, json_species):
@@ -112,3 +129,17 @@ class Convert(object):
     @classmethod
     def trait_to_json(cls, trait_card):
         return trait_card.trait
+
+    @classmethod
+    def json_to_trait_card(cls, json_trait_card):
+        assert(cls.validate_trait_card_json(json_trait_card))
+        return TraitCard(json_trait_card[1], json_trait_card[0])
+
+    @classmethod
+    def validate_trait_card_json(cls, json_trait_card):
+        return any([(json_trait_card[1] == "carnivore" and
+                     json_trait_card[0] <= 8 and
+                     json_trait_card[0] >= -8),
+                    (json_trait_card[1] != "carnivore" and
+                     json_trait_card[0] <= 3 and
+                     json_trait_card[0] >= -3)])
