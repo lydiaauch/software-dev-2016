@@ -37,6 +37,20 @@ class Convert(object):
         return dealer
 
     @classmethod
+    def dealer_to_json(cls, dealer):
+        config_json = []
+        player_json = []
+        for player in dealer.player_states():
+            player_json.append(Convert.player_to_json(player))
+        config_json.append(player_json)
+        config_json.append(dealer.watering_hole)
+        deck_json = []
+        for card in dealer.deck:
+            deck_json.append(Convert.trait_card_to_json(card))
+        config_json.append(deck_json)
+        return config_json
+
+    @classmethod
     def validate_configuration_json(cls, config_json):
         return all([len(config_json) == 3,
                     len(config_json[0]) <= 8,
@@ -134,6 +148,10 @@ class Convert(object):
     def json_to_trait_card(cls, json_trait_card):
         assert(cls.validate_trait_card_json(json_trait_card))
         return TraitCard(json_trait_card[1], json_trait_card[0])
+
+    @classmethod
+    def trait_card_to_json(cls, trait_card):
+        return [trait_card.food_points, trait_card.trait]
 
     @classmethod
     def validate_trait_card_json(cls, json_trait_card):
