@@ -67,7 +67,6 @@ class Dealer(object):
                 species = current_player.species[feeding]
                 self.feed(current_player, species)
             elif len(feeding) == 2:
-                # Does a fat tissue storing food trigger cooperation?
                 food_requested = feeding[1]
                 species = current_player.species[feeding[0]]
                 if food_requested > self.watering_hole:
@@ -76,7 +75,7 @@ class Dealer(object):
                 species.fat_storage += food_requested
             elif len(feeding) == 3:
                 attacker = current_player.species[feeding[0]]
-                target_player = self.player_state(feeding[1])
+                target_player = self.player_state(feeding[1] + 1)
                 defender = target_player.species[feeding[2]]
                 if "horns" in defender.trait_names():
                     self.kill(current_player, attacker)
