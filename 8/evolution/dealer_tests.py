@@ -207,7 +207,16 @@ class TestDealer(unittest.TestCase):
         self.assertEqual(self.species_3.population, 3)
         self.assertEqual(self.species_3.food, 3)
 
+    def test_player_can_feed(self):
+        self.assertFalse(self.dealer.player_can_feed(self.dealer.player_state(0)))
+        self.assertTrue(self.dealer.player_can_feed(self.dealer.player_state(2)))
 
+        self.species_4.traits.append(TraitCard("carnivore"))
+        self.species_1.traits.append(TraitCard("climbing"))
+        self.species_2.traits.append(TraitCard("climbing"))
+        self.species_3.traits.append(TraitCard("climbing"))
+        self.species_5.traits.append(TraitCard("climbing"))
+        self.assertFalse(self.dealer.player_can_feed(self.dealer.player_state(3)))
 
 if __name__ == '__main__':
     unittest.main()

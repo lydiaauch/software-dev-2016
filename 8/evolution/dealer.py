@@ -113,8 +113,7 @@ class Dealer(object):
                 "carnivore" in carnivore.trait_names() and
                 len(Dealer.carnivore_targets(carnivore, self.player_states())) == 0]
 
-        return len(hungries) >= 0 or len(hungries) != len(non_feedable_carnivores)
-
+        return hungries > 0 and len(hungries) != len(non_feedable_carnivores)
 
     def feed(self, player, species):
         """
@@ -257,6 +256,6 @@ class Dealer(object):
                 defender = player.species[i]
                 left_neighbor = (False if i == 0 else player.species[i - 1])
                 right_neighbor = (False if i == len(player.species) - 1 else player.species[i + 1])
-                if defender.is_attackable(carnivore, left_neighbor, right_neighbor):
+                if defender.is_attackable(carnivore, left_neighbor, right_neighbor) and defender != carnivore:
                     targets.append(defender)
         return targets
