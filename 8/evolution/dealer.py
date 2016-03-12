@@ -18,16 +18,24 @@ A Nat+ is a Natural number > 0
 """
 
 class Dealer(object):
+    """
+    A representation of a game of Evolution containing both the state of the game,
+    and the API to progress though it.
+
+    Attributes:
+        player_sets: List of Dicts for each player's 'interface' and 'state'.
+            Ex. self.player_sets[self.current_player_index]['state'] would get
+            the state of the current player.
+        deck: List of TraitCards representing the game's deck. Where the beginning
+            of the list is the top of the deck, and the end of the list is the bottom.
+        watering_hole: Integer representing the board's number of available food tokens.
+        current_player_index: Index of player_sets for the player whose turn it is.
+    """
 
     def __init__(self, player_interfaces):
         """
         create a Dealer object
         :param player_interfaces: list of player interfaces
-        :param player_sets: dict of player interfaces and
-        player states -> all player states are set to default
-        :param deck: deck of TraitCards
-        :param watering_hole: integer of food tokens
-        :param current_player_index: index of current players turn
         """
         self.player_sets = []
         self.deck = []
