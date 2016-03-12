@@ -4,6 +4,15 @@ class PlayerState(object):
     in order to prevent the player from modifying their data or acting out of turn
     the dealer only sends the minimum amount of data needed for the player to make
     choices
+
+    Attributes:
+        name: An Integer identifier for the player.
+        food_bag: Integer representing the number of food tokens acquired.
+        hand: A List of `TraitCards` representing the cards the player can use.
+        species: A List of `Species` representing the species boards the player
+            has in front of them. Species are ordered from left to right.
+
+
     """
     def __init__(self, name=None, food_bag=None, hand=None, species=None):
         if food_bag is None:

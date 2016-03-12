@@ -1,0 +1,12 @@
+#!/bin/bash 
+
+cd evolution
+
+echo -ne '\033c'
+for f in *_tests.py; do
+    echo $f
+    python $f
+    printf "\n\n"
+done
+
+exit 0
