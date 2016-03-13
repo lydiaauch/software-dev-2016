@@ -18,12 +18,12 @@ class Player(object):
         pass
 
     @classmethod
-    def next_feeding(cls, player, food_available, list_of_players):
+    def next_feeding(cls, player, food_available, opponents):
         """
         Determines a players next feeding species
         :param player: the PlayerState of the player who is feeding
         :param food_available: the amount of food on the watering hole board
-        :param list_of_players: the PlayerStates of other players in the game
+        :param opponents: the PlayerStates of other players in the game
         :return: feeding action for the next species to feed
         """
         hungry_fatties = [species for species in player.species
@@ -46,10 +46,10 @@ class Player(object):
             return player.species.index(feeding)
 
         if hungry_carnivores:
-            feeding = cls.feed_carnivore(hungry_carnivores, player, list_of_players)
+            feeding = cls.feed_carnivore(hungry_carnivores, player, opponents)
             if feeding:
                 attacking_species_index = player.species.index(feeding[0])
-                defending_player_index = list_of_players.index(feeding[1])
+                defending_player_index = opponents.index(feeding[1])
                 defending_species_index = feeding[1].species.index(feeding[2])
                 return [attacking_species_index, defending_player_index, defending_species_index]
 
@@ -58,7 +58,8 @@ class Player(object):
     @classmethod
     def find_hungry_herbs(cls, hungry_species, hungry_carnivores):
         """
-        Creates a list of hungry herbivores from a list of hungry species and hungry carnivores
+        Creates a list of hungry herbivores from a list of hungry
+        species and hungry carnivores
         :param hungry_species: list of hungry species
         :param hungry_carnivores: list of hungry carnivores
         :return: list of hungry herbivores
@@ -75,7 +76,8 @@ class Player(object):
         Feeds a species with the fat-tissue trait
         :param fat_tissue_species: species with a fat-tissue trait
         :param food_available: food on the watering_hole_board
-        :return: list of [Species, int] where Species is the fat_tissue_species and int is the requested food
+        :return: list of [Species, int] where Species is the
+        fat_tissue_species and int is the requested food
         """
         fatty = Species.largest_fatty_need(fat_tissue_species)
         food_needed = fatty.body - fatty.fat_storage
@@ -92,21 +94,21 @@ class Player(object):
         return Species.sort_lex(hungry_herbivores)[0]
 
     @classmethod
-    def feed_carnivore(cls, hungry_carnivores, player_state, list_of_player):
+    def feed_carnivore(cls, hungry_carnivores, player, opponents):
         """
         Feeds the largest hungry carnivore
         :param hungry_carnivores: list of hungry carnivores
-        :param player_state: the current player state
-        :param list_of_player: list of all player states
+        :param player: the current player's state
+        :param opponents: list of all other player's states
         :return:
         """
         sorted_carnivores = Species.sort_lex(hungry_carnivores)
         for carnivore in sorted_carnivores:
-            targets = Dealer.carnivore_targets(carnivore, list_of_player)
+            targets = Dealer.carnivore_targets(carnivore, opponents)
             if targets:
                 sorted_targets = Species.sort_lex(targets)
                 target = sorted_targets[0]
-                target_player = next(player for player in list_of_player if target in player.species)
+                target_player = next(player for player in opponents if target in player.species)
                 return [carnivore, target_player, target]
 
         return False

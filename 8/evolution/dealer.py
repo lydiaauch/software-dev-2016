@@ -11,7 +11,9 @@ A Feeding is one of:
 fed the Nat+ amount of food.
 - [Natural, Natural, Natural] if the carnivore at the first index is
 attacking the player at the second index, and defender species at the
-third index.
+third index. For the player index, the indices from 0 to num_players-2
+represent the player's opponents, while the index num_players-1 is reserved
+for the current player.
 
 A Natural is a Natural number >= 0
 A Nat+ is a Natural number > 0
@@ -75,7 +77,10 @@ class Dealer(object):
                 species.fat_storage += food_requested
             elif len(feeding) == 3:
                 attacker = current_player.species[feeding[0]]
-                target_player = self.player_state(feeding[1] + 1)
+                if feeding[1] == len(self.player_sets) - 1:
+                    target_player = current_player
+                else:
+                    target_player = self.opponents()[feeding[1]]
                 defender = target_player.species[feeding[2]]
                 if "horns" in defender.trait_names():
                     self.kill(current_player, attacker)
