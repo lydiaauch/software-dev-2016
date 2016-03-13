@@ -1,13 +1,5 @@
-import os
-import sys
-
 from species import Species
 from dealer import Dealer
-
-globals_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                            "..%s" % os.sep)
-sys.path.append(globals_path)
-
 from globals import *
 
 class Player(object):

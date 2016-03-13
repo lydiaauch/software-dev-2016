@@ -1,12 +1,4 @@
-import os
-import sys
-
-globals_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                            "..%s" % os.sep)
-sys.path.append(globals_path)
-
 from globals import *
-
 
 class Species(object):
     """
