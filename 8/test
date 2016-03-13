@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 cd evolution
 
@@ -8,5 +8,8 @@ for f in *_tests.py; do
     python $f
     printf "\n\n"
 done
+
+cd ../tests
+python test_all.py
 
 exit 0
