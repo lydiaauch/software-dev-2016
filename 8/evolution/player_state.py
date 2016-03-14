@@ -36,3 +36,11 @@ class PlayerState(object):
                     self.food_bag == other.food_bag,
                     self.hand == other.hand,
                     self.species == other.species])
+
+    def public_state(self):
+        """
+        Creates a new player with private information set to defaults.
+        :return: A new PlayerState object with the same information as this
+        player state, but with private information set to defaults.
+        """
+        return PlayerState(name=self.name, food_bag=None, hand=None, species=self.species)

@@ -150,8 +150,9 @@ class Dealer(object):
         auto_eat = self.auto_eat()
         current_player = self.player_sets[self.current_player_index]
         if auto_eat is None:
-            return current_player['interface'].next_feeding(current_player['state'],
-                                    self.watering_hole, self.opponents())
+            cur_player = current_player['state'].public_state()
+            opponents  = map(lambda spec: spec.public_state(), self.opponents())
+            return current_player['interface'].next_feeding(cur_player, self.watering_hole, opponents)
         else:
             return auto_eat
 
