@@ -28,7 +28,7 @@ class TraitCard(object):
             raise Exception("Given invalid trait: {0}".format(trait))
 
     def __str__(self):
-        return "TraitCard(trait=%s, food=%d)" % (self.trait, self.food_points)
+        return "[%d, %s]" % (self.food_points, self.trait)
 
     def __eq__(self, other):
         return all([isinstance(other, TraitCard),
