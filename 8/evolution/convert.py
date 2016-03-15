@@ -80,7 +80,7 @@ class Convert(object):
         return all([len(json_player) == 3 or
                    (len(json_player) == 4 and
                         json_player[3][0] == "cards" and
-                        len(json_player[3][1]) > 0),
+                        len(json_player[3][1]) >= 0),
                     json_player[0][0] == "id",
                     json_player[0][1] > 0,
                     json_player[1][0] == "species",
