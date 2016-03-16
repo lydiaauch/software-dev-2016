@@ -35,7 +35,7 @@ def player_display(player_config):
 
     root.mainloop()
 
-def dealer_display(dealer):
+def display(dealer):
     """
     Renders a dealer's view of the given Dealer.
     :param dealer: The game to display.
@@ -87,4 +87,5 @@ def dealer_display(dealer):
 
     for child in mainframe.winfo_children(): child.grid_configure(padx=10, pady=10)
 
+    root.after(100, player_display, dealer.player_state(0))
     root.mainloop()

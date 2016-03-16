@@ -6,7 +6,6 @@ A test harness for the Dealer display method
 
 import sys
 import json
-#import threading
 import thread
 
 import evolution.display
@@ -21,21 +20,7 @@ def main():
     json_situation = json.loads(json_situation)
     try:
         dealer = Convert.json_to_dealer(json_situation)
-
-        thread.start_new_thread(evolution.display.player_display, (dealer.player_state(0), ))
-        thread.start_new_thread(evolution.display.dealer_display, (dealer, ))
-
-        #dealer_thread = threading.Thread(target=evolution.display.dealer_display, args=dealer)
-        #dealer_thread.start()
-
-        #player_thread = threading.Thread(target=evolution.display.player_display, args=dealer.player_state(0))
-        #player_thread.start()
-
-        #evolution.display.dealer_display(dealer)
-        #evolution.display.player_display(dealer.player_state(0))
-
-        while 1:
-            pass
+        evolution.display.display(dealer)
     except AssertionError:
         pass
 
