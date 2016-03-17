@@ -1,6 +1,11 @@
 class TraitCard(object):
     """
     A Trait Card of the Evolution game
+
+    Attributes:
+      trait: A string representing the trait card's effect. One of `traits` below.
+      food_points: An integer representing the number of food tokens this card
+                   would contribute to the watering hole.
     """
 
     traits = ["carnivore",

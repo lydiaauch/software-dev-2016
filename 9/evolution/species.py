@@ -2,7 +2,15 @@ from globals import *
 
 class Species(object):
     """
-    A data representation of a Species in the Evolution game
+    A data representation of a Species in the Evolution game.
+
+    Attributes:
+        population: An integer representing the species' population count.
+        food: An integer representing the food tokens the species has consumed.
+        body: An integer representing the species' body size.
+        traits: A list of TraitCard objects representing the traits on the species.
+        fat_storage: An integer representing the number of food tokens the species
+                     has stored with its fat food trait.
     """
     def __init__(self, population=None, food=None, body=None, traits=None, fat_storage=None):
         if population is None:

@@ -7,7 +7,7 @@ class PlayerState(object):
 
     Attributes:
         name: An Integer identifier for the player.
-        food_bag: Integer representing the number of food tokens acquired.
+        food_bag: An Integer representing the number of food tokens acquired.
         hand: A List of `TraitCards` representing the cards the player can use.
         species: A List of `Species` representing the species boards the player
             has in front of them. Species are ordered from left to right.
