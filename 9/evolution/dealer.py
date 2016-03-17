@@ -84,9 +84,12 @@ class Dealer(object):
                 defender = target_player.species[feeding[2]]
                 if "horns" in defender.trait_names():
                     self.kill(current_player, attacker)
-                self.feed(current_player, attacker)
-                self.kill(target_player, defender)
-                self.feed_scavengers()
+                if attacker.population != 0:
+                    self.feed(current_player, attacker)
+                    self.kill(target_player, defender)
+                    self.feed_scavengers()
+                else:
+                    self.kill(target_player, defender)
         self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
         return True
 
@@ -98,6 +101,8 @@ class Dealer(object):
         :param species: The species who is being killed.
         """
         species.population -= 1
+        species.food = min(species.food, species.population)
+
         if species.population == 0:
             player.species.remove(species)
             self.deal(2, player)
@@ -125,20 +130,23 @@ class Dealer(object):
         :param player: The player who owns the given species.
         :sparam species: The species to be fed.
         """
+        has_fed = False
         if ("foraging" in species.trait_names() and
                 species.population - species.food >= 2 and
                 self.watering_hole >= 2):
             species.food += 2
             self.watering_hole -= 2
+            has_fed = True
         elif (species.population - species.food >= 1 and
                 self.watering_hole >= 1):
             species.food += 1
             self.watering_hole -= 1
+            has_fed = True
 
         species_index = player.species.index(species)
         right_neighbor = (False if species_index == len(player.species) - 1
                                 else player.species[species_index + 1])
-        if "cooperation" in species.trait_names() and right_neighbor:
+        if "cooperation" in species.trait_names() and right_neighbor and has_fed:
             self.feed(player, right_neighbor)
 
     def next_feed(self):
