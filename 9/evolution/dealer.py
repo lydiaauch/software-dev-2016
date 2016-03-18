@@ -191,10 +191,10 @@ class Dealer(object):
             eater = hungry_carnivores[0]
             carnivore_index = cur_player_species.index(eater)
             targets = Dealer.carnivore_targets(eater, self.opponents())
-            target_player = next(player for player in self.player_states()
-                                    if targets[0] in player.species)
 
-            if len(targets) == 1 and target_player.species != cur_player_species:
+            if len(targets) == 1:
+                target_player = next(player for player in self.player_states()
+                                    if targets[0] in player.species)
                 defender_index = target_player.species.index(targets[0])
                 target_index = self.opponents().index(target_player)
                 return [carnivore_index, target_index, defender_index]
