@@ -15,10 +15,12 @@ if __name__ == '__main__':
             file = open(i)
             p1 = subprocess.Popen(["./xstep", ""], stdin=file, stdout=subprocess.PIPE, cwd=os.path.relpath(".."))
             result = p1.stdout.read()
+            result = result.translate(None, string.whitespace)
             output,err = p1.communicate()
             outfile_name = i.replace("in.json", "out.json")
             expected = open(outfile_name).read()
-            if (result.translate(None, string.whitespace) == expected.translate(None, string.whitespace)):
+            expected = expected.translate(None, string.whitespace)
+            if (result == expected):
                 print("The test passed! \n")
             else:
                 print("The test FAILED.\n")
