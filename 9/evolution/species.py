@@ -4,6 +4,12 @@ class Species(object):
     """
     A data representation of a Species in the Evolution game
     """
+    uuid=0
+    @classmethod
+    def gen_id(cls):
+        cls.uuid += 1
+        return cls.uuid
+
     def __init__(self, population=None, food=None, body=None, traits=None, fat_storage=None):
         if population is None:
             population = 1
@@ -21,6 +27,7 @@ class Species(object):
         self.body = body
         self.traits = traits
         self.fat_storage = fat_storage
+        self.id = Species.gen_id()
 
     def __str__(self):
         return "Species(pop=%d, food=%d, body=%d, traits=%s" \
@@ -32,7 +39,8 @@ class Species(object):
                     self.food == other.food,
                     self.body == other.body,
                     self.traits == other.traits,
-                    self.fat_storage == other.fat_storage])
+                    self.fat_storage == other.fat_storage,
+                    self.id == other.id])
 
     def is_attackable(self, attacker, left_neighbor=False, right_neighbor=False):
         """
