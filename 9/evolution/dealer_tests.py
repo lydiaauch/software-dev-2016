@@ -3,6 +3,7 @@ from dealer import *
 from species import Species
 from traitcard import TraitCard
 from player import Player
+from convert_tests import TestConvert
 
 class TestDealer(unittest.TestCase):
     def setUp(self):
@@ -34,7 +35,7 @@ class TestDealer(unittest.TestCase):
     def test_check_for_hungries(self):
         hungries = self.dealer.check_for_hungries(self.species_list)
         self.assertEqual(2, len(hungries))
-        self.assertEqual(self.species_4, hungries[0])
+        self.assertTrue(TestConvert.species_soft_eq(self.species_4, hungries[0]))
 
     def test_opponents(self):
         opponents = self.dealer.opponents()

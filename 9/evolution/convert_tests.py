@@ -124,9 +124,12 @@ class TestConvert(unittest.TestCase):
         self.assertNotEqual(Convert.trait_to_json(self.t_1), self.jt_2)
 
     def test_json_to_species(self):
-        self.assertEqual(Convert.json_to_species(self.jSpecies_1), self.species_1)
-        self.assertEqual(Convert.json_to_species(self.jSpecies_2), self.species_2)
-        self.assertNotEqual(Convert.json_to_species(self.jSpecies_1), self.species_2)
+        self.assertTrue(self.species_soft_eq(Convert.json_to_species(self.jSpecies_1),
+                                             self.species_1))
+        self.assertTrue(self.species_soft_eq(Convert.json_to_species(self.jSpecies_2),
+                                             self.species_2))
+        self.assertFalse(self.species_soft_eq(Convert.json_to_species(self.jSpecies_1),
+                                              self.species_2))
         self.jSpecies_1[0][1] = -1
         self.assertRaises(AssertionError, Convert.json_to_species, self.jSpecies_1)
 
@@ -137,10 +140,10 @@ class TestConvert(unittest.TestCase):
         self.assertRaises(AssertionError, Convert.species_to_json, self.species_1)
 
     def test_json_to_player(self):
-        self.assertEqual(Convert.json_to_player(self.jPlayer_1), self.player_1)
-        self.assertEqual(Convert.json_to_player(self.jPlayer_2), self.player_2)
-        self.assertEqual(Convert.json_to_player(self.jPlayer_3), self.player_3)
-        self.assertNotEqual(Convert.json_to_player(self.jPlayer_1), self.player_2)
+        self.assertTrue(self.player_soft_eq(Convert.json_to_player(self.jPlayer_1), self.player_1))
+        self.assertTrue(self.player_soft_eq(Convert.json_to_player(self.jPlayer_2), self.player_2))
+        self.assertTrue(self.player_soft_eq(Convert.json_to_player(self.jPlayer_3), self.player_3))
+        self.assertFalse(self.player_soft_eq(Convert.json_to_player(self.jPlayer_1), self.player_2))
         self.jPlayer_1[0][1] = -1
         self.assertRaises(AssertionError, Convert.json_to_player, self.jPlayer_1)
 
@@ -157,6 +160,26 @@ class TestConvert(unittest.TestCase):
     def test_bad_json_to_player(self):
         bad_json = [["foood", 2], ["body", 2], ["population", 2], ["traits", [self.jt_1]]]
         self.assertRaises(Exception, Convert.json_to_player, bad_json)
+
+    @classmethod
+    def player_soft_eq(cls, player0, player1):
+        return all([player0.name == player1.name,
+                    player0.food_bag == player1.food_bag,
+                    player0.hand == player1.hand,
+                    cls.species_list_eq(player0.species, player1.species)])
+
+    @classmethod
+    def species_list_eq(cls, los0, los1):
+        return (len(los0) == len(los1) and
+                       all(cls.species_soft_eq(spec0, spec1) for spec0, spec1 in zip(los0, los1)))
+
+    @classmethod
+    def species_soft_eq(cls, spec0, spec1):
+        return all([spec0.population == spec1.population,
+                    spec0.food == spec1.food,
+                    spec0.body == spec1.body,
+                    spec0.traits == spec1.traits,
+                    spec0.fat_storage == spec1.fat_storage])
 
 
 if __name__ == '__main__':
