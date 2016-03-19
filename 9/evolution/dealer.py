@@ -51,7 +51,6 @@ class Dealer(object):
         :raises: Raises an exception if the watering hole starts at 0.
         """
         current_player = self.player_sets[self.current_player_index]['state']
-
         if self.watering_hole <= 0:
             return
 
