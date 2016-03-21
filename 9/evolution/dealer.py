@@ -1,22 +1,8 @@
 from player_state import *
 from species import *
-
+from feeding import *
 """
 A Dealer Object.
-
-A Feeding is one of:
-- false if the player chooses not to feed.
-- Natural if the herbivore at the given index is being fed.
-- [Natural, Nat+] if a fat-tissue species at the given index is being
-fed the Nat+ amount of food.
-- [Natural, Natural, Natural] if the carnivore at the first index is
-attacking the player at the second index, and defender species at the
-third index. For the player index, the indices from 0 to num_players-2
-represent the player's opponents, while the index num_players-1 is reserved
-for the current player.
-
-A Natural is a Natural number >= 0
-A Nat+ is a Natural number > 0
 """
 
 class Dealer(object):
@@ -64,32 +50,7 @@ class Dealer(object):
             raise Exception("There is no food in the watering hole")
         feeding = self.next_feed()
         #TODO validate given feeding
-        if feeding is not False:
-            if isinstance(feeding, int):
-                species = current_player.species[feeding]
-                self.feed(current_player, species)
-            elif len(feeding) == 2:
-                food_requested = feeding[1]
-                species = current_player.species[feeding[0]]
-                if food_requested > self.watering_hole:
-                    raise Exception("Fat tissue species asked for too much food.")
-                self.watering_hole -= food_requested
-                species.fat_storage += food_requested
-            elif len(feeding) == 3:
-                attacker = current_player.species[feeding[0]]
-                if feeding[1] == len(self.player_sets) - 1:
-                    target_player = current_player
-                else:
-                    target_player = self.opponents()[feeding[1]]
-                defender = target_player.species[feeding[2]]
-                if "horns" in defender.trait_names():
-                    self.kill(current_player, attacker)
-                if attacker.population != 0:
-                    self.feed(current_player, attacker)
-                    self.kill(target_player, defender)
-                    self.feed_scavengers()
-                else:
-                    self.kill(target_player, defender)
+        feeding.apply(self)
         self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
         return True
 
@@ -149,6 +110,15 @@ class Dealer(object):
         if "cooperation" in species.trait_names() and right_neighbor and has_fed:
             self.feed(player, right_neighbor)
 
+    def remove_player(self, player_index):
+        """
+        Removes the player at the given index from the player feeding order.
+        :param player_index: The index of the player to remove in the player_sets
+        array.
+        """
+        # TODO Implement the player abstaining for future rounds.
+        pass
+
     def next_feed(self):
         """
         gets the next species to feed for the current player.
@@ -156,8 +126,8 @@ class Dealer(object):
         is present, or by asking the interface of the current player
         """
         auto_eat = self.auto_eat()
-        current_player = self.player_sets[self.current_player_index]
         if auto_eat is None:
+            current_player = self.player_sets[self.current_player_index]
             return current_player['interface'].next_feeding(current_player['state'],
                                     self.watering_hole, self.opponents())
         else:
@@ -183,9 +153,9 @@ class Dealer(object):
             if "fat-tissue" in eater.trait_names():
                 max_food = eater.body - eater.fat_storage
                 food_requested = min(self.watering_hole, max_food)
-                return [herbivore_index, food_requested]
+                return FatTissueFeeding(herbivore_index, food_requested)
             else:
-                return herbivore_index
+                return HerbivoreFeeding(herbivore_index)
 
         if len(hungry_carnivores) == 1 and len(hungry_herbivores) == 0:
             eater = hungry_carnivores[0]
@@ -197,7 +167,7 @@ class Dealer(object):
                                     if targets[0] in player.species)
                 defender_index = target_player.species.index(targets[0])
                 target_index = self.opponents().index(target_player)
-                return [carnivore_index, target_index, defender_index]
+                return CarnivoreFeeding(carnivore_index, target_index, defender_index)
         return None
 
     def feed_scavengers(self):

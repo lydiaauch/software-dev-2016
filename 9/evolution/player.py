@@ -1,5 +1,6 @@
 from species import Species
 from dealer import Dealer
+from feeding import *
 from globals import *
 
 class Player(object):
@@ -23,7 +24,7 @@ class Player(object):
                           and species.fat_storage < species.body]
         if hungry_fatties:
             feeding = cls.feed_fatty(hungry_fatties, food_available)
-            return [player.species.index(feeding[0]), feeding[1]]
+            return FatTissueFeeding(player.species.index(feeding[0]), feeding[1])
 
         # Checks sequencing constraints
         hungry_species = [species for species in player.species if species.can_eat()]
@@ -35,7 +36,7 @@ class Player(object):
         hungry_herbivores = cls.find_hungry_herbs(hungry_species, hungry_carnivores)
         if hungry_herbivores:
             feeding = cls.feed_herbivores(hungry_herbivores)
-            return player.species.index(feeding)
+            return HerbivoreFeeding(player.species.index(feeding))
 
         if hungry_carnivores:
             feeding = cls.feed_carnivore(hungry_carnivores, player, opponents)
@@ -43,9 +44,11 @@ class Player(object):
                 attacking_species_index = player.species.index(feeding[0])
                 defending_player_index = opponents.index(feeding[1])
                 defending_species_index = feeding[1].species.index(feeding[2])
-                return [attacking_species_index, defending_player_index, defending_species_index]
+                return CarnivoreFeeding(attacking_species_index,
+                                        defending_player_index,
+                                        defending_species_index)
 
-        return False
+        return AbstainFeeding()
 
     @classmethod
     def find_hungry_herbs(cls, hungry_species, hungry_carnivores):

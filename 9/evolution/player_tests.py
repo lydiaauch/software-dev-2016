@@ -82,16 +82,25 @@ class TestPlayer(unittest.TestCase):
         self.species_4.traits = [TraitCard("carnivore")]
         self.species_5.traits = [TraitCard("fat-tissue")]
         # Test if fat_tissue_species
-        self.assertEqual(Player.next_feeding(self.player_1, 10, [self.player_2, self.player_3]), [1, 3])
+        next_feeding = Player.next_feeding(self.player_1, 10, [self.player_2, self.player_3])
+        self.assertEqual(next_feeding.species_index, 1)
+        self.assertEqual(next_feeding.food_requested, 3)
         # Test if hungry_herbivores
         self.species_5.traits = []
-        self.assertEqual(Player.next_feeding(self.player_1, 10, [self.player_2]), 2)
+        next_feeding = Player.next_feeding(self.player_1, 10, [self.player_2])
+        self.assertEqual(next_feeding.species_index, 2)
         # Test if hungry_carnivore
         self.species_5.traits = [TraitCard("carnivore")]
         self.species_6.traits = [TraitCard("carnivore")]
-        self.assertEqual(Player.next_feeding(self.player_1, 10, [self.player_2, self.player_3]), [0, 0, 0])
+        next_feeding = Player.next_feeding(self.player_1, 10, [self.player_2, self.player_3])
+        self.assertEqual(next_feeding.attacker_index,0)
+        self.assertEqual(next_feeding.target_index,0)
+        self.assertEqual(next_feeding.defender_index,0)
         # Test if you can attack your own species.
-        self.assertEqual(Player.next_feeding(self.player_1, 10, [self.player_1]), [0,0,0])
+        next_feeding = Player.next_feeding(self.player_1, 10, [self.player_1])
+        self.assertEqual(next_feeding.attacker_index,0)
+        self.assertEqual(next_feeding.target_index,0)
+        self.assertEqual(next_feeding.defender_index,0)
         # Test exception
         with self.assertRaises(Exception):
             Player.next_feeding(self.player_2, 10, [self.player_1])
