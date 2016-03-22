@@ -100,7 +100,7 @@ class TestPlayer(unittest.TestCase):
         next_feeding = Player.next_feeding(self.player_1, 10, [self.player_1])
         self.assertEqual(next_feeding.attacker_index,0)
         self.assertEqual(next_feeding.target_index,0)
-        self.assertEqual(next_feeding.defender_index,0)
+        self.assertEqual(next_feeding.defender_index,2)
         # Test exception
         with self.assertRaises(Exception):
             Player.next_feeding(self.player_2, 10, [self.player_1])
