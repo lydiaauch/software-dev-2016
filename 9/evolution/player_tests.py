@@ -20,6 +20,10 @@ class TestPlayer(unittest.TestCase):
         self.player_2 = PlayerState(species=[self.species_1])
         self.player_3 = PlayerState(species=[self.species_2, self.species_3, self.species_7])
 
+        self.attacker = Species()
+        self.attacker.traits = [TraitCard("carnivore")]
+        self.defender = Species()
+
     def test_feed_fatty(self):
         self.species_4.traits = [TraitCard("fat-tissue")]
         self.species_1.traits = [TraitCard("fat-tissue")]
@@ -105,6 +109,43 @@ class TestPlayer(unittest.TestCase):
         with self.assertRaises(Exception):
             Player.next_feeding(self.player_2, 10, [self.player_1])
 
+    def test_is_larger(self):
+        # Population different
+        self.defender.population = 2
+        self.attacker.population = 1
+        self.assertEqual(Player.is_larger(self.defender, self.attacker), 1)
+        self.assertEqual(Player.is_larger(self.attacker, self.defender), -1)
+        # Same population different food
+        self.attacker.population = 2
+        self.defender.food = 2
+        self.attacker.food = 1
+        self.assertEqual(Player.is_larger(self.defender, self.attacker), 1)
+        self.assertEqual(Player.is_larger(self.attacker, self.defender), -1)
+        # Same population and food different body
+        self.attacker.food = 2
+        self.defender.body = 4
+        self.attacker.body = 3
+        self.assertEqual(Player.is_larger(self.defender, self.attacker), 1)
+        self.assertEqual(Player.is_larger(self.attacker, self.defender), -1)
+        # Equal population, food, and body
+        self.attacker.body = 4
+        self.assertEqual(Player.is_larger(self.defender, self.attacker), 0)
+
+    def test_sort_lex(self):
+        sorted_list = [self.species_2, self.species_1, self.species_3, self.species_4, self.species_5]
+        self.assertEqual(Player.sort_lex(self.species_list), sorted_list)
+        self.assertNotEqual(Player.sort_lex(self.species_list), self.species_list)
+
+    def test_largest_tied_species(self):
+        tied_species = [self.species_2, self.species_1]
+        self.assertEqual(Player.largest_tied_species(self.species_list), tied_species)
+
+    def test_largest_fatty_need(self):
+        self.species_1.traits = [TraitCard("fat-tissue")]
+        self.species_2.traits = [TraitCard("fat-tissue")]
+        self.species_4.traits = [TraitCard("fat-tissue")]
+        self.assertEqual(Player.largest_fatty_need([self.species_1, self.species_4]), self.species_4)
+        self.assertEqual(Player.largest_fatty_need([self.species_1, self.species_2]), self.species_1)
 
 if __name__ == '__main__':
     unittest.main()

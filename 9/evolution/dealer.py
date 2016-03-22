@@ -34,6 +34,15 @@ class Dealer(object):
             player_set = {'interface': player, 'state': PlayerState()}
             self.player_sets.append(player_set)
 
+    def __eq__(self, other):
+        """Compares two dealer objects"""
+        return all([isinstance(other, Dealer),
+                    # TODO: Implement equality for player sets.
+                    len(self.player_sets) == len(other.player_sets),
+                    self.deck == other.deck,
+                    self.watering_hole == other.watering_hole,
+                    self.current_player_index == other.current_player_index])
+
     def feed1(self):
         """
         Executes one step in the feeding cycle and updates the game state accordingly
@@ -42,17 +51,18 @@ class Dealer(object):
         :raises: Raises an exception if the watering hole starts at 0.
         """
         current_player = self.player_sets[self.current_player_index]['state']
-        if not self.player_can_feed(current_player):
-            self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
-            return False
 
         if self.watering_hole <= 0:
-            raise Exception("There is no food in the watering hole")
+            return
+
+        if not self.player_can_feed(current_player):
+            self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
+            return
+
         feeding = self.next_feed()
         #TODO validate given feeding
         feeding.apply(self)
         self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
-        return True
 
     def kill(self, player, species):
         """

@@ -55,7 +55,7 @@ class Convert(object):
         return all([len(config_json) == 3,
                     len(config_json[0]) <= 8,
                     len(config_json[0]) >= 3,
-                    config_json[1] > 0])
+                    config_json[1] >= 0])
 
     @classmethod
     def json_to_player(cls, json_player):

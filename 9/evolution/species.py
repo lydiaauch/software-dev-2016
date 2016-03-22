@@ -35,11 +35,6 @@ class Species(object):
 
     def __eq__(self, other):
         return all([isinstance(other, Species),
-                    self.population == other.population,
-                    self.food == other.food,
-                    self.body == other.body,
-                    self.traits == other.traits,
-                    self.fat_storage == other.fat_storage,
                     self.id == other.id])
 
     def is_attackable(self, attacker, left_neighbor=False, right_neighbor=False):

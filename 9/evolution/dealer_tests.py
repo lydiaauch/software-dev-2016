@@ -1,3 +1,4 @@
+import copy
 import unittest
 from dealer import *
 from species import Species
@@ -117,8 +118,10 @@ class TestDealer(unittest.TestCase):
 
     def test_feed_1_no_wh_food(self):
         self.dealer.watering_hole = 0
-        with self.assertRaises(Exception):
-            self.dealer.feed1()
+        before = copy.deepcopy(self.dealer)
+        self.dealer.feed1()
+        self.assertEqual(before, self.dealer)
+
 
     def test_feed_1_scavenger(self):
         self.species_3.traits.append(TraitCard("carnivore"))
