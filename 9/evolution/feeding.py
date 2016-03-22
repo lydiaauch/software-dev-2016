@@ -58,11 +58,9 @@ class CarnivoreFeeding(object):
         else:
             target_player = dealer.opponents()[self.target_index]
         defender = target_player.species[self.defender_index]
+        dealer.kill(target_player, defender)
         if "horns" in defender.trait_names():
             dealer.kill(current_player, attacker)
         if attacker.population != 0:
             dealer.feed(current_player, attacker)
-            dealer.kill(target_player, defender)
             dealer.feed_scavengers()
-        else:
-            dealer.kill(target_player, defender)
