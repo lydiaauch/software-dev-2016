@@ -197,7 +197,7 @@ class Dealer(object):
         """
         Gives num_cards to the player from the deck.
         """
-        for i in range(num_cards):
+        for i in range(min(num_cards, len(self.deck))):
             card = self.deck.pop(0)
             player.hand.append(card)
 
