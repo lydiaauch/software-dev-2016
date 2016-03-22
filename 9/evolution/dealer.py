@@ -51,7 +51,6 @@ class Dealer(object):
         :raises: Raises an exception if the watering hole starts at 0.
         """
         current_player = self.player_sets[self.current_player_index]['state']
-
         if self.watering_hole <= 0:
             return
 
@@ -101,24 +100,29 @@ class Dealer(object):
         :param player: The player who owns the given species.
         :sparam species: The species to be fed.
         """
-        has_fed = False
-        if ("foraging" in species.trait_names() and
-                species.population - species.food >= 2 and
-                self.watering_hole >= 2):
-            species.food += 2
-            self.watering_hole -= 2
-            has_fed = True
-        elif (species.population - species.food >= 1 and
-                self.watering_hole >= 1):
+        before_eating = species.food
+
+        self.give_food(species)
+        if "foraging" in species.trait_names():
+            self.give_food(species)
+
+        tokens_eaten = species.food - before_eating
+        for _ in range(tokens_eaten):
+            self.cooperate(player, species)
+
+    def cooperate(self, player, species):
+        if self.watering_hole >= 1:
+            species_index = player.species.index(species)
+            right_neighbor = (False if species_index == len(player.species) - 1
+                                    else player.species[species_index + 1])
+            if "cooperation" in species.trait_names() and right_neighbor:
+                self.feed(player, right_neighbor)
+
+    def give_food(self, species):
+        if species.population - species.food >= 1 and self.watering_hole >= 1:
             species.food += 1
             self.watering_hole -= 1
-            has_fed = True
 
-        species_index = player.species.index(species)
-        right_neighbor = (False if species_index == len(player.species) - 1
-                                else player.species[species_index + 1])
-        if "cooperation" in species.trait_names() and right_neighbor and has_fed:
-            self.feed(player, right_neighbor)
 
     def remove_player(self, player_index):
         """
