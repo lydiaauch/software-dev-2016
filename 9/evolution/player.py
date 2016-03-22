@@ -74,7 +74,7 @@ class Player(object):
         :return: list of [Species, int] where Species is the
         fat_tissue_species and int is the requested food
         """
-        fatty = Species.largest_fatty_need(fat_tissue_species)
+        fatty = cls.largest_fatty_need(fat_tissue_species)
         food_needed = fatty.body - fatty.fat_storage
         food_requested = (food_needed if food_needed < food_available else food_available)
         return [fatty, food_requested]
@@ -86,7 +86,7 @@ class Player(object):
         :param hungry_herbivores: list of hungry herbivores
         :return: the Species to feed
         """
-        return Species.sort_lex(hungry_herbivores)[0]
+        return cls.sort_lex(hungry_herbivores)[0]
 
     @classmethod
     def feed_carnivore(cls, hungry_carnivores, player, opponents):
@@ -97,13 +97,79 @@ class Player(object):
         :param opponents: list of all other player's states
         :return:
         """
-        sorted_carnivores = Species.sort_lex(hungry_carnivores)
+        sorted_carnivores = cls.sort_lex(hungry_carnivores)
         for carnivore in sorted_carnivores:
             targets = Dealer.carnivore_targets(carnivore, opponents)
             if targets:
-                sorted_targets = Species.sort_lex(targets)
+                sorted_targets = cls.sort_lex(targets)
                 target = sorted_targets[0]
                 target_player = next(player for player in opponents if target in player.species)
                 return [carnivore, target_player, target]
 
         return False
+
+    @classmethod
+    def largest_tied_species(cls, list_of_species):
+        """
+        Returns the largest tied species of a Player's species, in terms of lexicographical order
+        :param list_of_species: a Player's species boards
+        :return: list of largest Species
+        """
+        sorted_species = cls.sort_lex(list_of_species)
+        largest = sorted_species[0]
+        largest_species = [species for species in sorted_species
+                           if species.population == largest.population
+                           and species.food == largest.food
+                           and species.body == largest.body]
+        return largest_species
+
+    @classmethod
+    def sort_lex(cls, list_of_species):
+        """
+        Returns the largest species in a list based on a lexicographic manner
+        :param list_of_species: a list of Species
+        :return: the largest Species
+        """
+        return sorted(list_of_species, cmp=cls.is_larger, reverse=True)
+
+
+    @classmethod
+    def is_larger(cls, species_1, species_2):
+        """
+        Determines which of the two given species are larger based on a lexicographic manner
+        :param species_1: first species to compare
+        :param species_2: second species to compare
+        :return: 1 if the first species is larger, -1 if the second is larger, 0 if they are equal
+        """
+        if species_1.population > species_2.population:
+            return 1
+        elif species_1.population == species_2.population:
+            if species_1.food > species_2.food:
+                return 1
+            elif species_1.food == species_2.food:
+                if species_1.body > species_2.body:
+                    return 1
+                elif species_1.body == species_2.body:
+                    return 0
+        return -1
+
+    @classmethod
+    def largest_fatty_need(cls, list_of_species):
+        """
+        Determines which species has a greater need for fat-tissue food
+        :param list_of_species: list of Species with the fat-tissue trait
+        :return: Species with greatest fat-tissue need
+        """
+        if len(list_of_species) == 1:
+            return list_of_species[0]
+        else:
+            max_need = max([species.population - species.food for species in list_of_species])
+
+        highest_needers = [species for species in list_of_species
+                           if species.population - species.food == max_need]
+        largest_needers = cls.largest_tied_species(highest_needers)
+        if len(largest_needers) > 1:
+            positions = [list_of_species.index(species) for species in largest_needers]
+            return largest_needers[positions.index(min(positions))]
+        else:
+            return largest_needers[0]
