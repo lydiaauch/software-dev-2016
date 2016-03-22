@@ -59,11 +59,13 @@ class TestDealer(unittest.TestCase):
         self.dealer.current_player_index = 2
         self.species_3.traits= [TraitCard("fat-tissue")]
         self.species_3.fat_storage = 0
-        self.assertEqual(self.dealer.auto_eat(), [0, 3])
+        auto_eat = self.dealer.auto_eat()
+        self.assertEqual(auto_eat.species_index, 0)
+        self.assertEqual(auto_eat.food_requested, 3)
 
         self.species_3.traits = []
         self.species_3.food = 2
-        self.assertEqual(self.dealer.auto_eat(), 0)
+        self.assertEqual(self.dealer.auto_eat().species_index, 0)
 
         self.species_3.traits = [TraitCard("carnivore")]
         self.assertIsNone(self.dealer.auto_eat())
@@ -72,7 +74,10 @@ class TestDealer(unittest.TestCase):
         self.species_4.traits = [TraitCard("climbing")]
         self.species_5.traits = [TraitCard("climbing")]
 
-        self.assertEqual(self.dealer.auto_eat(), [0, 0, 0])
+        auto_eat = self.dealer.auto_eat()
+        self.assertEqual(auto_eat.attacker_index, 0)
+        self.assertEqual(auto_eat.target_index, 0)
+        self.assertEqual(auto_eat.defender_index, 0)
 
         self.species_3.food = 4
         self.assertIsNone(self.dealer.auto_eat())
