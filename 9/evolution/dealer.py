@@ -100,23 +100,28 @@ class Dealer(object):
         :param player: The player who owns the given species.
         :sparam species: The species to be fed.
         """
-        self.feed_and_cooperate(player, species)
-        if ("foraging" in species.trait_names()):
-            self.feed_and_cooperate(player, species)
+        before_eating = species.food
 
+        self.give_food(species)
+        if "foraging" in species.trait_names():
+            self.give_food(species)
 
+        tokens_eaten = species.food - before_eating
+        for _ in range(tokens_eaten):
+            self.cooperate(player, species)
 
-    def feed_and_cooperate(self, player, species):
-        if (species.population - species.food >= 1 and
-                self.watering_hole >= 1):
-            species.food += 1
-            self.watering_hole -= 1
+    def cooperate(self, player, species):
+        if self.watering_hole >= 1:
             species_index = player.species.index(species)
             right_neighbor = (False if species_index == len(player.species) - 1
                                     else player.species[species_index + 1])
             if "cooperation" in species.trait_names() and right_neighbor:
                 self.feed(player, right_neighbor)
 
+    def give_food(self, species):
+        if species.population - species.food >= 1 and self.watering_hole >= 1:
+            species.food += 1
+            self.watering_hole -= 1
 
 
     def remove_player(self, player_index):
