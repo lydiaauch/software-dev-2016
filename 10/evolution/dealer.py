@@ -91,6 +91,11 @@ class Dealer(object):
                 "carnivore" in carnivore.trait_names() and
                 len(Dealer.carnivore_targets(carnivore, self.player_states())) == 0]
 
+        non_feedable_carnivores = [carnivore for carnivore in non_feedable_carnivores
+             if  "fat-tissue" not in carnivore.trait_names() or
+                 ("fat-tissue" in carnivore.trait_names() and
+                  carnivore.fat_storage == carnivore.body)]
+
         return hungries > 0 and len(hungries) != len(non_feedable_carnivores)
 
     def feed(self, player, species):
@@ -185,7 +190,7 @@ class Dealer(object):
         eater must be an element of this list.
         """
         herbivore_index = cur_player_species.index(eater)
-        if "fat-tissue" in eater.trait_names():
+        if "fat-tissue" in eater.trait_names() and eater.fat_storage < eater.body:
             max_food = eater.body - eater.fat_storage
             food_requested = min(self.watering_hole, max_food)
             return FatTissueFeeding(herbivore_index, food_requested)

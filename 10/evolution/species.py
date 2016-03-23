@@ -81,6 +81,6 @@ class Species(object):
         :return:  True if the species can eat, else false.
         """
         if "fat-tissue" in self.trait_names():
-            return self.fat_storage < self.body
+            return self.fat_storage < self.body or self.food < self.population
         else:
             return self.food < self.population

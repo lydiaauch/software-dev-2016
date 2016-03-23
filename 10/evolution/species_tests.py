@@ -26,6 +26,8 @@ class TestSpecies(unittest.TestCase):
         fat_tissue = Species(4, 3, 4, [TraitCard("fat-tissue")], 3)
         self.assertTrue(fat_tissue.can_eat())
         fat_tissue.fat_storage = 4
+        self.assertTrue(fat_tissue.can_eat())
+        fat_tissue.food = 4
         self.assertFalse(fat_tissue.can_eat())
 
     def test_trait_names(self):
