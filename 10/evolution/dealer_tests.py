@@ -7,6 +7,82 @@ from player import Player
 from convert_tests import TestConvert
 
 class TestDealer(unittest.TestCase):
+    def check_dealer(self, before, after, changes):
+        """
+        Checks that all aspects of self.dealer are the same except for the changes
+        specified in the changes after calling dealer.method. changes is a subset of
+        {
+            "watering_hole": Number,
+            "current_player_index": Number,
+            "deck": [TraitCard, ...] Where a TraitCard is an [Number, String]
+            "players": {Number: PlayerConfig, ...} where the player configuration
+                                                   describes the changes to the
+                                                   player state at the given index
+        }
+        """
+        self.check_attribute(before, after, changes, "watering_hole")
+        self.check_attribute(before, after, changes, "current_player_index")
+        self.check_attribute(before, after, changes, "deck")
+        for i in range(len(before.player_states())):
+            if i in changes["players"]:
+                self.check_player(before.player_state(i), after.player_state(i), changes["players"][i])
+            else:
+                self.check_player(before.player_state(i), after.player_state(i), {})
+
+    def check_player(self, before, after, changes):
+        """
+        Checks that all aspects of the given player are the same except for changes
+        specified in the configuration. A changes is a subset of the dictionary
+        {
+            "name": Any,
+            "food_bag": Number,
+            "hand": [TraitCard, ...], Where a TraitCard is an [Number, String]
+            "species": {Number: SpeciesConfig, ...} where the species configuration
+                                                    describes the changes to species
+                                                    at the given index, or is the
+                                                    string "Extinct" if the slot
+                                                    is now empty.
+
+        }
+        TODO: Extinct can only go at the end now, but could it just offset the index?
+        """
+        self.check_attribute(before, after, changes, "name")
+        self.check_attribute(before, after, changes, "food_bag")
+        self.check_attribute(before, after, changes, "hand")
+        for i in range(len(before.species)):
+            if "species" in changes and i in changes["species"]:
+                if changes["species"][i] == "Extinct":
+                    assertTrue(i > len(after.species))
+                else:
+                    self.check_species(before.species[i], after.species[i], changes["species"][i])
+            else:
+                self.check_species(before.species[i], after.species[i], {})
+
+    def check_species(self, before, after, changes):
+        """
+        Checks that all aspects of the given species are the same except for changes
+        specified in the configuration. A changes is a subset of the dictionary
+        {
+            "poplation": Number,
+            "food": Number,
+            "body": Number,
+            "fat_storage": Number,
+            "traits": [String, ...]
+        }
+        """
+        self.check_attribute(before, after, changes, "population")
+        self.check_attribute(before, after, changes, "food")
+        self.check_attribute(before, after, changes, "body")
+        self.check_attribute(before, after, changes, "fat_storage")
+        self.check_attribute(before, after, changes, "traits")
+
+    def check_attribute(self, before, after, changes, attribute):
+        if attribute in changes:
+            self.assertEqual(getattr(after, attribute), changes[attribute])
+        else:
+            self.assertEqual(getattr(after, attribute), getattr(before, attribute))
+
+
     def setUp(self):
         self.dealer = Dealer([Player(), Player(), Player(), Player()])
         self.dealer.watering_hole = 10
@@ -85,10 +161,14 @@ class TestDealer(unittest.TestCase):
 
     def test_feed_1_herbivore(self):
         # current player has single hungry herbivore -> auto_eat
+        before = copy.deepcopy(self.dealer)
         self.dealer.feed1()
-        self.assertEqual(self.dealer.watering_hole, 9)
-        self.assertEqual(self.dealer.current_player_index, 3)
-        self.assertEqual(self.species_3.food, 4)
+        changes = {
+            "watering_hole": 9,
+            "current_player_index": 3,
+            "players": { 2: { "species": { 0: {"food": 4}}}}
+        }
+        self.check_dealer(before, self.dealer, changes)
 
     def test_feed_1_fatty(self):
         # current player is feeding fat-tissue species
