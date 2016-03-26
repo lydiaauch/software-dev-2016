@@ -50,7 +50,7 @@ class TestDealer(unittest.TestCase):
         self.check_attribute(before, after, changes, "hand")
         i = 0 #before species_list index
         j = 0 #after species_list index
-        while i < len(before.species) and j < len(after.species):
+        while i < len(before.species) or j < len(after.species):
             if "species" in changes and i in changes["species"]:
                 if changes["species"][i] == "Extinct":
                     i += 1
@@ -63,8 +63,7 @@ class TestDealer(unittest.TestCase):
             i += 1
             j += 1
 
-        # TODO: Species list lengths are not checked.
-        # self.assertTrue(i == len(before.species) and j == len(after.species))
+        self.assertTrue(i == len(before.species) and j == len(after.species))
 
     def check_species(self, before, after, changes):
         """
