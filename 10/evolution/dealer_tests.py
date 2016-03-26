@@ -19,6 +19,7 @@ class TestDealer(unittest.TestCase):
                                                    describes the changes to the
                                                    player state at the given index
         }
+        #TODO: index players by id.
         """
         self.check_attribute(before, after, changes, "watering_hole")
         self.check_attribute(before, after, changes, "current_player_index")
@@ -37,26 +38,33 @@ class TestDealer(unittest.TestCase):
             "name": Any,
             "food_bag": Number,
             "hand": [TraitCard, ...], Where a TraitCard is an [Number, String]
-            "species": {Number: SpeciesConfig, ...} where the species configuration
-                                                    describes the changes to species
-                                                    at the given index, or is the
-                                                    string "Extinct" if the slot
-                                                    is now empty.
-
+            "species": {Number: SpeciesChanges, ...} where the species configuration
+                                                     describes the changes to species
+                                                     at the given index, or is the
+                                                     string "Extinct" if the slot
+                                                     is now empty.
         }
-        TODO: Extinct can only go at the end now, but could it just offset the index?
         """
         self.check_attribute(before, after, changes, "name")
         self.check_attribute(before, after, changes, "food_bag")
         self.check_attribute(before, after, changes, "hand")
-        for i in range(len(before.species)):
+        i = 0 #before species_list index
+        j = 0 #after species_list index
+        while i < len(before.species) and j < len(after.species):
             if "species" in changes and i in changes["species"]:
                 if changes["species"][i] == "Extinct":
-                    assertTrue(i > len(after.species))
+                    i += 1
+                    continue
                 else:
-                    self.check_species(before.species[i], after.species[i], changes["species"][i])
+                    self.check_species(before.species[i], after.species[j], changes["species"][i])
             else:
-                self.check_species(before.species[i], after.species[i], {})
+                self.check_species(before.species[i], after.species[j], {})
+
+            i += 1
+            j += 1
+
+        # TODO: Species list lengths are not checked.
+        # self.assertTrue(i == len(before.species) and j == len(after.species))
 
     def check_species(self, before, after, changes):
         """
@@ -77,11 +85,28 @@ class TestDealer(unittest.TestCase):
         self.check_attribute(before, after, changes, "traits")
 
     def check_attribute(self, before, after, changes, attribute):
+        """
+        Checks if a given attribute has changed from the before to after objects.
+        :param before: The object to check before the changes applied.
+        :param after: The object to check after the changes applied.
+        :param changes: Dictionary where the keys are the names of the attributes
+        that should have changed and the values are the expected values.
+        :param attribute: The string name of the attribute to check.
+        """
         if attribute in changes:
             self.assertEqual(getattr(after, attribute), changes[attribute])
         else:
             self.assertEqual(getattr(after, attribute), getattr(before, attribute))
 
+    def feed1(self, changes):
+        """
+        Checks that only attributes described in the changes dictionary have been
+        modified.
+        :param changes: See check_dealer changes docstring.
+        """
+        before = copy.deepcopy(self.dealer)
+        self.dealer.feed1()
+        self.check_dealer(before, self.dealer, changes)
 
     def setUp(self):
         self.dealer = Dealer([Player(), Player(), Player(), Player()])
@@ -161,23 +186,22 @@ class TestDealer(unittest.TestCase):
 
     def test_feed_1_herbivore(self):
         # current player has single hungry herbivore -> auto_eat
-        before = copy.deepcopy(self.dealer)
-        self.dealer.feed1()
         changes = {
             "watering_hole": 9,
             "current_player_index": 3,
             "players": { 2: { "species": { 0: {"food": 4}}}}
         }
-        self.check_dealer(before, self.dealer, changes)
+        self.feed1(changes)
 
     def test_feed_1_fatty(self):
         # current player is feeding fat-tissue species
         self.species_3.traits = [TraitCard("fat-tissue")]
-        self.dealer.feed1()
-        self.assertEqual(self.dealer.watering_hole, 7)
-        self.assertEqual(self.dealer.current_player_index, 3)
-        self.assertEqual(self.species_3.food, 3)
-        self.assertEqual(self.species_3.fat_storage, 3)
+        changes = {
+            "watering_hole": 7,
+            "current_player_index": 3,
+            "players": { 2: { "species": { 0: {"food": 3, "fat_storage": 3}}}}
+        }
+        self.feed1(changes)
 
     def test_feed_1_carnivore(self):
         self.species_3.traits = [TraitCard("carnivore")]
@@ -294,6 +318,20 @@ class TestDealer(unittest.TestCase):
         self.dealer.feed1()
         self.assertEqual(self.species_3.population, 3)
         self.assertEqual(self.species_3.food, 3)
+
+    def test_extinction(self):
+        self.species_3.traits.append(TraitCard("carnivore"))
+        self.species_1.population = 1
+        self.species_2.traits.append(TraitCard("climbing"))
+        self.species_4.traits.append(TraitCard("climbing"))
+        self.species_5.traits.append(TraitCard("climbing"))
+        changes = {
+            "watering_hole": 9,
+            "current_player_index": 3,
+            "players": { 2: { "species": { 0: {"food": 4}}},
+                         0: { "species": { 0: "Extinct"}}}
+        }
+        self.feed1(changes)
 
     def test_player_can_feed(self):
         self.assertFalse(self.dealer.player_can_feed(self.dealer.player_state(0)))
