@@ -48,22 +48,23 @@ class TestDealer(unittest.TestCase):
         self.check_attribute(before, after, changes, "name")
         self.check_attribute(before, after, changes, "food_bag")
         self.check_attribute(before, after, changes, "hand")
-        i = 0 #before species_list index
-        j = 0 #after species_list index
+        i = 0 # before species_list index
+        j = 0 # after species_list index
         while i < len(before.species) or j < len(after.species):
             if "species" in changes and i in changes["species"]:
                 if changes["species"][i] == "Extinct":
                     i += 1
                     continue
                 else:
+                    self.assertTrue(i < len(before.species) and j < len(after.species))
                     self.check_species(before.species[i], after.species[j], changes["species"][i])
             else:
+                self.assertTrue(i < len(before.species) and j < len(after.species))
                 self.check_species(before.species[i], after.species[j], {})
 
             i += 1
             j += 1
 
-        self.assertTrue(i == len(before.species) and j == len(after.species))
 
     def check_species(self, before, after, changes):
         """
