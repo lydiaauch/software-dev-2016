@@ -14,10 +14,10 @@ class TestDealer(unittest.TestCase):
         {
             "watering_hole": Number,
             "current_player_index": Number,
-            "deck": [TraitCard, ...] Where a TraitCard is an [Number, String]
-            "players": {Number: PlayerConfig, ...} where the player configuration
-                                                   describes the changes to the
-                                                   player state at the given index
+            "deck": [TraitCard, ...]
+            "players": {Number: PlayerChanges, ...} where a PlayerChanges is a dict
+                                                    describing the changes to the
+                                                    player state at the given index
         }
         #TODO: index players by id.
         """
@@ -25,10 +25,14 @@ class TestDealer(unittest.TestCase):
         self.check_attribute(before, after, changes, "current_player_index")
         self.check_attribute(before, after, changes, "deck")
         for i in range(len(before.player_states())):
-            if i in changes["players"]:
-                self.check_player(before.player_state(i), after.player_state(i), changes["players"][i])
+            if "players" in changes and i in changes["players"]:
+                self.check_player(before.player_state(i),
+                                  after.player_state(i),
+                                  changes["players"][i])
             else:
-                self.check_player(before.player_state(i), after.player_state(i), {})
+                self.check_player(before.player_state(i),
+                                  after.player_state(i),
+                                  {})
 
     def check_player(self, before, after, changes):
         """
@@ -37,29 +41,34 @@ class TestDealer(unittest.TestCase):
         {
             "name": Any,
             "food_bag": Number,
-            "hand": [TraitCard, ...], Where a TraitCard is an [Number, String]
-            "species": {Number: SpeciesChanges, ...} where the species configuration
-                                                     describes the changes to species
-                                                     at the given index, or is the
-                                                     string "Extinct" if the slot
-                                                     is now empty.
+            "hand": [TraitCard, ...],
+            "species": {Number: SpeciesChanges, ...} where a SpeciesChanges is a
+                                                     dict describing the changes
+                                                     to species at the given index,
+                                                     or is the string "Extinct"
+                                                     if the species at that index
+                                                     went extinct.
         }
         """
         self.check_attribute(before, after, changes, "name")
         self.check_attribute(before, after, changes, "food_bag")
         self.check_attribute(before, after, changes, "hand")
-        i = 0 # before species_list index
-        j = 0 # after species_list index
+        i = 0 # before.species list index
+        j = 0 # after.species  list index
         while i < len(before.species) or j < len(after.species):
             if "species" in changes and i in changes["species"]:
                 if changes["species"][i] == "Extinct":
                     i += 1
                     continue
                 else:
-                    self.assertTrue(i < len(before.species) and j < len(after.species))
-                    self.check_species(before.species[i], after.species[j], changes["species"][i])
+                    self.assertTrue(i < len(before.species) and
+                                    j < len(after.species))
+                    self.check_species(before.species[i],
+                                       after.species[j],
+                                       changes["species"][i])
             else:
-                self.assertTrue(i < len(before.species) and j < len(after.species))
+                self.assertTrue(i < len(before.species) and
+                                j < len(after.species))
                 self.check_species(before.species[i], after.species[j], {})
 
             i += 1
@@ -71,7 +80,7 @@ class TestDealer(unittest.TestCase):
         Checks that all aspects of the given species are the same except for changes
         specified in the configuration. A changes is a subset of the dictionary
         {
-            "poplation": Number,
+            "population": Number,
             "food": Number,
             "body": Number,
             "fat_storage": Number,
@@ -111,10 +120,10 @@ class TestDealer(unittest.TestCase):
     def setUp(self):
         self.dealer = Dealer([Player(), Player(), Player(), Player()])
         self.dealer.watering_hole = 10
-        self.dealer.player_sets[0]['state'].name = 0;
-        self.dealer.player_sets[1]['state'].name = 1;
-        self.dealer.player_sets[2]['state'].name = 2;
-        self.dealer.player_sets[3]['state'].name = 3;
+        self.dealer.player_sets[0]['state'].name = 0
+        self.dealer.player_sets[1]['state'].name = 1
+        self.dealer.player_sets[2]['state'].name = 2
+        self.dealer.player_sets[3]['state'].name = 3
         self.dealer.current_player_index = 2
 
         self.species_1 = Species(4, 4, 4)
@@ -150,7 +159,8 @@ class TestDealer(unittest.TestCase):
         self.species_4.traits = [TraitCard("climbing")]
         self.species_5.traits = [TraitCard("climbing")]
 
-        self.assertEqual(Dealer.carnivore_targets(self.species_3, list_of_opponents), [self.species_1])
+        self.assertEqual(Dealer.carnivore_targets(self.species_3, list_of_opponents),
+                        [self.species_1])
 
         self.species_1.traits = [TraitCard("climbing")]
         self.assertEqual(Dealer.carnivore_targets(self.species_3, list_of_opponents), [])
@@ -209,22 +219,29 @@ class TestDealer(unittest.TestCase):
         self.species_4.traits = [TraitCard("climbing")]
         self.species_5.traits = [TraitCard("climbing")]
 
-        self.dealer.feed1()
-        self.assertEqual(self.dealer.watering_hole, 9)
-        self.assertEqual(self.dealer.current_player_index, 3)
-        self.assertEqual(self.species_3.food, 4)
-        self.assertEqual(self.species_1.population, 3)
+        changes = {
+            "watering_hole": 9,
+            "current_player_index": 3,
+            "players": { 2: { "species": { 0: {"food": 4}}},
+                         0: { "species": { 0: {"population": 3, "food": 3}}}}
+        }
+        self.feed1(changes)
 
     def test_feed_1_cant_feed(self):
-        self.dealer.feed1()
-        self.assertEqual(self.dealer.current_player_index, 3)
+        self.species_3.food = 4
+        changes = {
+            "current_player_index": 3,
+            "players": { 2: { "species": { 0: {"food": 4}}}}
+        }
+        self.feed1(changes)
 
     def test_feed_1_no_wh_food(self):
+        # TODO: should the player index remain the same or change even when there
+        # is no food to eat
         self.dealer.watering_hole = 0
-        before = copy.deepcopy(self.dealer)
-        self.dealer.feed1()
-        self.assertEqual(before, self.dealer)
+        changes = {"current_player_index": 3}
 
+        self.feed1(changes)
 
     def test_feed_1_scavenger(self):
         self.species_3.traits.append(TraitCard("carnivore"))
@@ -233,31 +250,49 @@ class TestDealer(unittest.TestCase):
         self.species_4.traits.append(TraitCard("climbing"))
         self.species_5.traits.append(TraitCard("climbing"))
 
-        self.dealer.feed1()
-        self.assertEqual(self.species_3.food, 4)
-        self.assertEqual(self.species_4.food, 4)
-        self.assertEqual(self.species_1.population, 3)
-        self.assertEqual(self.dealer.watering_hole, 8)
+        changes = {
+            "watering_hole": 8,
+            "current_player_index": 3,
+            "players": { 2: { "species": { 0: {"food": 4}}},
+                         3: { "species": { 0: {"food": 4}}},
+                         0: { "species": { 0: {"food": 3, "population": 3}}}}
+        }
+        self.feed1(changes)
 
     def test_feed_1_double_foraging(self):
         self.species_3.traits.append(TraitCard("foraging"))
         self.species_3.food = 1
-        self.dealer.feed1()
-        self.assertEqual(self.species_3.food, 3)
+
+        changes = {
+            "watering_hole": 8,
+            "current_player_index": 3,
+            "players": { 2: { "species": { 0: {"food": 3}}}}
+        }
+        self.feed1(changes)
 
     def test_feed_1_foraging(self):
         self.species_3.traits.append(TraitCard("foraging"))
         self.species_3.food = 3
-        self.dealer.feed1()
-        self.assertEqual(self.species_3.food, 4)
+
+        changes = {
+            "watering_hole": 9,
+            "current_player_index": 3,
+            "players": { 2: { "species": { 0: {"food": 4}}}}
+        }
+        self.feed1(changes)
 
     def test_feed_1_cooperation(self):
         self.dealer.current_player_index = 3
         self.species_4.traits.append(TraitCard("cooperation"))
         self.species_5.food = 1
-        self.dealer.feed1()
-        self.assertEqual(self.species_4.food, 4)
-        self.assertEqual(self.species_5.food, 2)
+
+        changes = {
+            "watering_hole": 8,
+            "current_player_index": 0,
+            "players": { 3: { "species": { 0: {"food": 4},
+                                           1: {"food": 2}}}}
+        }
+        self.feed1(changes)
 
     def test_feed_1_scavenger_cooperation(self):
         self.species_3.traits.append(TraitCard("carnivore"))
@@ -268,10 +303,15 @@ class TestDealer(unittest.TestCase):
         self.species_5.traits.append(TraitCard("climbing"))
         self.species_5.food = 2
 
-        self.dealer.feed1()
-        self.assertTrue("cooperation" in self.species_4.trait_names())
-        self.assertEqual(self.species_4.food, 4)
-        self.assertEqual(self.species_5.food, 3)
+        changes = {
+            "watering_hole": 7,
+            "current_player_index": 3,
+            "players": {0: { "species": { 0: {"food": 3, "population": 3}}},
+                        2: { "species": { 0: {"food": 4}}},
+                        3: { "species": { 0: {"food": 4},
+                                          1: {"food": 3}}}}
+        }
+        self.feed1(changes)
 
     def test_feed_1_cooperation_chain(self):
         self.dealer.player_sets[3]['state'].species.append(self.species_3)
@@ -280,10 +320,16 @@ class TestDealer(unittest.TestCase):
         self.species_5.traits.append(TraitCard("cooperation"))
         self.species_5.food = 1
         self.species_3.food = 0
-        self.dealer.feed1()
-        self.assertEqual(self.species_4.food, 4)
-        self.assertEqual(self.species_5.food, 2)
-        self.assertEqual(self.species_3.food, 1)
+
+        changes = {
+            "watering_hole": 7,
+            "current_player_index": 0,
+            "players": { 3: { "species": { 0: {"food": 4},
+                                           1: {"food": 2},
+                                           2: {"food": 1}}},
+                         2: { "species": { 0: {"food": 1}}}}
+        }
+        self.feed1(changes)
 
     def test_feed_1_carnivore_foraging(self):
         self.species_3.food = 0
@@ -293,8 +339,13 @@ class TestDealer(unittest.TestCase):
         self.species_4.traits.append(TraitCard("climbing"))
         self.species_5.traits.append(TraitCard("climbing"))
 
-        self.dealer.feed1()
-        self.assertEqual(self.species_3.food, 2)
+        changes = {
+            "watering_hole": 8,
+            "current_player_index": 3,
+            "players": { 2: { "species": { 0: {"food": 2}}},
+                         0: { "species": { 0: {"food": 3, "population": 3}}}}
+        }
+        self.feed1(changes)
 
     def test_feed_1_horns(self):
         self.species_3.food = 0
@@ -304,9 +355,13 @@ class TestDealer(unittest.TestCase):
         self.species_4.traits.append(TraitCard("climbing"))
         self.species_5.traits.append(TraitCard("climbing"))
 
-        self.dealer.feed1()
-        self.assertEqual(self.species_3.population, 3)
-        self.assertEqual(self.species_3.food, 1)
+        changes = {
+            "watering_hole": 9,
+            "current_player_index": 3,
+            "players": { 2: { "species": { 0: {"food": 1, "population": 3}}},
+                         0: { "species": { 0: {"food": 3, "population": 3}}}}
+        }
+        self.feed1(changes)
 
     def test_feed_1_horns_no_food(self):
         self.species_3.traits.append(TraitCard("carnivore"))
@@ -315,21 +370,28 @@ class TestDealer(unittest.TestCase):
         self.species_4.traits.append(TraitCard("climbing"))
         self.species_5.traits.append(TraitCard("climbing"))
 
-        self.dealer.feed1()
-        self.assertEqual(self.species_3.population, 3)
-        self.assertEqual(self.species_3.food, 3)
+        changes = {
+            "watering_hole": 10,
+            "current_player_index": 3,
+            "players": { 2: { "species": { 0: {"food": 3, "population": 3}}},
+                         0: { "species": { 0: {"food": 3, "population": 3}}}}
+        }
+        self.feed1(changes)
 
     def test_extinction(self):
+        self.dealer.deck.append(TraitCard("carnivore", -5))
         self.species_3.traits.append(TraitCard("carnivore"))
-        self.species_1.population = 1
         self.species_2.traits.append(TraitCard("climbing"))
         self.species_4.traits.append(TraitCard("climbing"))
         self.species_5.traits.append(TraitCard("climbing"))
+        self.species_1.population = 1
         changes = {
             "watering_hole": 9,
             "current_player_index": 3,
+            "deck": [],
             "players": { 2: { "species": { 0: {"food": 4}}},
-                         0: { "species": { 0: "Extinct"}}}
+                         0: { "species": { 0: "Extinct"},
+                              "hand": [TraitCard("carnivore", -5)]}}
         }
         self.feed1(changes)
 
