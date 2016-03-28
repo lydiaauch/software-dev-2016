@@ -270,7 +270,7 @@ class TestDealer(unittest.TestCase):
         }
         self.feed1(changes)
 
-    def test_feed1_foraging_cooperator(self):
+    def test_feed1_foraging_cooperator_food_run_out(self):
         self.species_4.traits = [TraitCard("foraging"), TraitCard("cooperation")]
         self.species_4.food = 0
         self.species_5.food = 0
@@ -281,6 +281,19 @@ class TestDealer(unittest.TestCase):
             "current_player_index": 0,
             "players": { 3: { "species": {0: { "food": 2 },
                                           1: { "food": 1 }}}}
+        }
+
+    def test_feed1_foraging_cooperator_enough_food(self):
+        self.species_4.traits = [TraitCard("foraging"), TraitCard("cooperation")]
+        self.species_4.food = 0
+        self.species_5.food = 0
+        self.dealer.current_player_index = 3
+        self.dealer.watering_hole = 4
+        changes = {
+            "watering_hole": 0,
+            "current_player_index": 0,
+            "players": { 3: { "species": {0: { "food": 2 },
+                                          1: { "food": 2 }}}}
         }
 
     def test_feed_1_foraging(self):
