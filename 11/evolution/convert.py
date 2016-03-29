@@ -3,6 +3,7 @@ from traitcard import TraitCard
 from player_state import PlayerState
 from player import Player
 from dealer import Dealer
+from actions import *
 
 class Convert(object):
     """
@@ -142,18 +143,43 @@ class Convert(object):
         return json_species
 
     @classmethod
+    def json_to_step4(cls, json_step4):
+        actions = []
+        for action in json_step4:
+            actions.append(cls.json_to_action(action))
+        return actions
+
+    @classmethod
     def json_to_action(cls, json_action):
         """
-        [Natural, [BT, ...] [RT, ...]]
+        [Natural, [GP, ...], [GB, ...], [BT, ...], [RT, ...]]
         """
         assert(cls.validate_action_json(json_action))
         species_index = json_action[0]
-        
+        pop_grows = []
+        for i in range(len(json_action[1])):
+            gp = json_action[1][i]
+            pop_grows.append(PopGrow(gp[1], gp[2]))
+        body_grows = []
+        for i in range(len(json_action[2])):
+            gb = json_action[2][i]
+            body_grows.append(BodyGrow(gb[1], gb[2]))
+        new_boards = []
+        for i in range(len(json_action[3])):
+            bt = json_action[3][i]
+            traits = bt[1:]
+            new_boards.append(BoardAddition(bt[0], traits))
+        trait_replacements = []
+        for i in range(len(json_action[4])):
+            rt = json_action[4][i]
+            trait_replacements.append(ReplaceTrait(rt[0], rt[1], rt[2]))
+
+        return Action(species_index, pop_grows, body_grows, new_boards, trait_replacements)
 
     @classmethod
     def validate_action_json(cls, json_action):
         # TODO
-        pass
+        return True
 
     @classmethod
     def json_to_trait(cls, json_trait):

@@ -18,6 +18,7 @@ class Dealer(object):
             of the list is the top of the deck, and the end of the list is the bottom.
         watering_hole: Integer representing the board's number of available food tokens.
         current_player_index: Index of player_sets for the player whose turn it is.
+        wh_cards: The face down cards whose food value will be added to the waterin' hole.
     """
 
     def __init__(self, player_interfaces):
@@ -29,6 +30,7 @@ class Dealer(object):
         self.deck = []
         self.watering_hole = 0
         self.current_player_index = 0
+        self.wh_cards = []
 
         for player in player_interfaces:
             player_set = {'interface': player, 'state': PlayerState()}
@@ -41,7 +43,38 @@ class Dealer(object):
                     len(self.player_sets) == len(other.player_sets),
                     self.deck == other.deck,
                     self.watering_hole == other.watering_hole,
-                    self.current_player_index == other.current_player_index])
+                    self.current_player_index == other.current_player_index,
+                    self.wh_cards == other.wh_cards])
+
+    def step4(self, step4):
+        # TODO: Apply Actions from step4
+        # wait for matthias to tell us if ordering of actions matters
+
+        self.reveal_cards()
+        self.trigger_auto_traits()
+
+        while self.watering_hole > 0:
+            self.feed1
+
+    def reveal_cards(self):
+        """
+        Adds all food points from cards in the wh_cards list to the waterin' hole.
+        """
+        while len(wh_cards) > 0:
+            self.watering_hole += self.wh_cards.pop(0).food_points
+        self.watering_hole = max(self.watering_hole, 0)
+
+    def trigger_auto_traits(self):
+        """
+        Automatically updates the population or body size of a species with the
+        Fertile or Long Neck traits
+        """
+        for player in self.player_states():
+            for species in player.species:
+                if "Fertile" in species.trait_names():
+                    species.population += 1
+                elif "Long Neck" in species.trait_names():
+                    species.food += 1
 
     def feed1(self):
         """
