@@ -31,6 +31,8 @@ class Dealer(object):
         self.watering_hole = 0
         self.current_player_index = 0
         self.wh_cards = []
+        self.skipped_players = []
+
 
         for player in player_interfaces:
             player_set = {'interface': player, 'state': PlayerState()}
@@ -87,7 +89,10 @@ class Dealer(object):
         if self.watering_hole <= 0:
             return
 
-        if not self.player_can_feed(current_player):
+        if self.current_player_index in self.skipped_players or \
+                    not self.player_can_feed(current_player):
+            self.skip_player(self.current_player_index)
+
             self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
             return
 
@@ -170,14 +175,14 @@ class Dealer(object):
             species.food += 1
             self.watering_hole -= 1
 
-    def remove_player(self, player_index):
+    def skip_player(self, player_index):
         """
         Removes the player at the given index from the player feeding order.
         :param player_index: The index of the player to remove in the player_sets
         array.
         """
-        # TODO Implement the player abstaining for future rounds.
-        pass
+        self.skipped_players.append(player_index)
+
 
     def next_feed(self):
         """
