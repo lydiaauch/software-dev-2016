@@ -24,6 +24,7 @@ class TraitCard(object):
         if any(trait == t for t in self.traits):
             self.trait = trait
             self.food_points = food_points
+            self.used = False
         else:
             raise Exception("Given invalid trait: {0}".format(trait))
 

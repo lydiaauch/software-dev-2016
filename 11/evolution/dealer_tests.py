@@ -107,6 +107,12 @@ class TestDealer(unittest.TestCase):
         else:
             self.assertEqual(getattr(after, attribute), getattr(before, attribute))
 
+
+    def step4(self, changes, actions):
+        before = copy.deepcopy(self.dealer)
+        self.dealer.step4(actions)
+        self.check_dealer(before, self.dealer, changes)
+
     def feed1(self, changes):
         """
         Checks that only attributes described in the changes dictionary have been
@@ -139,6 +145,12 @@ class TestDealer(unittest.TestCase):
         self.dealer.player_sets[2]['state'].species = [self.species_3]
         self.dealer.player_sets[3]['state'].species = [self.species_4, self.species_5]
 
+    def test_step4_basic(self):
+        actions = [[0, [], [], [], []],
+                   [0, [], [], [], []],
+                   [0, [], [], [], []],
+                   [0, [], [], [], []]]
+        self.step4(actions, {})
 
     def test_check_for_hungries(self):
         hungries = self.dealer.check_for_hungries(self.species_list)

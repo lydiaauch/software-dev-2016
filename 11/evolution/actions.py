@@ -3,9 +3,9 @@ class Action(object):
     Describes a Player's action during step 3 of Evolution.
     """
 
-    def __init__(self, species_index, pop_grows, body_grows,
+    def __init__(self, food_card, pop_grows, body_grows,
                        species_additions, trait_replacements):
-        self.species_index = species_index
+        self.food_card = food_card
         self.pop_grows = pop_grows
         self.body_grows = body_grows
         self.species_additions = species_additions

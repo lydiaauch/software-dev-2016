@@ -49,14 +49,14 @@ class Dealer(object):
                     self.wh_cards == other.wh_cards])
 
     def step4(self, step4):
-        # TODO: Apply Actions from step4
-        # wait for matthias to tell us if ordering of actions matters
+        for player, action in zip(self.player_states(), step4):
+            player.apply_action(action)
 
         self.reveal_cards()
         self.trigger_auto_traits()
 
-        while self.watering_hole > 0:
-            self.feed1
+        while self.watering_hole > 0 and len(self.player_sets) != len(self.skipped_players):
+            self.feed1()
 
     def reveal_cards(self):
         """
@@ -76,7 +76,7 @@ class Dealer(object):
                 if "Fertile" in species.trait_names():
                     species.population += 1
                 elif "Long Neck" in species.trait_names():
-                    species.food += 1
+                    self.feed(player, species)
 
     def feed1(self):
         """
@@ -89,13 +89,10 @@ class Dealer(object):
         if self.watering_hole <= 0:
             return
 
-        if self.current_player_index in self.skipped_players or \
-                    not self.player_can_feed(current_player):
+        if self.current_player_index in self.skipped_players or not self.player_can_feed(current_player):
             self.skip_player(self.current_player_index)
-
             self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
             return
-
         feeding = self.next_feed()
         #TODO validate given feeding
         feeding.apply(self)
@@ -181,8 +178,8 @@ class Dealer(object):
         :param player_index: The index of the player to remove in the player_sets
         array.
         """
-        self.skipped_players.append(player_index)
-
+        if player_index not in self.skipped_players:
+            self.skipped_players.append(player_index)
 
     def next_feed(self):
         """
