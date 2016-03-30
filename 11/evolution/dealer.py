@@ -60,7 +60,7 @@ class Dealer(object):
         """
         Adds all food points from cards in the wh_cards list to the waterin' hole.
         """
-        while len(wh_cards) > 0:
+        while len(self.wh_cards) > 0:
             self.watering_hole += self.wh_cards.pop(0).food_points
         self.watering_hole = max(self.watering_hole, 0)
 
