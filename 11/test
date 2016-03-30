@@ -9,7 +9,8 @@ for f in *_tests.py; do
     printf "\n"
 done
 
-cd ../tests
-python test_all.py
+cd ../tests/xstep
+python ./test_xstep.py
+#python ./step4/test_step4.py
 
 exit 0

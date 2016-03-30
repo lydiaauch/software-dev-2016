@@ -9,11 +9,11 @@ sys.path.append(evolution_path)
 
 if __name__ == '__main__':
     files = os.listdir(os.getcwd())
+    tests_passed = 0
     for i in sorted(files):
         if i.endswith("in.json"):
-            print("--------  " + i + "  --------")
             file = open(i)
-            p1 = subprocess.Popen(["./xstep", ""], stdin=file, stdout=subprocess.PIPE, cwd=os.path.relpath(".."))
+            p1 = subprocess.Popen(["./xstep", ""], stdin=file, stdout=subprocess.PIPE, cwd=os.path.relpath("../.."))
             result = p1.stdout.read()
             result = result.translate(None, string.whitespace)
             output,err = p1.communicate()
@@ -21,8 +21,11 @@ if __name__ == '__main__':
             expected = open(outfile_name).read()
             expected = expected.translate(None, string.whitespace)
             if (result == expected):
-                print("The test passed! \n")
+                tests_passed += 1
             else:
+                print("--------  " + i + "  --------")
                 print("The test FAILED.\n")
                 print("Expected:\n" + expected)
                 print("Actual:\n" + result)
+    if tests_passed > 0:
+        print(str(tests_passed) + " :tests passed!\n")

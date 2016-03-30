@@ -282,6 +282,7 @@ class TestDealer(unittest.TestCase):
             "players": { 3: { "species": {0: { "food": 2 },
                                           1: { "food": 1 }}}}
         }
+        self.feed1(changes)
 
     def test_feed1_foraging_cooperator_enough_food(self):
         self.species_4.traits = [TraitCard("foraging"), TraitCard("cooperation")]
@@ -295,6 +296,7 @@ class TestDealer(unittest.TestCase):
             "players": { 3: { "species": {0: { "food": 2 },
                                           1: { "food": 2 }}}}
         }
+        self.feed1(changes)
 
     def test_feed_1_foraging(self):
         self.species_3.traits.append(TraitCard("foraging"))
