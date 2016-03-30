@@ -1,0 +1,17 @@
+#!/bin/bash
+
+cd evolution
+
+echo -ne '\033c'
+for f in *_tests.py; do
+    echo $f
+    python $f
+    printf "\n"
+done
+
+cd ../tests/xstep
+python ./test_xstep.py
+cd ../step4
+python ./test_step4.py
+
+exit 0

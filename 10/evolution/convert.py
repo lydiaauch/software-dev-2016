@@ -120,7 +120,7 @@ class Convert(object):
         return all([len(json_species) == 4 or
                     (len(json_species) == 5 and
                         json_species[4][0] == "fat-food" and
-                        json_species[4][1] > 0),
+                        json_species[4][1] >= 0),
                     json_species[0][0] == "food",
                     json_species[0][1] >= 0,
                     json_species[1][0] == "body",
