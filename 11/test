@@ -11,6 +11,7 @@ done
 
 cd ../tests/xstep
 python ./test_xstep.py
-#python ./step4/test_step4.py
+cd ../step4
+python ./test_step4.py
 
 exit 0
