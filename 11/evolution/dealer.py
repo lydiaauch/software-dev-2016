@@ -50,14 +50,13 @@ class Dealer(object):
 
     def step4(self, step4):
         self.reveal_cards(step4)
+        self.trigger_auto_traits()
 
         for player, action in zip(self.player_states(), step4):
             player.apply_action(action)
 
-        self.trigger_auto_traits()
-
-        # while self.watering_hole > 0 and len(self.player_sets) != len(self.skipped_players):
-        #     self.feed1()
+        while self.watering_hole > 0 and len(self.player_sets) != len(self.skipped_players):
+            self.feed1()
 
     def reveal_cards(self, step4):
         """
@@ -78,10 +77,18 @@ class Dealer(object):
         """
         for player in self.player_states():
             for species in player.species:
-                if "Fertile" in species.trait_names():
+                if "fertile" in species.trait_names():
                     species.population += 1
-                elif "Long Neck" in species.trait_names():
+
+        for player in self.player_states():
+            for species in player.species:
+                if "long-neck" in species.trait_names():
                     self.feed(player, species)
+
+        for player in self.player_states():
+            for species in player.species:
+                if "fat-tissue" in species.trait_names():
+                    species.digest_fat()
 
     def feed1(self):
         """

@@ -89,3 +89,11 @@ class Species(object):
             return self.fat_storage < self.body or self.food < self.population
         else:
             return self.food < self.population
+
+    def digest_fat(self):
+        """
+        Metabolize fat food. ie move fat food onto food amount.
+        """
+        can_move = min(self.population-self.food, self.fat_storage)
+        self.fat_storage -= can_move
+        self.food += can_move
