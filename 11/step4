@@ -15,13 +15,13 @@ def main():
     for line in message:
         json_message += line.rstrip('\n')
     json_message = json.loads(json_message)
-    try:
-        dealer = Convert.json_to_dealer(json_message[0])
-        step4  = Convert.json_to_step4(json_message[1])
-        dealer.step4(step4)
-        print json.dumps(Convert.dealer_to_json(dealer))
-    except AssertionError:
-        pass
+    #try:
+    dealer = Convert.json_to_dealer(json_message[0])
+    step4  = Convert.json_to_step4(json_message[1])
+    dealer.step4(step4)
+    print json.dumps(Convert.dealer_to_json(dealer))
+    #except AssertionError:
+
 
 
 if __name__ == "__main__":

@@ -1,3 +1,6 @@
+from species import Species
+from actions import *
+
 class PlayerState(object):
     """
     Represents data about the player that is kept track of by the dealer
@@ -42,9 +45,9 @@ class PlayerState(object):
         """
         self.create_new_boards(action.species_additions)
         self.replace_traits(action.trait_replacements)
-        self.increase_populations(actions.pop_grows)
-        self.increase_body_sizes(actions.body_grows)
-        self.remove_used_cards(action)
+        self.increase_populations(action.pop_grows)
+        self.increase_body_sizes(action.body_grows)
+        self.remove_used_cards()
 
     def create_new_boards(self, board_additions):
         """
@@ -52,6 +55,7 @@ class PlayerState(object):
         :param board_additions: List of BoardAdditions to construct species from.
         """
         for addition in board_additions:
+            self.hand[addition.payment_index].used = True
             traits = []
             for trait_idx in addition.traits:
                 new_trait = self.hand[trait_idx]

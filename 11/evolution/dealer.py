@@ -49,21 +49,26 @@ class Dealer(object):
                     self.wh_cards == other.wh_cards])
 
     def step4(self, step4):
+        self.reveal_cards(step4)
+
         for player, action in zip(self.player_states(), step4):
             player.apply_action(action)
 
-        self.reveal_cards()
         self.trigger_auto_traits()
 
-        while self.watering_hole > 0 and len(self.player_sets) != len(self.skipped_players):
-            self.feed1()
+        # while self.watering_hole > 0 and len(self.player_sets) != len(self.skipped_players):
+        #     self.feed1()
 
-    def reveal_cards(self):
+    def reveal_cards(self, step4):
         """
-        Adds all food points from cards in the wh_cards list to the waterin' hole.
+        Adds all food points from cards allocated for food in the given step4 to
+        the waterin' hole.
         """
-        while len(self.wh_cards) > 0:
-            self.watering_hole += self.wh_cards.pop(0).food_points
+        for action, player in zip(step4, self.player_states()):
+            food_card = player.hand[action.food_card]
+            self.watering_hole += food_card.food_points
+            food_card.used = True
+
         self.watering_hole = max(self.watering_hole, 0)
 
     def trigger_auto_traits(self):
