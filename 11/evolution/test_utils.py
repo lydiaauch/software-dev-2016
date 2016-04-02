@@ -63,12 +63,12 @@ def check_player(self, before, after, changes):
             if changes["species"][i] == "Extinct":
                 i += 1
                 continue
-            else:
-                self.assertTrue(i < len(before.species) and
-                                j < len(after.species))
+            elif i < len(before.species):
                 self.check_species(before.species[i],
                                    after.species[j],
                                    changes["species"][i])
+            else:
+                self.check_species(None, after.species[j], changes["species"][i])
         else:
             self.assertTrue(i < len(before.species) and
                             j < len(after.species))
