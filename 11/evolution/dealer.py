@@ -55,6 +55,8 @@ class Dealer(object):
         for player, action in zip(self.player_states(), step4):
             player.apply_action(action)
 
+        self.move_fat_food()
+
         while self.watering_hole > 0 and len(self.player_sets) != len(self.skipped_players):
             self.feed1()
 
@@ -85,6 +87,10 @@ class Dealer(object):
                 if "long-neck" in species.trait_names():
                     self.feed(player, species)
 
+    def move_fat_food(self):
+        """
+        Moves fat-food to normal food
+        """
         for player in self.player_states():
             for species in player.species:
                 if "fat-tissue" in species.trait_names():

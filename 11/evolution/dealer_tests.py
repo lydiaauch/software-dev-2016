@@ -343,5 +343,113 @@ class TestDealer(unittest.TestCase):
         self.species_5.traits.append(TraitCard("climbing"))
         self.assertFalse(self.dealer.player_can_feed(self.dealer.player_state(3)))
 
+    def test_step4_simple(self):
+        self.dealer.player_state(0).hand = [TraitCard("burrowing",food_points=0)]
+        self.dealer.player_state(1).hand = [TraitCard("burrowing",food_points=3)]
+        self.dealer.player_state(2).hand = [TraitCard("burrowing",food_points=2)]
+        self.dealer.player_state(3).hand = [TraitCard("burrowing",food_points=1)]
+
+        actions = [Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
+
+        changes = {
+            "watering_hole": 14,
+            "current_player_index": 0,
+            "players": { 0: { "hand": []},
+                         1: { "hand": []},
+                         2: { "hand": [], "species": { 0: {"food": 4}}},
+                         3: { "hand": [], "species": { 0: {"food": 4}}}}
+        }
+
+        self.step4(changes, actions)
+
+
+    def test_step4_GP(self):
+        self.dealer.player_state(0).hand = [TraitCard("burrowing",food_points=0),
+                                            TraitCard("climbing",food_points=1)]
+        self.dealer.player_state(1).hand = [TraitCard("burrowing",food_points=3)]
+        self.dealer.player_state(2).hand = [TraitCard("burrowing",food_points=2)]
+        self.dealer.player_state(3).hand = [TraitCard("burrowing",food_points=1)]
+
+        actions = [Action(0,[PopGrow(0,1)],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
+
+        changes = {
+            "watering_hole": 13,
+            "current_player_index": 1,
+            "players": { 0: { "hand": [], "species": { 0: {"food": 5, "population": 5}}},
+                         1: { "hand": []},
+                         2: { "hand": [], "species": { 0: {"food": 4}}},
+                         3: { "hand": [], "species": { 0: {"food": 4}}}}
+        }
+
+        self.step4(changes, actions)
+
+    def test_step4_GB(self):
+        self.dealer.player_state(0).hand = [TraitCard("burrowing",food_points=0),
+                                            TraitCard("climbing",food_points=1)]
+        self.dealer.player_state(1).hand = [TraitCard("burrowing",food_points=3)]
+        self.dealer.player_state(2).hand = [TraitCard("burrowing",food_points=2)]
+        self.dealer.player_state(3).hand = [TraitCard("burrowing",food_points=1)]
+
+        actions = [Action(0,[],[BodyGrow(0,1)],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
+
+        changes = {
+            "watering_hole": 14,
+            "current_player_index": 0,
+            "players": { 0: { "hand": [], "species": { 0: {"body": 5}}},
+                         1: { "hand": []},
+                         2: { "hand": [], "species": { 0: {"food": 4}}},
+                         3: { "hand": [], "species": { 0: {"food": 4}}}}
+        }
+
+        self.step4(changes, actions)
+
+
+    def test_step4_RT(self):
+        self.species_1.traits.append(TraitCard("long-neck"))
+        self.dealer.player_state(0).hand = [TraitCard("burrowing",food_points=0),
+                                            TraitCard("climbing",food_points=1)]
+        self.dealer.player_state(1).hand = [TraitCard("burrowing",food_points=3)]
+        self.dealer.player_state(2).hand = [TraitCard("burrowing",food_points=2)]
+        self.dealer.player_state(3).hand = [TraitCard("burrowing",food_points=1)]
+
+        actions = [Action(0,[],[],[],[ReplaceTrait(0,0,1)]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
+
+        changes = {
+            "watering_hole": 14,
+            "current_player_index": 0,
+            "players": { 0: { "hand": [], "species": { 0: {"traits": [TraitCard("climbing", food_points=1)]}}},
+                         1: { "hand": []},
+                         2: { "hand": [], "species": { 0: {"food": 4}}},
+                         3: { "hand": [], "species": { 0: {"food": 4}}}}
+        }
+
+        self.step4(changes, actions)
+
+    def test_step4_BT(self):
+        self.dealer.player_state(0).hand = [TraitCard("burrowing",food_points=0),
+                                            TraitCard("climbing",food_points=1),
+                                            TraitCard("climbing",food_points=2)]
+        self.dealer.player_state(1).hand = [TraitCard("burrowing",food_points=3)]
+        self.dealer.player_state(2).hand = [TraitCard("burrowing",food_points=2)]
+        self.dealer.player_state(3).hand = [TraitCard("burrowing",food_points=1)]
+
+        actions = [Action(0,[],[],[BoardAddition(0,[1,2])],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
+
+        changes = {
+            "watering_hole": 13,
+            "current_player_index": 1,
+            "players": { 0: { "hand": [], "species": { 1: {"body": 0,
+                                                           "food": 1,
+                                                           "fat_storage": 0,
+                                                           "population": 1,
+                                                           "traits": [TraitCard("climbing", food_points=1),
+                                                                      TraitCard("climbing", 2)]}}},
+                         1: { "hand": []},
+                         2: { "hand": [], "species": { 0: {"food": 4}}},
+                         3: { "hand": [], "species": { 0: {"food": 4}}}}
+        }
+
+        self.step4(changes, actions)
+
 if __name__ == '__main__':
     unittest.main()
