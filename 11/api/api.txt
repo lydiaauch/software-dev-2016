@@ -1,0 +1,63 @@
+class Player(object):
+    """
+    A data representation of a Player in the Evolution game
+    """
+    def __init__(self):
+        pass
+
+    def make_play(self, player, food_available, list_of_players):
+        """
+        Returns an `Action` the player would like to take given the current
+        state of the game.
+        :param player: The `PlayerState` of the current player.
+        :param food_available: The number of food tokens in the watering hole.
+        :param: list_of_players: A list of the opponents' `PlayerState`s.
+        :return: An `Action` the player would like to make with the current game state.
+        """
+
+    @classmethod
+    def next_feeding(cls, player, food_available, list_of_players):
+        """
+        Determines a players next feeding species
+        :param player: the PlayerState of the player who is feeding
+        :param food_available: the amount of food on the watering hole board
+        :param list_of_players: the PlayerStates of other players in the game
+        :return: feeding action for the next species to feed
+        """
+
+"""
+DATA DEFINITIONS
+"""
+
+["registration", {}]
+
+["waiting", {"player_ID": Number}]
+
+["start-round", {"game-state": Configuration}]
+
+["play", {"action": Action4}]
+
+["pick-feeding", {"game-state": Configuration}]
+
+["feeding", {"choice": Feeding}]
+
+["end-game", {"game-state": Configuration}]
+
+
+"""
+DATA DEFINITIONS FROM EVOLUTION
+"""
+
+An Action4 is [Natural, [GP, ...], [GB, ...], [BT, ...], [RT, ...]]
+
+A Feeding is one of:
+
+    false, meaning the only possibility is to have one of this player’s species attack some other species and the player chooses to forgo any attack now and for the rest of this turn;
+
+    Natural, that is, the index of a single species that is vegetarian and gets the next token of food;
+
+    [Natural, Nat], that is, an index to a given species and desired number of food tokens—meaning the indexed species comes with a fat-tissue trait and wishes to store the specified number of food tokens;
+
+    [Natural, Natural, Natural], that is, an index pointing to a species of the current player, an index for an element of the given sequence of players, and an index for one of its species—meaning the first species attacks the second species, which belongs to the given player.
+
+A Configuration is [LOP+, Natural, LOC].
