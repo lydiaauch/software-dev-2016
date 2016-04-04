@@ -1,5 +1,5 @@
-The purpose of this project was to implement the player and dealer gui's to
-display their current states.
+The purpose of this project was to implement step4 of the Evolution game and   
+write an interaction diagram for the Player/Dealer communication for the game.
 ________________________________________________________________________________
 
 xgui: test harness for the display method. Takes a Dealer to display the contents of.
