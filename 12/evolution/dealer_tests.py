@@ -469,5 +469,74 @@ class TestDealer(unittest.TestCase):
                 self.assertEqual(len(cards), 7)
         self.assertEqual(len(self.dealer.deck), 122)
 
+    def test_compare_cards(self):
+        card0 = TraitCard("climbing",  0)
+        card1 = TraitCard("burrowing", 3)
+        card2 = TraitCard("climbing", -1)
+        cards = [card0, card1, card2]
+        cards.sort(Dealer.compare_cards)
+        self.assertEqual(cards, [card1, card2, card0])
+        self.assertEqual(Dealer.compare_cards(card0, card1), 1)
+        self.assertEqual(Dealer.compare_cards(card1, card2), -1)
+        self.assertEqual(Dealer.compare_cards(card0, card2), 1)
+
+    def test_make_initial_species(self):
+        self.dealer.player_state(0).species = []
+        before = copy.deepcopy(self.dealer)
+        self.dealer.make_initial_species()
+        changes = {
+            "players": {0: { "species": {
+                                0: { "food": 0, "body": 0, "population": 1,
+                                     "traits": [], "fat_storage": 0 }}}}}
+        self.check_dealer(before, self.dealer, changes)
+
+    def test_min_deck_size(self):
+        self.assertEqual(self.dealer.min_deck_size(), 17)
+        self.dealer.player_state(0).species.append(Species())
+        self.assertEqual(self.dealer.min_deck_size(), 18)
+        self.dealer.player_sets.append({'state': PlayerState(), 'interface': None})
+        self.assertEqual(self.dealer.min_deck_size(), 21)
+
+    def test_reduce_species_pop(self):
+        before = copy.deepcopy(self.dealer)
+        self.dealer.reduce_species_pop()
+        changes = {
+                "players": {
+                         2: { "species": { 0: {"population": 3}}},
+                         3: { "species": { 0: {"population": 3}}}}
+        }
+        self.check_dealer(before, self.dealer, changes)
+
+    def test_reduce_species_pop_extinct(self):
+        self.dealer.player_state(0).species[0].food = 0
+        self.dealer.deck = [TraitCard("climbing"), TraitCard("burrowing"), TraitCard("long-neck")]
+        before = copy.deepcopy(self.dealer)
+        self.dealer.reduce_species_pop()
+        changes = {
+                "deck": [TraitCard("long-neck")],
+                "players": {
+                         0: { "hand": [TraitCard("climbing"), TraitCard("burrowing")],
+                              "species": { 0: "Extinct"}},
+                         2: { "species": { 0: {"population": 3}}},
+                         3: { "species": { 0: {"population": 3}}}}
+        }
+        self.check_dealer(before, self.dealer, changes)
+
+    def test_move_food(self):
+        before = copy.deepcopy(self.dealer)
+        self.dealer.move_food()
+        changes = {
+                "players": {
+                         0: { "food_bag": 4,
+                              "species": { 0: {"food": 0}}},
+                         1: { "food_bag": 4,
+                              "species": { 0: {"food": 0}}},
+                         2: { "food_bag": 3,
+                              "species": { 0: {"food": 0}}},
+                         3: { "food_bag": 6,
+                              "species": { 0: {"food": 0}, 1: {"food": 0}}}}
+        }
+        self.check_dealer(before, self.dealer, changes)
+
 if __name__ == '__main__':
     unittest.main()

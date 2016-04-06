@@ -83,7 +83,7 @@ class Dealer(object):
                 self.deck.extend(self.gen_cards(17, "carnivore"))
             else:
                 self.deck.extend(self.gen_cards(7, trait))
-        self.deck.sort(self.compare_cards)
+        self.deck.sort(Dealer.compare_cards)
 
     def gen_cards(self, num_cards, trait_name):
         """
@@ -98,7 +98,8 @@ class Dealer(object):
             cards.append(TraitCard(trait_name, -1*(num+1)))
         return cards
 
-    def compare_cards(self, c1, c2):
+    @classmethod
+    def compare_cards(cls, c1, c2):
         """
         Compares two trait cards. Returns -1 if c1 is less than c2, or 1 if
         c1 is larger than c2.
