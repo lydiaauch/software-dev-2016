@@ -11,6 +11,14 @@ class Action(object):
         self.species_additions = species_additions
         self.trait_replacements = trait_replacements
 
+    def __eq__(self, other):
+        """Compares two action objects"""
+        return all([isinstance(other, Action),
+            self.food_card == other.food_card,
+            self.pop_grows == other.pop_grows,
+            self.body_grows == other.body_grows,
+            self.species_additions == other.species_additions,
+            self.trait_replacements == other.trait_replacements])
 
 class PopGrow(object):
     """
@@ -27,6 +35,10 @@ class PopGrow(object):
         self.species_index = species_index
         self.payment_index = payment_index
 
+    def __eq__(self, other):
+        return all([isinstance(other, PopGrow),
+            self.species_index == other.species_index,
+            self.payment_index == other.payment_index])
 
 class BodyGrow(object):
     """
@@ -43,6 +55,10 @@ class BodyGrow(object):
         self.species_index = species_index
         self.payment_index = payment_index
 
+    def __eq__(self, other):
+        return all([isinstance(other, BodyGrow),
+            self.species_index == other.species_index,
+            self.payment_index == other.payment_index])
 
 class BoardAddition(object):
     """
@@ -62,6 +78,10 @@ class BoardAddition(object):
         else:
             self.traits = traits
 
+    def __eq__(self, other):
+        return all([isinstance(other, BoardAddition),
+            self.traits == other.traits,
+            self.payment_index == other.payment_index])
 
 class ReplaceTrait(object):
     """
@@ -81,3 +101,9 @@ class ReplaceTrait(object):
         self.species_index = species_index
         self.removed_trait_index = removed_trait_index
         self.new_trait_index = new_trait_index
+
+    def __eq__(self, other):
+        return all([isinstance(other, BoardAddition),
+            self.species_index == other.species_index,
+            self.removed_trait_index == other.removed_trait_index,
+            self.new_trait_index == other.new_trait_index])

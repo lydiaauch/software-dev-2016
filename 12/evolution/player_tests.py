@@ -1,4 +1,6 @@
 import unittest
+import test_utils
+from actions import *
 from species import Species
 from traitcard import TraitCard
 from player import Player
@@ -6,6 +8,9 @@ from player_state import PlayerState
 
 
 class TestPlayer(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        test_utils.setup()
 
     def setUp(self):
         self.species_1 = Species(4, 4, 4)
@@ -178,6 +183,18 @@ class TestPlayer(unittest.TestCase):
         self.species_4.traits = [TraitCard("fat-tissue")]
         self.assertEqual(Player.largest_fatty_need([self.species_1, self.species_4]), self.species_4)
         self.assertEqual(Player.largest_fatty_need([self.species_1, self.species_2]), self.species_1)
+
+    def test_choose(self):
+        self.player_1.hand = [TraitCard("burrowing"), TraitCard("carnivore"), TraitCard("fertile")]
+        expected = Action(0, [], [], [BoardAddition(1, [2])], [])
+        self.assertEqual(expected, Player.choose(self.player_1, [self.species_list], []))
+
+    def test_choose_gp(self):
+        self.player_1.hand = [TraitCard("scavenger"), TraitCard("burrowing"),
+                             TraitCard("carnivore"), TraitCard("fertile")]
+        expected = Action(1, [PopGrow(3, 0)], [], [BoardAddition(2, [3])], [])
+        actual = Player.choose(self.player_1, [self.species_list], [])
+        self.assertEqual(expected, actual)
 
 if __name__ == '__main__':
     unittest.main()

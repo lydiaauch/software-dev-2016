@@ -1,3 +1,4 @@
+from actions import *
 from species import Species
 from dealer import Dealer
 from feeding import *
@@ -19,6 +20,27 @@ class Player(object):
         :param player_state: The PlayerState representing this player.
         """
         pass
+
+    @classmethod
+    def choose(cls, player, before_players, after_players):
+        cards = []
+        for i, card in enumerate(player.hand):
+            cards.append({"card": card, "index": i})
+        cards.sort(lambda c0, c1: Dealer.compare_cards(c0['card'], c1['card']))
+
+        food_card = cards[0]['index']
+        action = Action(food_card, [], [], [], [])
+        action.species_additions.append(BoardAddition(cards[1]['index'],
+                                                      [cards[2]['index']]))
+        if len(player.hand) > 3:
+            action.pop_grows.append(PopGrow(len(player.species), cards[3]['index']))
+        if len(player.hand) > 4:
+            action.body_grows.append(BodyGrow(len(player.species), cards[4]['index']))
+        if len(player.hand) > 5:
+            action.trait_replacements.append(ReplaceTrait(len(player.species),
+                                                          0,
+                                                          cards[5]['index']))
+        return action
 
     @classmethod
     def next_feeding(cls, player, food_available, opponents):
