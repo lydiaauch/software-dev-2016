@@ -20,6 +20,14 @@ class Action(object):
             self.species_additions == other.species_additions,
             self.trait_replacements == other.trait_replacements])
 
+    def __str__(self):
+        return "food: %d, pop_grows: %s, body_grows: %s, species_additions: %s, trait_replacements: %s" % \
+                    (self.food_card,
+                    str(map(lambda x: str(x), self.pop_grows)),
+                    str(map(lambda x: str(x), self.body_grows)),
+                    str(map(lambda x: str(x), self.species_additions)),
+                    str(map(lambda x: str(x), self.trait_replacements)))
+
 class PopGrow(object):
     """
     Describes a Player action to increase the population of the species at the
@@ -40,6 +48,11 @@ class PopGrow(object):
             self.species_index == other.species_index,
             self.payment_index == other.payment_index])
 
+    def __str__(self):
+        return "species_index: %d, payment: %d" % \
+                    (self.species_index,
+                    self.payment_index)
+
 class BodyGrow(object):
     """
     Describes a Player action to increase the body of the species at the
@@ -59,6 +72,11 @@ class BodyGrow(object):
         return all([isinstance(other, BodyGrow),
             self.species_index == other.species_index,
             self.payment_index == other.payment_index])
+
+    def __str__(self):
+        return "species_index: %d, payment: %d" %\
+                    (self.species_index,
+                    self.payment_index)
 
 class BoardAddition(object):
     """
@@ -83,6 +101,10 @@ class BoardAddition(object):
             self.traits == other.traits,
             self.payment_index == other.payment_index])
 
+    def __str__(self):
+        return "payment: %d, traits: %s" % \
+                    (self.payment_index, str(self.traits))
+
 class ReplaceTrait(object):
     """
     Describes a player action to replace one trait on a species with another.
@@ -103,7 +125,13 @@ class ReplaceTrait(object):
         self.new_trait_index = new_trait_index
 
     def __eq__(self, other):
-        return all([isinstance(other, BoardAddition),
+        return all([isinstance(other, ReplaceTrait),
             self.species_index == other.species_index,
             self.removed_trait_index == other.removed_trait_index,
             self.new_trait_index == other.new_trait_index])
+
+    def __str__(self):
+        return "species_index: %d, removed_trait: %d, new_trait: %d" % \
+                    (self.species_index,
+                     self.removed_trait_index,
+                     self.new_trait_index)

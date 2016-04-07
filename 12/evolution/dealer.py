@@ -151,7 +151,16 @@ class Dealer(object):
         Gets player actions for each player using the choose method.
         :return: List-of-Action, on for each player in the game.
         """
-        pass
+        actions = []
+        before = []
+        after = map(lambda plr: plr.species ,self.player_states())
+        for player in self.player_sets:
+            state = player['state']
+            interface = player['interface']
+            after = after[1:]
+            actions.append(interface.choose(state, before, after))
+            before.append(state.species)
+        return actions
 
     def reduce_species_pop(self):
         """

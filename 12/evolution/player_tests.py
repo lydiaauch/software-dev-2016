@@ -1,3 +1,4 @@
+import copy
 import unittest
 import test_utils
 from actions import *
@@ -195,6 +196,30 @@ class TestPlayer(unittest.TestCase):
         expected = Action(1, [PopGrow(3, 0)], [], [BoardAddition(2, [3])], [])
         actual = Player.choose(self.player_1, [self.species_list], [])
         self.assertEqual(expected, actual)
+
+    def test_choose_gb(self):
+        self.player_1.hand = [TraitCard("scavenger"), TraitCard("burrowing"),
+                             TraitCard("carnivore"), TraitCard("fertile"), TraitCard("foraging")]
+        expected = Action(1, [PopGrow(3, 4)], [BodyGrow(3, 0)], [BoardAddition(2, [3])], [])
+        actual = Player.choose(self.player_1, [self.species_list], [])
+        self.assertEqual(expected, actual)
+
+    def test_choose_rt(self):
+        self.player_1.hand = [TraitCard("long-neck"), TraitCard("scavenger"), TraitCard("burrowing"),
+                             TraitCard("carnivore"), TraitCard("fertile"), TraitCard("foraging")]
+        expected = Action(2, [PopGrow(3, 5)], [BodyGrow(3, 0)], [BoardAddition(3, [4])], [ReplaceTrait(3, 0, 1)])
+        actual = Player.choose(self.player_1, [self.species_list], [])
+        self.assertEqual(expected, actual)
+
+    def test_choose_rt(self):
+        self.player_1.hand = [TraitCard("long-neck"), TraitCard("scavenger"), TraitCard("burrowing"),
+                             TraitCard("carnivore"), TraitCard("fertile"), TraitCard("foraging"), TraitCard("scavenger", 3)]
+        expected = Action(2, [PopGrow(3, 5)], [BodyGrow(3, 0)], [BoardAddition(3, [4])], [ReplaceTrait(3, 0, 1)])
+        actual = Player.choose(self.player_1, [self.species_list], [])
+        player_expected = copy.deepcopy(self.player_1)
+        player_expected.apply_action(expected)
+        self.player_1.apply_action(actual)
+        self.check_player(player_expected, self.player_1, {})
 
 if __name__ == '__main__':
     unittest.main()
