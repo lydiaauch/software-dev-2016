@@ -2,6 +2,7 @@ from actions import *
 from species import Species
 from dealer import Dealer
 from feeding import *
+from choice import Choice
 from globals import *
 
 class Player(object):
@@ -22,7 +23,8 @@ class Player(object):
         pass
 
     @classmethod
-    def choose(cls, player, before_players, after_players):
+    def choose(cls, choice):
+        player = choice.player
         cards = []
         for i, card in enumerate(player.hand):
             cards.append({"card": card, "index": i})
@@ -31,7 +33,7 @@ class Player(object):
         food_card = cards[0]['index']
         action = Action(food_card, [], [], [], [])
         action.species_additions.append(BoardAddition(cards[1]['index'],
-                                                      [cards[2]['index']]))
+                                                     [cards[2]['index']]))
         if len(player.hand) > 3:
             action.pop_grows.append(PopGrow(len(player.species), cards[3]['index']))
         if len(player.hand) > 4:

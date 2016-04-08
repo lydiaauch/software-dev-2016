@@ -13,5 +13,7 @@ cd ../tests/xstep
 python ./test_xstep.py
 cd ../step4
 python ./test_step4.py
+cd ../xsilly
+python ./test_xsilly.py
 
 exit 0

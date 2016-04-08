@@ -2,6 +2,7 @@ from player_state import *
 from species import *
 from feeding import *
 from traitcard import TraitCard
+from choice import Choice
 """
 A Dealer Object.
 """
@@ -158,7 +159,8 @@ class Dealer(object):
             state = player['state']
             interface = player['interface']
             after = after[1:]
-            actions.append(interface.choose(state, before, after))
+            choice = Choice(state, before, after)
+            actions.append(interface.choose(choice))
             before.append(state.species)
         return actions
 

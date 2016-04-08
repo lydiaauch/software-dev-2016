@@ -6,6 +6,7 @@ from species import Species
 from traitcard import TraitCard
 from player import Player
 from player_state import PlayerState
+from choice import Choice
 
 
 class TestPlayer(unittest.TestCase):
@@ -188,34 +189,39 @@ class TestPlayer(unittest.TestCase):
     def test_choose(self):
         self.player_1.hand = [TraitCard("burrowing"), TraitCard("carnivore"), TraitCard("fertile")]
         expected = Action(0, [], [], [BoardAddition(1, [2])], [])
-        self.assertEqual(expected, Player.choose(self.player_1, [self.species_list], []))
+        choice = Choice(self.player_1, [self.species_list], [])
+        self.assertEqual(expected, Player.choose(choice))
 
     def test_choose_gp(self):
         self.player_1.hand = [TraitCard("scavenger"), TraitCard("burrowing"),
                              TraitCard("carnivore"), TraitCard("fertile")]
         expected = Action(1, [PopGrow(3, 0)], [], [BoardAddition(2, [3])], [])
-        actual = Player.choose(self.player_1, [self.species_list], [])
+        choice = Choice(self.player_1, [self.species_list], [])
+        actual = Player.choose(choice)
         self.assertEqual(expected, actual)
 
     def test_choose_gb(self):
         self.player_1.hand = [TraitCard("scavenger"), TraitCard("burrowing"),
                              TraitCard("carnivore"), TraitCard("fertile"), TraitCard("foraging")]
         expected = Action(1, [PopGrow(3, 4)], [BodyGrow(3, 0)], [BoardAddition(2, [3])], [])
-        actual = Player.choose(self.player_1, [self.species_list], [])
+        choice = Choice(self.player_1, [self.species_list], [])
+        actual = Player.choose(choice)
         self.assertEqual(expected, actual)
 
     def test_choose_rt(self):
         self.player_1.hand = [TraitCard("long-neck"), TraitCard("scavenger"), TraitCard("burrowing"),
                              TraitCard("carnivore"), TraitCard("fertile"), TraitCard("foraging")]
         expected = Action(2, [PopGrow(3, 5)], [BodyGrow(3, 0)], [BoardAddition(3, [4])], [ReplaceTrait(3, 0, 1)])
-        actual = Player.choose(self.player_1, [self.species_list], [])
+        choice = Choice(self.player_1, [self.species_list], [])
+        actual = Player.choose(choice)
         self.assertEqual(expected, actual)
 
     def test_choose_rt(self):
         self.player_1.hand = [TraitCard("long-neck"), TraitCard("scavenger"), TraitCard("burrowing"),
                              TraitCard("carnivore"), TraitCard("fertile"), TraitCard("foraging"), TraitCard("scavenger", 3)]
         expected = Action(2, [PopGrow(3, 5)], [BodyGrow(3, 0)], [BoardAddition(3, [4])], [ReplaceTrait(3, 0, 1)])
-        actual = Player.choose(self.player_1, [self.species_list], [])
+        choice = Choice(self.player_1, [self.species_list], [])
+        actual = Player.choose(choice)
         player_expected = copy.deepcopy(self.player_1)
         player_expected.apply_action(expected)
         self.player_1.apply_action(actual)

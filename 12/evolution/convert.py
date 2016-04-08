@@ -4,6 +4,7 @@ from player_state import PlayerState
 from player import Player
 from dealer import Dealer
 from actions import *
+from choice import Choice
 
 class Convert(object):
     """
@@ -57,6 +58,23 @@ class Convert(object):
                     len(config_json[0]) <= 8,
                     len(config_json[0]) >= 3,
                     config_json[1] >= 0])
+
+    @classmethod
+    def json_to_choice(cls, json_choice):
+        assert(cls.validate_choice_json(json_choice))
+        player = cls.json_to_player(json_choice[0])
+        before = cls.json_to_listof_species(json_choice[1])
+        after = cls.json_to_listof_species(json_choice[2])
+        return Choice(player, before, after)
+
+    @classmethod
+    def json_to_listof_species(cls, json_species_list):
+        return map(lambda los: map(lambda spec: cls.json_to_species(spec), los), json_species_list)
+
+    @classmethod
+    def validate_choice_json(cls, json_choice):
+        # TODO
+        return True
 
     @classmethod
     def json_to_player(cls, json_player):
@@ -180,6 +198,25 @@ class Convert(object):
     def validate_action_json(cls, json_action):
         # TODO
         return True
+
+    @classmethod
+    def action_to_json(cls, action):
+        gps = map(lambda gp: ["population", gp.species_index, gp.payment_index],
+                 action.pop_grows)
+        gbs = map(lambda gb: ["body", gb.species_index, gb.payment_index],
+                 action.body_grows)
+        bts = map(lambda bt: cls.bt_to_json(bt), action.species_additions)
+        rts = map(lambda rt: [rt.species_index,
+                              rt.removed_trait_index,
+                              rt.new_trait_index],
+                 action.trait_replacements)
+        return [action.food_card, gps, gbs, bts, rts]
+
+    @classmethod
+    def bt_to_json(cls, bt):
+        bt_json = [bt.payment_index]
+        bt_json.extend(bt.traits)
+        return bt_json
 
     @classmethod
     def json_to_trait(cls, json_trait):
