@@ -1,0 +1,15 @@
++------+
+| main |
++------+
+   |
+   |  end_game(n)           +----------+
+   | ---------------------->| player 1 |
+   |                        +----------+
+  ...                           ...
+   |   end_game(n)               |          +----------+
+   | ----------------------------|--------->| player 2 |
+   |                             |          +----------+
+   |                             |                |
+
+end_game is a message of the form ["end_game", Configuration]
+which signals the end of the game.

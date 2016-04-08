@@ -1,4 +1,6 @@
-see api/API_Diagrams.png for an interface diagram of the Evolution game.
+see setup-api.txt for a description of the API for starting a game of Evolution.
+see round-api.txt for a description of the API for during a game of Evolution.
+see end-api.txt for a description of the API for ending a game of Evolution.
 
 class Player(object):
     """
@@ -26,41 +28,3 @@ class Player(object):
         :param list_of_players: the PlayerStates of other players in the game
         :return: feeding action for the next species to feed
         """
-
-"""
-DATA DEFINITIONS
-"""
-
-["registration", {}]
-
-["waiting", {"player_ID": Number}]
-
-["start-round", {"game-state": Configuration}]
-
-["play", {"action": Action4}]
-
-["pick-feeding", {"game-state": Configuration}]
-
-["feeding", {"choice": Feeding}]
-
-["end-game", {"game-state": Configuration}]
-
-
-"""
-DATA DEFINITIONS FROM EVOLUTION
-"""
-
-An Action4 is [Natural, [GP, ...], [GB, ...], [BT, ...], [RT, ...]]
-
-A Feeding is one of:
-
-    false, meaning the only possibility is to have one of this player’s species attack some other species and the player chooses to forgo any attack now and for the rest of this turn;
-
-    Natural, that is, the index of a single species that is vegetarian and gets the next token of food;
-
-    [Natural, Nat], that is, an index to a given species and desired number of food tokens—meaning the indexed species comes with a fat-tissue trait and wishes to store the specified number of food tokens;
-
-    [Natural, Natural, Natural], that is, an index pointing to a species of the current player, an index for an element of the given sequence of players, and an index for one of its species—meaning the first species attacks the second species, which belongs to the given player.
-
-A Configuration is [LOP+, Natural, LOC].
-
