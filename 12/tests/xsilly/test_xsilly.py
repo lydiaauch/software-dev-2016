@@ -28,4 +28,4 @@ if __name__ == '__main__':
                 print("Expected:\n" + expected)
                 print("Actual:\n" + result)
     if tests_passed > 0:
-        print(str(tests_passed) + " :tests passed for xstep!\n")
+        print(str(tests_passed) + " :tests passed for xsilly!\n")
