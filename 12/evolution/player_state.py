@@ -104,3 +104,11 @@ class PlayerState(object):
         Removes all cards from this player's hand that are marked used.
         """
         self.hand = filter(lambda c: not c.used, self.hand)
+
+    def public_state(self):
+        """
+        Creates a new player with private information set to defaults.
+        :return: A new PlayerState object with the same information as this
+        player state, but with private information set to defaults.
+        """
+        return PlayerState(name=self.name, food_bag=None, hand=None, species=self.species)
