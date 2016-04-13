@@ -1,0 +1,154 @@
++--------+   +------+   +------+  +----------+  +----------+
+| dealer |   | in 1 |   | in 2 |  | player 1 |  | player 2 |
++--------+   +------+   +------+  +----------+  +----------+
+    |             |          |          |             |
+    | start(b,c)  |          |          |             |
+    |-----------> | start(t) |          |             |
+    |             |-------------------> |             |
+    | start(b,c)  |          |          |             |
+    |----------------------> |  start(t)|             |
+    |             |          |----------------------> |
+
+b ~ an optional species board with pop. = 1
+c ~ the appropriate number of cards
+start(t) is a message of the form ["start-round", Player]
+A Player is represented by the JSON:
+      [["id",Natural+],
+       ["species",LOS],
+       ["bag",Natural]
+       ["cards",LOC]]
+
+
+ +--------+   +------+   +------+  +----------+  +----------+
+ | dealer |   | in 1 |   | in 2 |  | player 1 |  | player 2 |
+ +--------+   +------+   +------+  +----------+  +----------+
+     |             |         |            |             |
+     | choose(s)   |         |            |             |
+     |-----------> | choose(c)            |             |
+     |             |--------------------> |             |
+     | choose(s)   |         |            |             |
+     |---------------------> | choose(c)                |
+     |             |         |------------------------> |
+     |             |         |            |             |
+     |             |         |            |  return(r)  |
+     | <================================================|
+     |             |         |            |             |
+     |             |         |return(r)   |             | (C)
+     | <==================================|             |
+     |             |         |            |             |
+
+(C) No order is assumed here. All players might be queried "in parallel".
+
+s ~ the state of all players
+
+choose(c) is a message of the form ["choce-actions", Choice]
+c ~ A Choice object of the form:
+      [Player+,[LOS,...,LOS],[LOS,...,LOS]]
+      where the Player+ represents the current player and the first [LOS...]
+      represents the species of player's before the current player, the second
+      list represents species belonging to player's after the current one.
+
+return(r) is a message of the form ["play", Action4]
+r ~ an Action4 is a representation of a Players Choice:
+     [Natural, [GP, ...], [GB, ...], [BT, ...], [RT, ...]]
+
+     A GP is ["population",Natural, Natural].
+     Interpretation A ["population",i,j] array requests a trade of card j for a
+     growth of the population of species board i by one.
+
+     A GB is ["body",Natural, Natural].
+     Interpretation A ["body",i,j] array requests a trade of card j for a growth
+     of the body of species board i by one.
+
+     A BT is one of:
+     [Natural]
+     [Natural, Natural]
+     [Natural, Natural, Natural]
+     [Natural, Natural, Natural, Natural]
+     Interpretation A BT represents a species board addition to the right of the
+     existing sequence of boards for the corresponding player. Specifically, [i, j, ..., k]
+     uses the first of the player’s cards (i) to "pay" for the new board and uses
+     the remaining (up to three) cards (j, ..., k) as traits.
+
+     An RT is [Natural, Natural, Natural].
+     Interpretation An RT represents a trait replacement for a species board.
+     Specifically, [b, i, j] specifies that board b’s i’s trait card is replaced
+     with the j’s card from the player’s card sequence.
+
+
+ +--------+   +------+   +------+   +----------+  +----------+
+ | dealer |   | in 1 |   | in 2 |   | player 1 |  | player 2 |
+ +--------+   +------+   +------+   +----------+  +----------+
+     |             |        |               |             |
+     |             |        |               |             |
+  feeding()        |        |               |             |
+ +-- |             |        |               |             |
+ |   | feedNext(xs)|        |               |             | (D)
+ |   |--------------------> | feedNext(ys)  |             |
+ |   |             |        |---------------------------->|
+ |   |             |        |               |             |
+ |   |             |        |               |  return(fc) |
+ |   | <==================================================|
+ |   |             |        |               |             |
+ |   | feedNext(xs)|        |               |             |
+ |   |-----------> | feednext(ys)           |             |
+ |   |             |----------------------> |             |
+ |   |             |        |               |             |
+ |   |             |        |    return(fc) |             |
+ |   | <====================================|             |
+ |   |             |        |               |             |
+... ...           ...      ...             ...           ...
+ |   |             |        |               |             |
+ +-> |             |        |               |             |
+     |             |        |               |             |
+
+
+(D) The dealer will call only if there is more than one feeding choice.
+
+    It will automatically feed
+    -- a single species with a non-full fat-food trait card
+       (to the max possible)
+    -- a single vegetarian
+    -- a single carnivore that can attack only one species
+       from a different player (no self-attack is allowed).
+
+xs ~ the dealer's current knowledge of the watering hole and
+     the players in attackable order [all playes starting from
+     current, in turn order]
+
+feedNext(ys) is a message of the form ["pick-feeding", Configuration]
+ys ~ A Configuration is a:
+     [LOP, Natural, LOC]
+     Interpretation The list of players describes all players participating in
+     this game. It also specifies the order in which they take turns feeding
+     their species.
+
+     The natural number is the number of food tokens at the watering hole.
+
+     The list of cards is the remaining deck of cards; the cards are handed out
+     in this order.
+
+     A LOP+ is [Player, ..., Player].
+
+return(fc) is a message of the form ["feeding", Feeding]
+fc ~ a Feeding is one of:
+    false, Note the difference to the official rules. meaning the player forgoes
+    any additional chance to take food from the watering hole for a carnivore
+    attack or a fat-tissue fill-up during this turn’s feeding cycle. Of course,
+    if the player owns species that "scavenge", these species still receive food
+    if a carnivore eats.
+
+    Natural is the index of a single species of the currently feeding player that
+    is vegetarian and gets the next token of food;
+
+    [Natural, Nat+] combines an index to a given species and desired number of
+    food tokens—meaning the indexed species of the currently feeding player comes
+    with a fat-tissue trait and wishes to store the specified number of food
+    tokens on that trait;
+
+    Nat+ is a Nat greater than 0.
+
+    [Natural, Natural, Natural] is a triple of indexes: the first one pointing
+    to a carnivore of the current player, the second one points to a player, and
+    the third one into the species sequence of the designated player. The first
+    species attacks the second species for one food token.

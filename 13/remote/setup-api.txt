@@ -1,0 +1,32 @@
++------+
+| main |
++------+
+   |
+   |  reg(n)                +----------+                (C)
+   | <----------------------| player 1 |
+   |  ====================> +----------+
+  ... waiting(id)               ...
+   |  reg(n)                     |         +----------+
+   | <---------------------------|---------| player 2 |
+   |  ===========================|=======> +----------+
+   |  waiting(id)                |                |
+   |                             |                |
+   | nu +--------+               |                |     (A)
+   |--> | dealer |               |                |
+   |    +--------+               |                |
+   |        |                    |                |
+   |        | new(p1) +------+   |                |
+   |        |-------->| in 1 |   |                |     (B)
+   |        |         +------+   |                |
+   |        |            |       |                |
+   |        | new(p2)    |       |   +------+     |
+   |        |----------------------->| in 2 |     |
+   |        |            |       |   +------+     |
+   |        |            |       |                |
+
+(A) nu = new(p1,..,p2) where p1 and p2 are remote procedure players connected to
+player1 and player2 respectively.
+(B) in : an internal representation of a player
+(C) reg: A message of the form ["registration", {}]
+    waiting: message ["waiting", {"player_ID": Number}]
+             containing the registering player's id for the game.

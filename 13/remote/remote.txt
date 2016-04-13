@@ -1,0 +1,30 @@
+see setup-api.txt for a description of the API for starting a game of Evolution.
+see round-api.txt for a description of the API for during a game of Evolution.
+see end-api.txt for a description of the API for ending a game of Evolution.
+
+class Player(object):
+    """
+    A data representation of a Player in the Evolution game
+    """
+    def __init__(self):
+        pass
+
+    def make_play(self, player, food_available, list_of_players):
+        """
+        Returns an `Action` the player would like to take given the current
+        state of the game.
+        :param player: The `PlayerState` of the current player.
+        :param food_available: The number of food tokens in the watering hole.
+        :param: list_of_players: A list of the opponents' `PlayerState`s.
+        :return: An `Action` the player would like to make with the current game state.
+        """
+
+    @classmethod
+    def next_feeding(cls, player, food_available, list_of_players):
+        """
+        Determines a players next feeding species
+        :param player: the PlayerState of the player who is feeding
+        :param food_available: the amount of food on the watering hole board
+        :param list_of_players: the PlayerStates of other players in the game
+        :return: feeding action for the next species to feed
+        """
