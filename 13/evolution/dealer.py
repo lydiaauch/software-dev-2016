@@ -1,8 +1,7 @@
-from player_state import *
-from species import *
+from player_state import PlayerState
+from species import Species
 from feeding import *
 from traitcard import TraitCard
-from choice import Choice
 """
 A Dealer Object.
 """
@@ -37,7 +36,7 @@ class Dealer(object):
         self.skipped_players = []
 
         for index, player in enumerate(player_interfaces):
-            self.players.append(PlayerState(player, index+1))
+            self.players.append(PlayerState(player, index + 1))
 
     def __eq__(self, other):
         """Compares two dealer objects"""
@@ -69,8 +68,8 @@ class Dealer(object):
         results = ""
         sorted_players = self.players
         sorted_players.sort(cmp=lambda p1, p2: p2.food_bag - p1.food_bag)
-        for index, player  in enumerate(sorted_players):
-            results += "%d player id: %d score: %d\n" % (index+1, player.name, player.food_bag)
+        for index, player in enumerate(sorted_players):
+            results += "%d player id: %d score: %d\n" % (index + 1, player.name, player.food_bag)
         return results
 
     def create_deck(self):
@@ -92,9 +91,9 @@ class Dealer(object):
         """
         cards = []
         cards.append(TraitCard(trait_name, 0))
-        for num in range(num_cards/2):
-            cards.append(TraitCard(trait_name, num+1))
-            cards.append(TraitCard(trait_name, -1*(num+1)))
+        for num in range(num_cards / 2):
+            cards.append(TraitCard(trait_name, num + 1))
+            cards.append(TraitCard(trait_name, -1 * (num + 1)))
         return cards
 
     @classmethod
@@ -282,10 +281,11 @@ class Dealer(object):
                 "carnivore" in carnivore.trait_names() and
                 len(Dealer.carnivore_targets(carnivore, self.players)) == 0]
 
-        non_feedable_carnivores = [carnivore for carnivore in non_feedable_carnivores
+        non_feedable_carnivores = \
+            [carnivore for carnivore in non_feedable_carnivores
              if "fat-tissue" not in carnivore.trait_names() or
-                 ("fat-tissue" in carnivore.trait_names() and
-                  carnivore.fat_storage == carnivore.body)]
+             ("fat-tissue" in carnivore.trait_names() and
+              carnivore.fat_storage == carnivore.body)]
 
         return hungries > 0 and len(hungries) != len(non_feedable_carnivores)
 
@@ -307,7 +307,7 @@ class Dealer(object):
         auto_eat = self.auto_eat()
         if auto_eat is None:
             current_player = self.players[self.current_player_index]
-            opponents = map(lambda plr: plr.public_state(),  self.opponents())
+            opponents = map(lambda plr: plr.public_state(), self.opponents())
             return current_player.next_feeding(self.watering_hole, opponents)
         else:
             return auto_eat
@@ -321,9 +321,9 @@ class Dealer(object):
         cur_player_species = self.players[self.current_player_index].species
 
         hungry_herbivores = [species for species in cur_player_species
-                                if "carnivore" not in species.trait_names() and species.can_eat()]
+                             if "carnivore" not in species.trait_names() and species.can_eat()]
         hungry_carnivores = [species for species in cur_player_species
-                                if "carnivore" in species.trait_names() and species.can_eat()]
+                             if "carnivore" in species.trait_names() and species.can_eat()]
 
         if len(hungry_herbivores) == 1 and len(hungry_carnivores) == 0:
             eater = hungry_herbivores[0]
@@ -418,6 +418,7 @@ class Dealer(object):
                 defender = player.species[i]
                 left_neighbor = (False if i == 0 else player.species[i - 1])
                 right_neighbor = (False if i == len(player.species) - 1 else player.species[i + 1])
-                if defender.is_attackable(carnivore, left_neighbor, right_neighbor) and defender != carnivore:
+                if defender.is_attackable(carnivore, left_neighbor, right_neighbor) \
+                   and defender != carnivore:
                     targets.append(defender)
         return targets

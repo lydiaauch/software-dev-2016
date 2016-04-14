@@ -6,6 +6,7 @@ from species import Species
 from traitcard import TraitCard
 from player import Player
 from convert_tests import TestConvert
+from actions import *
 
 
 class TestDealer(unittest.TestCase):
@@ -70,14 +71,14 @@ class TestDealer(unittest.TestCase):
         self.species_5.traits = [TraitCard("climbing")]
 
         self.assertEqual(Dealer.carnivore_targets(self.species_3, list_of_opponents),
-                        [self.species_1])
+                         [self.species_1])
 
         self.species_1.traits = [TraitCard("climbing")]
         self.assertEqual(Dealer.carnivore_targets(self.species_3, list_of_opponents), [])
 
     def test_auto_eat_fat_tissue(self):
         self.dealer.current_player_index = 2
-        self.species_3.traits= [TraitCard("fat-tissue")]
+        self.species_3.traits = [TraitCard("fat-tissue")]
         self.species_3.fat_storage = 0
         auto_eat = self.dealer.auto_eat()
         self.assertEqual(auto_eat.species_index, 0)
@@ -109,7 +110,7 @@ class TestDealer(unittest.TestCase):
         changes = {
             "watering_hole": 9,
             "current_player_index": 3,
-            "players": { 2: { "species": { 0: {"food": 4}}}}
+            "players": {2: {"species": {0: {"food": 4}}}}
         }
         self.feed1(changes)
 
@@ -119,7 +120,7 @@ class TestDealer(unittest.TestCase):
         changes = {
             "watering_hole": 7,
             "current_player_index": 3,
-            "players": { 2: { "species": { 0: {"food": 3, "fat_storage": 3}}}}
+            "players": {2: {"species": {0: {"food": 3, "fat_storage": 3}}}}
         }
         self.feed1(changes)
 
@@ -132,8 +133,8 @@ class TestDealer(unittest.TestCase):
         changes = {
             "watering_hole": 9,
             "current_player_index": 3,
-            "players": { 2: { "species": { 0: {"food": 4}}},
-                         0: { "species": { 0: {"population": 3, "food": 3}}}}
+            "players": {2: {"species": {0: {"food": 4}}},
+                        0: {"species": {0: {"population": 3, "food": 3}}}}
         }
         self.feed1(changes)
 
@@ -141,7 +142,7 @@ class TestDealer(unittest.TestCase):
         self.species_3.food = 4
         changes = {
             "current_player_index": 3,
-            "players": { 2: { "species": { 0: {"food": 4}}}}
+            "players": {2: {"species": {0: {"food": 4}}}}
         }
         self.feed1(changes)
 
@@ -163,9 +164,9 @@ class TestDealer(unittest.TestCase):
         changes = {
             "watering_hole": 8,
             "current_player_index": 3,
-            "players": { 2: { "species": { 0: {"food": 4}}},
-                         3: { "species": { 0: {"food": 4}}},
-                         0: { "species": { 0: {"food": 3, "population": 3}}}}
+            "players": {2: {"species": {0: {"food": 4}}},
+                        3: {"species": {0: {"food": 4}}},
+                        0: {"species": {0: {"food": 3, "population": 3}}}}
         }
         self.feed1(changes)
 
@@ -176,7 +177,7 @@ class TestDealer(unittest.TestCase):
         changes = {
             "watering_hole": 8,
             "current_player_index": 3,
-            "players": { 2: { "species": { 0: {"food": 3}}}}
+            "players": {2: {"species": {0: {"food": 3}}}}
         }
         self.feed1(changes)
 
@@ -203,8 +204,8 @@ class TestDealer(unittest.TestCase):
         changes = {
             "watering_hole": 0,
             "current_player_index": 0,
-            "players": { 3: { "species": {0: { "food": 2 },
-                                          1: { "food": 2 }}}}
+            "players": {3: {"species": {0: {"food": 2},
+                                        1: {"food": 2}}}}
         }
         self.feed1(changes)
 
@@ -215,7 +216,7 @@ class TestDealer(unittest.TestCase):
         changes = {
             "watering_hole": 9,
             "current_player_index": 3,
-            "players": { 2: { "species": { 0: {"food": 4}}}}
+            "players": {2: {"species": {0: {"food": 4}}}}
         }
         self.feed1(changes)
 
@@ -227,8 +228,8 @@ class TestDealer(unittest.TestCase):
         changes = {
             "watering_hole": 8,
             "current_player_index": 0,
-            "players": { 3: { "species": { 0: {"food": 4},
-                                           1: {"food": 2}}}}
+            "players": {3: {"species": {0: {"food": 4},
+                                        1: {"food": 2}}}}
         }
         self.feed1(changes)
 
@@ -244,10 +245,10 @@ class TestDealer(unittest.TestCase):
         changes = {
             "watering_hole": 7,
             "current_player_index": 3,
-            "players": {0: { "species": { 0: {"food": 3, "population": 3}}},
-                        2: { "species": { 0: {"food": 4}}},
-                        3: { "species": { 0: {"food": 4},
-                                          1: {"food": 3}}}}
+            "players": {0: {"species": {0: {"food": 3, "population": 3}}},
+                        2: {"species": {0: {"food": 4}}},
+                        3: {"species": {0: {"food": 4},
+                                        1: {"food": 3}}}}
         }
         self.feed1(changes)
 
@@ -262,10 +263,10 @@ class TestDealer(unittest.TestCase):
         changes = {
             "watering_hole": 7,
             "current_player_index": 0,
-            "players": { 3: { "species": { 0: {"food": 4},
-                                           1: {"food": 2},
-                                           2: {"food": 1}}},
-                         2: { "species": { 0: {"food": 1}}}}
+            "players": {3: {"species": {0: {"food": 4},
+                                        1: {"food": 2},
+                                        2: {"food": 1}}},
+                        2: {"species": {0: {"food": 1}}}}
         }
         self.feed1(changes)
 
@@ -280,8 +281,8 @@ class TestDealer(unittest.TestCase):
         changes = {
             "watering_hole": 8,
             "current_player_index": 3,
-            "players": { 2: { "species": { 0: {"food": 2}}},
-                         0: { "species": { 0: {"food": 3, "population": 3}}}}
+            "players": {2: {"species": {0: {"food": 2}}},
+                        0: {"species": {0: {"food": 3, "population": 3}}}}
         }
         self.feed1(changes)
 
@@ -296,8 +297,8 @@ class TestDealer(unittest.TestCase):
         changes = {
             "watering_hole": 9,
             "current_player_index": 3,
-            "players": { 2: { "species": { 0: {"food": 1, "population": 3}}},
-                         0: { "species": { 0: {"food": 3, "population": 3}}}}
+            "players": {2: {"species": {0: {"food": 1, "population": 3}}},
+                        0: {"species": {0: {"food": 3, "population": 3}}}}
         }
         self.feed1(changes)
 
@@ -311,8 +312,8 @@ class TestDealer(unittest.TestCase):
         changes = {
             "watering_hole": 10,
             "current_player_index": 3,
-            "players": { 2: { "species": { 0: {"food": 3, "population": 3}}},
-                         0: { "species": { 0: {"food": 3, "population": 3}}}}
+            "players": {2: {"species": {0: {"food": 3, "population": 3}}},
+                        0: {"species": {0: {"food": 3, "population": 3}}}}
         }
         self.feed1(changes)
 
@@ -327,9 +328,9 @@ class TestDealer(unittest.TestCase):
             "watering_hole": 9,
             "current_player_index": 3,
             "deck": [],
-            "players": { 2: { "species": { 0: {"food": 4}}},
-                         0: { "species": { 0: "Extinct"},
-                              "hand": [TraitCard("carnivore", -5)]}}
+            "players": {2: {"species": {0: {"food": 4}}},
+                        0: {"species": {0: "Extinct"},
+                            "hand": [TraitCard("carnivore", -5)]}}
         }
         self.feed1(changes)
 
@@ -345,109 +346,114 @@ class TestDealer(unittest.TestCase):
         self.assertFalse(self.dealer.player_can_feed(self.dealer.players[3]))
 
     def test_step4_simple(self):
-        self.dealer.players[0].hand = [TraitCard("burrowing",food_points=0)]
-        self.dealer.players[1].hand = [TraitCard("burrowing",food_points=3)]
-        self.dealer.players[2].hand = [TraitCard("burrowing",food_points=2)]
-        self.dealer.players[3].hand = [TraitCard("burrowing",food_points=1)]
+        self.dealer.players[0].hand = [TraitCard("burrowing", food_points=0)]
+        self.dealer.players[1].hand = [TraitCard("burrowing", food_points=3)]
+        self.dealer.players[2].hand = [TraitCard("burrowing", food_points=2)]
+        self.dealer.players[3].hand = [TraitCard("burrowing", food_points=1)]
 
-        actions = [Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
+        actions = [Action(0, [], [], [], []), Action(0, [], [], [], []),
+                   Action(0, [], [], [], []), Action(0, [], [], [], [])]
 
         changes = {
             "watering_hole": 14,
             "current_player_index": 0,
-            "players": { 0: { "hand": []},
-                         1: { "hand": []},
-                         2: { "hand": [], "species": { 0: {"food": 4}}},
-                         3: { "hand": [], "species": { 0: {"food": 4}}}}
+            "players": {0: {"hand": []},
+                        1: {"hand": []},
+                        2: {"hand": [], "species": {0: {"food": 4}}},
+                        3: {"hand": [], "species": {0: {"food": 4}}}}
         }
 
         self.step4(changes, actions)
 
-
     def test_step4_GP(self):
-        self.dealer.players[0].hand = [TraitCard("burrowing",food_points=0),
-                                            TraitCard("climbing",food_points=1)]
-        self.dealer.players[1].hand = [TraitCard("burrowing",food_points=3)]
-        self.dealer.players[2].hand = [TraitCard("burrowing",food_points=2)]
-        self.dealer.players[3].hand = [TraitCard("burrowing",food_points=1)]
+        self.dealer.players[0].hand = [TraitCard("burrowing", food_points=0),
+                                       TraitCard("climbing", food_points=1)]
+        self.dealer.players[1].hand = [TraitCard("burrowing", food_points=3)]
+        self.dealer.players[2].hand = [TraitCard("burrowing", food_points=2)]
+        self.dealer.players[3].hand = [TraitCard("burrowing", food_points=1)]
 
-        actions = [Action(0,[PopGrow(0,1)],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
+        actions = [Action(0, [PopGrow(0, 1)], [], [], []), Action(0, [], [], [], []),
+                   Action(0, [], [], [], []), Action(0, [], [], [], [])]
 
         changes = {
             "watering_hole": 13,
             "current_player_index": 1,
-            "players": { 0: { "hand": [], "species": { 0: {"food": 5, "population": 5}}},
-                         1: { "hand": []},
-                         2: { "hand": [], "species": { 0: {"food": 4}}},
-                         3: { "hand": [], "species": { 0: {"food": 4}}}}
+            "players": {0: {"hand": [], "species": {0: {"food": 5, "population": 5}}},
+                        1: {"hand": []},
+                        2: {"hand": [], "species": {0: {"food": 4}}},
+                        3: {"hand": [], "species": {0: {"food": 4}}}}
         }
 
         self.step4(changes, actions)
 
     def test_step4_GB(self):
-        self.dealer.players[0].hand = [TraitCard("burrowing",food_points=0),
-                                            TraitCard("climbing",food_points=1)]
-        self.dealer.players[1].hand = [TraitCard("burrowing",food_points=3)]
-        self.dealer.players[2].hand = [TraitCard("burrowing",food_points=2)]
-        self.dealer.players[3].hand = [TraitCard("burrowing",food_points=1)]
+        self.dealer.players[0].hand = [TraitCard("burrowing", food_points=0),
+                                       TraitCard("climbing", food_points=1)]
+        self.dealer.players[1].hand = [TraitCard("burrowing", food_points=3)]
+        self.dealer.players[2].hand = [TraitCard("burrowing", food_points=2)]
+        self.dealer.players[3].hand = [TraitCard("burrowing", food_points=1)]
 
-        actions = [Action(0,[],[BodyGrow(0,1)],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
+        actions = [Action(0, [], [BodyGrow(0, 1)], [], []), Action(0, [], [], [], []),
+                   Action(0, [], [], [], []), Action(0, [], [], [], [])]
 
         changes = {
             "watering_hole": 14,
             "current_player_index": 0,
-            "players": { 0: { "hand": [], "species": { 0: {"body": 5}}},
-                         1: { "hand": []},
-                         2: { "hand": [], "species": { 0: {"food": 4}}},
-                         3: { "hand": [], "species": { 0: {"food": 4}}}}
+            "players": {0: {"hand": [], "species": {0: {"body": 5}}},
+                        1: {"hand": []},
+                        2: {"hand": [], "species": {0: {"food": 4}}},
+                        3: {"hand": [], "species": {0: {"food": 4}}}}
         }
 
         self.step4(changes, actions)
 
-
     def test_step4_RT(self):
         self.species_1.traits.append(TraitCard("long-neck"))
-        self.dealer.players[0].hand = [TraitCard("burrowing",food_points=0),
-                                            TraitCard("climbing",food_points=1)]
-        self.dealer.players[1].hand = [TraitCard("burrowing",food_points=3)]
-        self.dealer.players[2].hand = [TraitCard("burrowing",food_points=2)]
-        self.dealer.players[3].hand = [TraitCard("burrowing",food_points=1)]
+        self.dealer.players[0].hand = [TraitCard("burrowing", food_points=0),
+                                       TraitCard("climbing", food_points=1)]
+        self.dealer.players[1].hand = [TraitCard("burrowing", food_points=3)]
+        self.dealer.players[2].hand = [TraitCard("burrowing", food_points=2)]
+        self.dealer.players[3].hand = [TraitCard("burrowing", food_points=1)]
 
-        actions = [Action(0,[],[],[],[ReplaceTrait(0,0,1)]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
+        actions = [Action(0, [], [], [], [ReplaceTrait(0, 0, 1)]), Action(0, [], [], [], []),
+                   Action(0, [], [], [], []), Action(0, [], [], [], [])]
 
         changes = {
             "watering_hole": 14,
             "current_player_index": 0,
-            "players": { 0: { "hand": [], "species": { 0: {"traits": [TraitCard("climbing", food_points=1)]}}},
-                         1: { "hand": []},
-                         2: { "hand": [], "species": { 0: {"food": 4}}},
-                         3: { "hand": [], "species": { 0: {"food": 4}}}}
+            "players": {0: {"hand": [],
+                            "species": {0: {"traits": [TraitCard("climbing", food_points=1)]}}},
+                        1: {"hand": []},
+                        2: {"hand": [], "species": {0: {"food": 4}}},
+                        3: {"hand": [], "species": {0: {"food": 4}}}}
         }
 
         self.step4(changes, actions)
 
     def test_step4_BT(self):
-        self.dealer.players[0].hand = [TraitCard("burrowing",food_points=0),
-                                            TraitCard("climbing",food_points=1),
-                                            TraitCard("climbing",food_points=2)]
-        self.dealer.players[1].hand = [TraitCard("burrowing",food_points=3)]
-        self.dealer.players[2].hand = [TraitCard("burrowing",food_points=2)]
-        self.dealer.players[3].hand = [TraitCard("burrowing",food_points=1)]
+        self.dealer.players[0].hand = [TraitCard("burrowing", food_points=0),
+                                       TraitCard("climbing", food_points=1),
+                                       TraitCard("climbing", food_points=2)]
+        self.dealer.players[1].hand = [TraitCard("burrowing", food_points=3)]
+        self.dealer.players[2].hand = [TraitCard("burrowing", food_points=2)]
+        self.dealer.players[3].hand = [TraitCard("burrowing", food_points=1)]
 
-        actions = [Action(0,[],[],[BoardAddition(0,[1,2])],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
+        actions = [Action(0, [], [], [BoardAddition(0, [1, 2])], []), Action(0, [], [], [], []),
+                   Action(0, [], [], [], []), Action(0, [], [], [], [])]
 
         changes = {
             "watering_hole": 13,
             "current_player_index": 1,
-            "players": { 0: { "hand": [], "species": { 1: {"body": 0,
-                                                           "food": 1,
-                                                           "fat_storage": 0,
-                                                           "population": 1,
-                                                           "traits": [TraitCard("climbing", food_points=1),
-                                                                      TraitCard("climbing", 2)]}}},
-                         1: { "hand": []},
-                         2: { "hand": [], "species": { 0: {"food": 4}}},
-                         3: { "hand": [], "species": { 0: {"food": 4}}}}
+            "players": {0: {"hand": [],
+                            "species": {1: {"body": 0,
+                                            "food": 1,
+                                            "fat_storage": 0,
+                                            "population": 1,
+                                            "traits": [TraitCard("climbing", food_points=1),
+                                                       TraitCard("climbing", 2)]}}},
+                        1: {"hand": []},
+                        2: {"hand": [], "species": {0: {"food": 4}}},
+                        3: {"hand": [], "species": {0: {"food": 4}}}}
         }
 
         self.step4(changes, actions)
@@ -471,7 +477,7 @@ class TestDealer(unittest.TestCase):
         self.assertEqual(len(self.dealer.deck), 122)
 
     def test_compare_cards(self):
-        card0 = TraitCard("climbing",  0)
+        card0 = TraitCard("climbing", 0)
         card1 = TraitCard("burrowing", 3)
         card2 = TraitCard("climbing", -1)
         cards = [card0, card1, card2]
@@ -486,9 +492,10 @@ class TestDealer(unittest.TestCase):
         before = copy.deepcopy(self.dealer)
         self.dealer.make_initial_species()
         changes = {
-            "players": {0: {"species": {
-                                0: {"food": 0, "body": 0, "population": 1,
-                                    "traits": [], "fat_storage": 0}}}}}
+            "players": {
+                0: {"species": {
+                    0: {"food": 0, "body": 0, "population": 1,
+                        "traits": [], "fat_storage": 0}}}}}
         self.check_dealer(before, self.dealer, changes)
 
     def test_min_deck_size(self):
@@ -502,9 +509,9 @@ class TestDealer(unittest.TestCase):
         before = copy.deepcopy(self.dealer)
         self.dealer.reduce_species_pop()
         changes = {
-                "players": {
-                    2: {"species": {0: {"population": 3}}},
-                    3: {"species": {0: {"population": 3}}}}
+            "players": {
+                2: {"species": {0: {"population": 3}}},
+                3: {"species": {0: {"population": 3}}}}
         }
         self.check_dealer(before, self.dealer, changes)
 
@@ -515,12 +522,12 @@ class TestDealer(unittest.TestCase):
         before = copy.deepcopy(self.dealer)
         self.dealer.reduce_species_pop()
         changes = {
-                "deck": [TraitCard("long-neck")],
-                "players": {
-                    0: {"hand": [TraitCard("climbing"), TraitCard("burrowing")],
-                        "species": {0: "Extinct"}},
-                    2: {"species": {0: {"population": 3}}},
-                    3: {"species": {0: {"population": 3}}}}
+            "deck": [TraitCard("long-neck")],
+            "players": {
+                0: {"hand": [TraitCard("climbing"), TraitCard("burrowing")],
+                    "species": {0: "Extinct"}},
+                2: {"species": {0: {"population": 3}}},
+                3: {"species": {0: {"population": 3}}}}
         }
         self.check_dealer(before, self.dealer, changes)
 
