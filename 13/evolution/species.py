@@ -1,4 +1,5 @@
-from globals import *
+from globals import MAX_POPULATION
+
 
 class Species(object):
     """
@@ -12,7 +13,8 @@ class Species(object):
         fat_storage: the number of fat-food tokens the species has
         id: a unique ID for the species
     """
-    uuid=0
+    uuid = 0
+
     @classmethod
     def gen_id(cls):
         cls.uuid += 1
@@ -97,3 +99,7 @@ class Species(object):
         can_move = min(self.population-self.food, self.fat_storage)
         self.fat_storage -= can_move
         self.food += can_move
+
+    def breed(self):
+        if self.population < MAX_POPULATION:
+            self.population += 1

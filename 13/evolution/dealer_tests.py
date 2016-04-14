@@ -30,10 +30,10 @@ class TestDealer(unittest.TestCase):
     def setUp(self):
         self.dealer = Dealer([Player(), Player(), Player(), Player()])
         self.dealer.watering_hole = 10
-        self.dealer.player_sets[0]['state'].name = 0
-        self.dealer.player_sets[1]['state'].name = 1
-        self.dealer.player_sets[2]['state'].name = 2
-        self.dealer.player_sets[3]['state'].name = 3
+        self.dealer.players[0].name = 0
+        self.dealer.players[1].name = 1
+        self.dealer.players[2].name = 2
+        self.dealer.players[3].name = 3
         self.dealer.current_player_index = 2
 
         self.species_1 = Species(4, 4, 4)
@@ -44,10 +44,10 @@ class TestDealer(unittest.TestCase):
         self.species_list = [self.species_1, self.species_2, self.species_3,
                              self.species_4, self.species_5]
 
-        self.dealer.player_sets[0]['state'].species = [self.species_1]
-        self.dealer.player_sets[1]['state'].species = [self.species_2]
-        self.dealer.player_sets[2]['state'].species = [self.species_3]
-        self.dealer.player_sets[3]['state'].species = [self.species_4, self.species_5]
+        self.dealer.players[0].species = [self.species_1]
+        self.dealer.players[1].species = [self.species_2]
+        self.dealer.players[2].species = [self.species_3]
+        self.dealer.players[3].species = [self.species_4, self.species_5]
 
     def test_check_for_hungries(self):
         hungries = self.dealer.check_for_hungries(self.species_list)
@@ -251,7 +251,7 @@ class TestDealer(unittest.TestCase):
         self.feed1(changes)
 
     def test_feed_1_cooperation_chain(self):
-        self.dealer.player_sets[3]['state'].species.append(self.species_3)
+        self.dealer.players[3].species.append(self.species_3)
         self.dealer.current_player_index = 3
         self.species_4.traits.append(TraitCard("cooperation"))
         self.species_5.traits.append(TraitCard("cooperation"))
@@ -333,21 +333,21 @@ class TestDealer(unittest.TestCase):
         self.feed1(changes)
 
     def test_player_can_feed(self):
-        self.assertFalse(self.dealer.player_can_feed(self.dealer.player_state(0)))
-        self.assertTrue(self.dealer.player_can_feed(self.dealer.player_state(2)))
+        self.assertFalse(self.dealer.player_can_feed(self.dealer.players[0]))
+        self.assertTrue(self.dealer.player_can_feed(self.dealer.players[2]))
 
         self.species_4.traits.append(TraitCard("carnivore"))
         self.species_1.traits.append(TraitCard("climbing"))
         self.species_2.traits.append(TraitCard("climbing"))
         self.species_3.traits.append(TraitCard("climbing"))
         self.species_5.traits.append(TraitCard("climbing"))
-        self.assertFalse(self.dealer.player_can_feed(self.dealer.player_state(3)))
+        self.assertFalse(self.dealer.player_can_feed(self.dealer.players[3]))
 
     def test_step4_simple(self):
-        self.dealer.player_state(0).hand = [TraitCard("burrowing",food_points=0)]
-        self.dealer.player_state(1).hand = [TraitCard("burrowing",food_points=3)]
-        self.dealer.player_state(2).hand = [TraitCard("burrowing",food_points=2)]
-        self.dealer.player_state(3).hand = [TraitCard("burrowing",food_points=1)]
+        self.dealer.players[0].hand = [TraitCard("burrowing",food_points=0)]
+        self.dealer.players[1].hand = [TraitCard("burrowing",food_points=3)]
+        self.dealer.players[2].hand = [TraitCard("burrowing",food_points=2)]
+        self.dealer.players[3].hand = [TraitCard("burrowing",food_points=1)]
 
         actions = [Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
 
@@ -364,11 +364,11 @@ class TestDealer(unittest.TestCase):
 
 
     def test_step4_GP(self):
-        self.dealer.player_state(0).hand = [TraitCard("burrowing",food_points=0),
+        self.dealer.players[0].hand = [TraitCard("burrowing",food_points=0),
                                             TraitCard("climbing",food_points=1)]
-        self.dealer.player_state(1).hand = [TraitCard("burrowing",food_points=3)]
-        self.dealer.player_state(2).hand = [TraitCard("burrowing",food_points=2)]
-        self.dealer.player_state(3).hand = [TraitCard("burrowing",food_points=1)]
+        self.dealer.players[1].hand = [TraitCard("burrowing",food_points=3)]
+        self.dealer.players[2].hand = [TraitCard("burrowing",food_points=2)]
+        self.dealer.players[3].hand = [TraitCard("burrowing",food_points=1)]
 
         actions = [Action(0,[PopGrow(0,1)],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
 
@@ -384,11 +384,11 @@ class TestDealer(unittest.TestCase):
         self.step4(changes, actions)
 
     def test_step4_GB(self):
-        self.dealer.player_state(0).hand = [TraitCard("burrowing",food_points=0),
+        self.dealer.players[0].hand = [TraitCard("burrowing",food_points=0),
                                             TraitCard("climbing",food_points=1)]
-        self.dealer.player_state(1).hand = [TraitCard("burrowing",food_points=3)]
-        self.dealer.player_state(2).hand = [TraitCard("burrowing",food_points=2)]
-        self.dealer.player_state(3).hand = [TraitCard("burrowing",food_points=1)]
+        self.dealer.players[1].hand = [TraitCard("burrowing",food_points=3)]
+        self.dealer.players[2].hand = [TraitCard("burrowing",food_points=2)]
+        self.dealer.players[3].hand = [TraitCard("burrowing",food_points=1)]
 
         actions = [Action(0,[],[BodyGrow(0,1)],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
 
@@ -406,11 +406,11 @@ class TestDealer(unittest.TestCase):
 
     def test_step4_RT(self):
         self.species_1.traits.append(TraitCard("long-neck"))
-        self.dealer.player_state(0).hand = [TraitCard("burrowing",food_points=0),
+        self.dealer.players[0].hand = [TraitCard("burrowing",food_points=0),
                                             TraitCard("climbing",food_points=1)]
-        self.dealer.player_state(1).hand = [TraitCard("burrowing",food_points=3)]
-        self.dealer.player_state(2).hand = [TraitCard("burrowing",food_points=2)]
-        self.dealer.player_state(3).hand = [TraitCard("burrowing",food_points=1)]
+        self.dealer.players[1].hand = [TraitCard("burrowing",food_points=3)]
+        self.dealer.players[2].hand = [TraitCard("burrowing",food_points=2)]
+        self.dealer.players[3].hand = [TraitCard("burrowing",food_points=1)]
 
         actions = [Action(0,[],[],[],[ReplaceTrait(0,0,1)]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
 
@@ -426,12 +426,12 @@ class TestDealer(unittest.TestCase):
         self.step4(changes, actions)
 
     def test_step4_BT(self):
-        self.dealer.player_state(0).hand = [TraitCard("burrowing",food_points=0),
+        self.dealer.players[0].hand = [TraitCard("burrowing",food_points=0),
                                             TraitCard("climbing",food_points=1),
                                             TraitCard("climbing",food_points=2)]
-        self.dealer.player_state(1).hand = [TraitCard("burrowing",food_points=3)]
-        self.dealer.player_state(2).hand = [TraitCard("burrowing",food_points=2)]
-        self.dealer.player_state(3).hand = [TraitCard("burrowing",food_points=1)]
+        self.dealer.players[1].hand = [TraitCard("burrowing",food_points=3)]
+        self.dealer.players[2].hand = [TraitCard("burrowing",food_points=2)]
+        self.dealer.players[3].hand = [TraitCard("burrowing",food_points=1)]
 
         actions = [Action(0,[],[],[BoardAddition(0,[1,2])],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[]), Action(0,[],[],[],[])]
 
@@ -452,10 +452,10 @@ class TestDealer(unittest.TestCase):
         self.step4(changes, actions)
 
     def test_print_results(self):
-        self.dealer.player_state(0).food_bag = 0
-        self.dealer.player_state(1).food_bag = 1
-        self.dealer.player_state(2).food_bag = 2
-        self.dealer.player_state(3).food_bag = 3
+        self.dealer.players[0].food_bag = 0
+        self.dealer.players[1].food_bag = 1
+        self.dealer.players[2].food_bag = 2
+        self.dealer.players[3].food_bag = 3
         expected_str = "1 player id: 3 score: 3\n2 player id: 2 score: 2\n3 player id: 1 score: 1\n4 player id: 0 score: 0\n"
         self.assertEqual(self.dealer.print_results(), expected_str)
 
@@ -481,7 +481,7 @@ class TestDealer(unittest.TestCase):
         self.assertEqual(Dealer.compare_cards(card0, card2), 1)
 
     def test_make_initial_species(self):
-        self.dealer.player_state(0).species = []
+        self.dealer.players[0].species = []
         before = copy.deepcopy(self.dealer)
         self.dealer.make_initial_species()
         changes = {
@@ -492,9 +492,9 @@ class TestDealer(unittest.TestCase):
 
     def test_min_deck_size(self):
         self.assertEqual(self.dealer.min_deck_size(), 17)
-        self.dealer.player_state(0).species.append(Species())
+        self.dealer.players[0].species.append(Species())
         self.assertEqual(self.dealer.min_deck_size(), 18)
-        self.dealer.player_sets.append({'state': PlayerState(), 'interface': None})
+        self.dealer.players.append({'state': PlayerState(), 'interface': None})
         self.assertEqual(self.dealer.min_deck_size(), 21)
 
     def test_reduce_species_pop(self):
@@ -508,7 +508,7 @@ class TestDealer(unittest.TestCase):
         self.check_dealer(before, self.dealer, changes)
 
     def test_reduce_species_pop_extinct(self):
-        self.dealer.player_state(0).species[0].food = 0
+        self.dealer.players[0].species[0].food = 0
         self.dealer.deck = [TraitCard("climbing"), TraitCard("burrowing"), TraitCard("long-neck")]
         before = copy.deepcopy(self.dealer)
         self.dealer.reduce_species_pop()

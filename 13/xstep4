@@ -20,9 +20,6 @@ def main():
     step4  = Convert.json_to_step4(json_message[1])
     dealer.step4(step4)
     print json.dumps(Convert.dealer_to_json(dealer))
-    #except AssertionError:
-
-
 
 if __name__ == "__main__":
     main()

@@ -28,23 +28,20 @@ class Dealer(object):
         create a Dealer object
         :param player_interfaces: list of player interfaces
         """
-        self.player_sets = []
+        self.players = []
         self.deck = []
         self.watering_hole = 0
         self.current_player_index = 0
         self.wh_cards = []
         self.skipped_players = []
 
-
-        for player, index in zip(player_interfaces, range(len(player_interfaces))):
-            player_set = {'interface': player, 'state': PlayerState(index+1)}
-            self.player_sets.append(player_set)
+        for index, player  in enumerate(player_interfaces):
+            self.players.append(PlayerState(player, index+1))
 
     def __eq__(self, other):
         """Compares two dealer objects"""
         return all([isinstance(other, Dealer),
-                    # TODO: Implement equality for player sets.
-                    len(self.player_sets) == len(other.player_sets),
+                    len(self.players) == len(other.players),
                     self.deck == other.deck,
                     self.watering_hole == other.watering_hole,
                     self.current_player_index == other.current_player_index,
@@ -69,9 +66,9 @@ class Dealer(object):
         Prints player ID's and scores in descending order.
         """
         results = ""
-        sorted_players = self.player_states()
+        sorted_players = self.players
         sorted_players.sort(cmp=lambda p1, p2: p2.food_bag - p1.food_bag)
-        for player, index in zip(sorted_players, range(len(sorted_players))):
+        for index, player  in enumerate(sorted_players):
             results += "%d player id: %d score: %d\n" % (index+1, player.name, player.food_bag)
         return results
 
@@ -121,7 +118,7 @@ class Dealer(object):
         Gives each player without a species board one new species with a
         population of one.
         """
-        for player in self.player_states():
+        for player in self.players:
             if len(player.species) == 0:
                 player.species.append(Species())
 
@@ -133,9 +130,9 @@ class Dealer(object):
         :return: The number of cards required to deal at the start of a round.
         """
         num_species = 0
-        for player in self.player_states():
+        for player in self.players:
             num_species += len(player.species)
-        min_cards = (3 * len(self.player_sets)) + num_species
+        min_cards = (3 * len(self.players)) + num_species
         return min_cards
 
     def deal_round(self):
@@ -143,7 +140,7 @@ class Dealer(object):
         Gives each player one card per species board it owns and three additional
         cards.
         """
-        for player in self.player_states():
+        for player in self.players:
             num_cards = 3 + len(player.species)
             self.deal(num_cards, player)
 
@@ -154,14 +151,11 @@ class Dealer(object):
         """
         actions = []
         before = []
-        after = map(lambda plr: plr.species ,self.player_states())
-        for player in self.player_sets:
-            state = player['state']
-            interface = player['interface']
+        after = map(lambda plr: plr.species, self.players)
+        for player in self.players:
             after = after[1:]
-            choice = Choice(state, before, after)
-            actions.append(interface.choose(choice))
-            before.append(state.species)
+            actions.append(player.choose(before, after))
+            before.append(player.species)
         return actions
 
     def reduce_species_pop(self):
@@ -169,7 +163,7 @@ class Dealer(object):
         Reduces each players species population to its food amount at the end of
         a round.
         """
-        for player in self.player_states():
+        for player in self.players:
             for species in player.species:
                 to_kill = species.population - species.food
                 for _ in range(to_kill):
@@ -179,7 +173,7 @@ class Dealer(object):
         """
         Moves all food tokens from each players species to their food_bags.
         """
-        for player in self.player_states():
+        for player in self.players:
             for species in player.species:
                 player.food_bag += species.food
                 species.food = 0
@@ -194,12 +188,12 @@ class Dealer(object):
         self.reveal_cards(step4)
         self.trigger_auto_traits()
 
-        for player, action in zip(self.player_states(), step4):
+        for player, action in zip(self.players, step4):
             player.apply_action(action)
 
         self.move_fat_food()
 
-        while self.watering_hole > 0 and len(self.player_sets) != len(self.skipped_players):
+        while self.watering_hole > 0 and len(self.players) != len(self.skipped_players):
             self.feed1()
 
     def reveal_cards(self, step4):
@@ -207,7 +201,7 @@ class Dealer(object):
         Adds all food points from cards allocated for food in the given step4 to
         the waterin' hole.
         """
-        for action, player in zip(step4, self.player_states()):
+        for action, player in zip(step4, self.players):
             food_card = player.hand[action.food_card]
             self.watering_hole += food_card.food_points
             food_card.used = True
@@ -219,24 +213,17 @@ class Dealer(object):
         Automatically updates the population or body size of a species with the
         Fertile or Long Neck traits
         """
-        for player in self.player_states():
-            for species in player.species:
-                if "fertile" in species.trait_names():
-                    species.population += 1
-
-        for player in self.player_states():
-            for species in player.species:
-                if "long-neck" in species.trait_names():
-                    self.feed(player, species)
+        for player in self.players:
+            player.trigger_fertile()
+        for player in self.players:
+            player.trigger_long_neck()
 
     def move_fat_food(self):
         """
         Moves fat-food to normal food
         """
-        for player in self.player_states():
-            for species in player.species:
-                if "fat-tissue" in species.trait_names():
-                    species.digest_fat()
+        for player in self.players:
+            player.trigger_fat_food()
 
     def feed1(self):
         """
@@ -245,18 +232,25 @@ class Dealer(object):
         True if the player is auto fed or makes a feeding decision
         :raises: Raises an exception if the watering hole starts at 0.
         """
-        current_player = self.player_sets[self.current_player_index]['state']
+        current_player = self.players[self.current_player_index]
         if self.watering_hole <= 0:
             return
 
         if self.current_player_index in self.skipped_players or not self.player_can_feed(current_player):
             self.skip_player(self.current_player_index)
-            self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
+            self.rotate_players()
             return
+
         feeding = self.next_feed()
         #TODO validate given feeding
         feeding.apply(self)
-        self.current_player_index = (self.current_player_index + 1) % len(self.player_sets)
+        self.rotate_players()
+
+    def rotate_players(self):
+        """
+        Increments this dealer's current player index to the next player in the ordering.
+        """
+        self.current_player_index = (self.current_player_index + 1) % len(self.players)
 
     def kill(self, player, species):
         """
@@ -269,7 +263,7 @@ class Dealer(object):
         species.food = min(species.food, species.population)
 
         if species.population == 0:
-            player.species.remove(species)
+            player.remove_species(species)
             self.deal(2, player)
 
     def player_can_feed(self, player):
@@ -284,53 +278,14 @@ class Dealer(object):
         non_feedable_carnivores = \
             [carnivore for carnivore in hungries if
                 "carnivore" in carnivore.trait_names() and
-                len(Dealer.carnivore_targets(carnivore, self.player_states())) == 0]
+                len(Dealer.carnivore_targets(carnivore, self.players)) == 0]
 
         non_feedable_carnivores = [carnivore for carnivore in non_feedable_carnivores
-             if  "fat-tissue" not in carnivore.trait_names() or
+             if "fat-tissue" not in carnivore.trait_names() or
                  ("fat-tissue" in carnivore.trait_names() and
                   carnivore.fat_storage == carnivore.body)]
 
         return hungries > 0 and len(hungries) != len(non_feedable_carnivores)
-
-    def feed(self, player, species):
-        """
-        Feeds the given species food tokens from the watering hole. Accounts for
-        foraging food amounts as well as cooperation feeding.
-        :param player: The player who owns the given species.
-        :sparam species: The species to be fed.
-        """
-        before_eating = species.food
-
-        self.give_food(species)
-        if "foraging" in species.trait_names():
-            self.give_food(species)
-
-        tokens_eaten = species.food - before_eating
-        for _ in range(tokens_eaten):
-            self.cooperate(player, species)
-
-    def cooperate(self, player, species):
-        """
-        Triggers cooperation for the given species if it has the cooperation trait.
-        :param player: The owner of the species to cooperate.
-        :param species: The species cooperating.
-        """
-        if self.watering_hole >= 1:
-            species_index = player.species.index(species)
-            right_neighbor = (False if species_index == len(player.species) - 1
-                                    else player.species[species_index + 1])
-            if "cooperation" in species.trait_names() and right_neighbor:
-                self.feed(player, right_neighbor)
-
-    def give_food(self, species):
-        """
-        Gives the given species one food token from the watering hole if possible.
-        :param species: The Species to be fed.
-        """
-        if species.population - species.food >= 1 and self.watering_hole >= 1:
-            species.food += 1
-            self.watering_hole -= 1
 
     def skip_player(self, player_index):
         """
@@ -349,10 +304,9 @@ class Dealer(object):
         """
         auto_eat = self.auto_eat()
         if auto_eat is None:
-            current_player = self.player_sets[self.current_player_index]
+            current_player = self.players[self.current_player_index]
             opponents = map(lambda plr: plr.public_state(),  self.opponents())
-            return current_player['interface'].next_feeding(current_player['state'],
-                                    self.watering_hole, opponents)
+            return current_player.next_feeding(self.watering_hole, opponents)
         else:
             return auto_eat
 
@@ -362,7 +316,7 @@ class Dealer(object):
         :param list_of_species: the current players species
         :return: A Feeding, or None if a feeding choice cannot be automatic.
         """
-        cur_player_species = self.player_state(self.current_player_index).species
+        cur_player_species = self.players[self.current_player_index].species
 
         hungry_herbivores = [species for species in cur_player_species
                                 if "carnivore" not in species.trait_names() and species.can_eat()]
@@ -404,7 +358,7 @@ class Dealer(object):
         targets = Dealer.carnivore_targets(eater, self.opponents())
 
         if len(targets) == 1:
-            target_player = next(player for player in self.player_states()
+            target_player = next(player for player in self.players
                                 if targets[0] in player.species)
             defender_index = target_player.species.index(targets[0])
             target_index = self.opponents().index(target_player)
@@ -414,10 +368,11 @@ class Dealer(object):
         """
         Gives one food token to all species with the scavenger trait.
         """
-        for player in self.player_states():
-            for species in player.species:
-                if "scavenger" in species.trait_names() and species.food < species.population:
-                    self.feed(player, species)
+        for player in self.players:
+            player.trigger_scavenging()
+
+    def feed(self, player, species):
+        player.feed(species, self.watering_hole)
 
     def deal(self, num_cards, player):
         """
@@ -438,30 +393,12 @@ class Dealer(object):
                 hungries.append(species)
         return hungries
 
-    def player_state(self, i):
-        """
-        Gets the state of the player at the ith index of the game's player list.
-        :param: i The index of the player's state
-        :return: A PlayerState object representing the ith player.
-        """
-        return self.player_sets[i]['state']
-
-    def player_states(self):
-        """
-        Gets the 'state' objects of all the players in the game's player dictionary.
-        :return: A List of the player_state objects.
-        """
-        states = []
-        for i in range(0, len(self.player_sets)):
-            states.append(self.player_sets[i]['state'])
-        return states
-
     def opponents(self):
         """
         get the player states of all non-current player
         :return: a list of player states
         """
-        opponents = self.player_states()
+        opponents = [plr for plr in self.players]
         opponents.pop(self.current_player_index)
         return opponents
 

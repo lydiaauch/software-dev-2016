@@ -1,6 +1,7 @@
 from species import Species
 from actions import *
 
+
 class PlayerState(object):
     """
     Represents data about the player that is kept track of by the dealer
@@ -9,13 +10,16 @@ class PlayerState(object):
     choices
 
     Attributes:
+        interface: A Class the player delegates strategy decisions to.
         name: An Integer identifier for the player.
         food_bag: Integer representing the number of food tokens acquired.
         hand: A List of `TraitCards` representing the cards the player can use.
         species: A List of `Species` representing the species boards the player
             has in front of them. Species are ordered from left to right.
     """
-    def __init__(self, name=None, food_bag=None, hand=None, species=None):
+    def __init__(self, interface=None, name=None, food_bag=None, hand=None, species=None):
+        if interface is None:
+            interface = None
         if food_bag is None:
             food_bag = 0
         if hand is None:
@@ -23,6 +27,7 @@ class PlayerState(object):
         if species is None:
             species = []
 
+        self.interface = interface
         self.name = name
         self.food_bag = food_bag
         self.hand = hand
@@ -33,6 +38,7 @@ class PlayerState(object):
 
     def __eq__(self, other):
         return all([isinstance(other, PlayerState),
+                    self.interface == other.interface,
                     self.name == other.name,
                     self.food_bag == other.food_bag,
                     self.hand == other.hand,
@@ -62,7 +68,6 @@ class PlayerState(object):
                 traits.append(new_trait)
                 new_trait.used = True
             self.species.append(Species(traits=traits))
-
 
     def replace_traits(self, trait_replacements):
         """
@@ -112,3 +117,70 @@ class PlayerState(object):
         player state, but with private information set to defaults.
         """
         return PlayerState(name=self.name, food_bag=None, hand=None, species=self.species)
+
+    def choose(self, before, after):
+        self.interface.choose(Choice(self, before, after))
+
+    def next_feeding(self, wh, opponents):
+        self.interface.next_feeding(self, wh, opponents)
+
+    def trait_trigger(self, traitname, effect):
+        for species in self.species:
+            if traitname in species.trait_names():
+                effect(species)
+
+    def trigger_fertile(self):
+        self.trait_trigger("fertile", lambda spec: spec.breed())
+
+    def trigger_long_neck(self):
+        self.trait_trigger("long-neck", lambda spec: self.feed(spec))
+
+    def trigger_scavenging(self):
+        self.trait_trigger("scavenger", lambda spec: self.feed(spec))
+
+    def trigger_fat_food(self):
+        self.trait_trigger("fat-food", lambda spec: spec.digest_fat())
+
+    def remove_species(self, species):
+        self.species.remove(species)
+
+    def feed(self, species, wh=None):
+        """
+        Feeds the given species food tokens from the watering hole. Accounts for
+        foraging food amounts as well as cooperation feeding.
+        :param player: The player who owns the given species.
+        :sparam species: The species to be fed.
+        """
+        before_eating = species.food
+
+        self.give_food(species, wh)
+        if "foraging" in species.trait_names():
+            self.give_food(species, wh)
+
+        tokens_eaten = species.food - before_eating
+        for _ in range(tokens_eaten):
+            self.cooperate(species, wh)
+
+    def cooperate(self, species, wh):
+        """
+        Triggers cooperation for the given species if it has the cooperation trait.
+        :param player: The owner of the species to cooperate.
+        :param species: The species cooperating.
+        """
+        if wh and wh >= 1:
+            species_index = self.species.index(species)
+            right_neighbor = (False if species_index == len(self.species) - 1
+                              else self.species[species_index + 1])
+            if "cooperation" in species.trait_names() and right_neighbor:
+                self.feed(right_neighbor, wh)
+
+    def give_food(self, species, wh):
+        """
+        Gives the given species one food token from the watering hole if possible.
+        :param species: The Species to be fed.
+        :param wh: Number of food tokens in the watering hole.
+        """
+        if species.population - species.food >= 1 and (wh is None or wh >= 1):
+            species.food += 1
+            if wh is not None:
+                wh -= 1

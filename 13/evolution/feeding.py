@@ -6,6 +6,7 @@ class AbstainFeeding(object):
         """
         dealer.skip_player(dealer.current_player_index)
 
+
 class HerbivoreFeeding(object):
     def __init__(self, species_index):
         """
@@ -20,9 +21,10 @@ class HerbivoreFeeding(object):
         Applies the consequences of this feeding to the given dealer.
         :param dealer: The game this Feeding effects.
         """
-        current_player = dealer.player_state(dealer.current_player_index)
+        current_player = dealer.players[dealer.current_player_index]
         species = current_player.species[self.species_index]
         dealer.feed(current_player, species)
+
 
 class FatTissueFeeding(object):
     def __init__(self, species_index, food_requested):
@@ -40,10 +42,11 @@ class FatTissueFeeding(object):
         """
         Applies the consequences of this feeding to the given dealer.
         :param dealer: The game this Feeding effects.
-        """
-        species = dealer.player_state(dealer.current_player_index).species[self.species_index]
+    """
+        species = dealer.players[dealer.current_player_index].species[self.species_index]
         dealer.watering_hole -= self.food_requested
         species.fat_storage += self.food_requested
+
 
 class CarnivoreFeeding(object):
     def __init__(self, attacker_index, target_index, defender_index):
@@ -67,9 +70,9 @@ class CarnivoreFeeding(object):
         Applies the consequences of this feeding to the given dealer.
         :param dealer: The game this Feeding effects.
         """
-        current_player = dealer.player_state(dealer.current_player_index)
+        current_player = dealer.players[dealer.current_player_index]
         attacker = current_player.species[self.attacker_index]
-        if self.target_index == len(dealer.player_sets) - 1:
+        if self.target_index == len(dealer.players) - 1:
             target_player = current_player
         else:
             target_player = dealer.opponents()[self.target_index]

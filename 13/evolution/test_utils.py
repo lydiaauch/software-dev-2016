@@ -4,11 +4,13 @@ from species import Species
 from traitcard import TraitCard
 from player import Player
 
+
 def setup():
-    unittest.TestCase.check_dealer    = check_dealer
-    unittest.TestCase.check_player    = check_player
-    unittest.TestCase.check_species   = check_species
+    unittest.TestCase.check_dealer = check_dealer
+    unittest.TestCase.check_player = check_player
+    unittest.TestCase.check_species = check_species
     unittest.TestCase.check_attribute = check_attribute
+
 
 def check_dealer(self, before, after, changes):
     """
@@ -27,15 +29,16 @@ def check_dealer(self, before, after, changes):
     self.check_attribute(before, after, changes, "watering_hole")
     self.check_attribute(before, after, changes, "current_player_index")
     self.check_attribute(before, after, changes, "deck")
-    for i in range(len(before.player_states())):
+    for i in range(len(before.players)):
         if "players" in changes and i in changes["players"]:
-            self.check_player(before.player_state(i),
-                              after.player_state(i),
+            self.check_player(before.players[i],
+                              after.players[i],
                               changes["players"][i])
         else:
-            self.check_player(before.player_state(i),
-                              after.player_state(i),
+            self.check_player(before.players[i],
+                              after.players[i],
                               {})
+
 
 def check_player(self, before, after, changes):
     """
@@ -56,8 +59,8 @@ def check_player(self, before, after, changes):
     self.check_attribute(before, after, changes, "name")
     self.check_attribute(before, after, changes, "food_bag")
     self.check_attribute(before, after, changes, "hand")
-    i = 0 # before.species list index
-    j = 0 # after.species  list index
+    i = 0  # before.species list index
+    j = 0  # after.species  list index
     while i < len(before.species) or j < len(after.species):
         if "species" in changes and i in changes["species"]:
             if changes["species"][i] == "Extinct":

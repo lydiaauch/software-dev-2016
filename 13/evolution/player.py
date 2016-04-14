@@ -5,6 +5,7 @@ from feeding import *
 from choice import Choice
 from globals import *
 
+
 class Player(object):
     """
     A data representation of a Player in the Evolution game

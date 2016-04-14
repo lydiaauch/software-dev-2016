@@ -104,7 +104,7 @@ class TestConvert(unittest.TestCase):
 
     def test_json_to_dealer(self):
         dealer = Convert.json_to_dealer(self.jConfig_1)
-        self.assertEqual(len(dealer.player_sets), 3)
+        self.assertEqual(len(dealer.players), 3)
         self.assertEqual(dealer.watering_hole, 42)
         self.assertEqual(len(dealer.deck), 2)
         self.assertEqual(dealer.deck[0], self.tc_5)

@@ -6,6 +6,7 @@ from dealer import Dealer
 from actions import *
 from choice import Choice
 
+
 class Convert(object):
     """
     Methods for converting between JSON input and Python objects
@@ -19,9 +20,9 @@ class Convert(object):
         Converts a Configuration json input into a dealer with the game as
         described in the Configuration object.
         :param json_config: A Configuration [LOP, Natural, LOC], where LOP is a
-        list of 3 to 8 Players, the Natural represents food in the watering hole,
+        list of Players, the Natural represents food in the watering hole,
         and the LOC is the deck of cards in the order they will appear.
-        :return: A Dealer with the game configured properly to the given json_config.
+        :return: A Dealer with the game configured to the given json_config.
         """
         assert(cls.validate_configuration_json(json_config))
         players_interfaces = []
@@ -30,7 +31,7 @@ class Convert(object):
             players_interfaces.append(Player())
         dealer = Dealer(players_interfaces)
         for i in range(num_players):
-            dealer.player_sets[i]['state'] = cls.json_to_player(json_config[0][i])
+            dealer.players[i] = cls.json_to_player(json_config[0][i])
         dealer.watering_hole = json_config[1]
         deck = []
         for i in range(len(json_config[2])):
@@ -42,7 +43,7 @@ class Convert(object):
     def dealer_to_json(cls, dealer):
         config_json = []
         player_json = []
-        for player in dealer.player_states():
+        for player in dealer.players:
             player_json.append(Convert.player_to_json(player))
         config_json.append(player_json)
         config_json.append(dealer.watering_hole)
