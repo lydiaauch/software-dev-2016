@@ -17,9 +17,7 @@ class PlayerState(object):
         species: A List of `Species` representing the species boards the player
             has in front of them. Species are ordered from left to right.
     """
-    def __init__(self, interface=None, name=None, food_bag=None, hand=None, species=None):
-        if interface is None:
-            interface = None
+    def __init__(self, interface, name=None, food_bag=None, hand=None, species=None):
         if food_bag is None:
             food_bag = 0
         if hand is None:
@@ -116,7 +114,11 @@ class PlayerState(object):
         :return: A new PlayerState object with the same information as this
         player state, but with private information set to defaults.
         """
-        return PlayerState(name=self.name, food_bag=None, hand=None, species=self.species)
+        return PlayerState(self.interface,
+                           name=self.name,
+                           food_bag=None,
+                           hand=None,
+                           species=self.species)
 
     def choose(self, before, after):
         self.interface.choose(Choice(self, before, after))
@@ -145,7 +147,7 @@ class PlayerState(object):
         return self.trigger_trait_feeding("scavenger", wh)
 
     def trigger_fat_food(self):
-        self.trait_trigger("fat-food", lambda spec: spec.digest_fat())
+        self.trait_trigger("fat-tissue", lambda spec: spec.digest_fat())
 
     def remove_species(self, species):
         self.species.remove(species)

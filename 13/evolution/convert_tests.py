@@ -3,6 +3,7 @@ from species import Species
 from traitcard import TraitCard
 from player_state import PlayerState
 from convert import Convert
+from player import Player
 
 
 class TestConvert(unittest.TestCase):
@@ -84,16 +85,19 @@ class TestConvert(unittest.TestCase):
         self.species_4 = Species(2, 2, 2, [self.t_3, self.t_4])
 
     def setUp_players(self):
-        self.player_1 = PlayerState(name=1,
+        self.player_1 = PlayerState(Player,
+                                    name=1,
                                     food_bag=2,
                                     species=[self.species_1])
 
-        self.player_2 = PlayerState(name=2,
+        self.player_2 = PlayerState(Player,
+                                    name=2,
                                     food_bag=1,
                                     species=[self.species_2],
                                     hand=[self.tc_1, self.tc_2])
 
-        self.player_3 = PlayerState(name=3,
+        self.player_3 = PlayerState(Player,
+                                    name=3,
                                     food_bag=3,
                                     species=[self.species_3, self.species_4],
                                     hand=[self.tc_3, self.tc_4])

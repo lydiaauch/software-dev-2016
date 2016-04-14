@@ -22,10 +22,19 @@ class TestPlayer(unittest.TestCase):
         self.species_5 = Species(3, 1, 3)
         self.species_6 = Species(4, 3, 3)
         self.species_7 = Species(4, 4, 4)
-        self.species_list = [self.species_2, self.species_4, self.species_3, self.species_5, self.species_1]
-        self.player_1 = PlayerState(species=[self.species_4, self.species_5, self.species_6])
-        self.player_2 = PlayerState(species=[self.species_1])
-        self.player_3 = PlayerState(species=[self.species_2, self.species_3, self.species_7])
+        self.species_list = [self.species_2, self.species_4,
+                             self.species_3, self.species_5,
+                             self.species_1]
+        self.player_1 = PlayerState(Player,
+                                    species=[self.species_4,
+                                             self.species_5,
+                                             self.species_6])
+        self.player_2 = PlayerState(Player,
+                                    species=[self.species_1])
+        self.player_3 = PlayerState(Player,
+                                    species=[self.species_2,
+                                             self.species_3,
+                                             self.species_7])
 
         self.attacker = Species()
         self.attacker.traits = [TraitCard("carnivore")]

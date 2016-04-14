@@ -90,7 +90,8 @@ class Convert(object):
         if len(json_player) == 4:
             for json_card in json_player[3][1]:
                 hand.append(cls.json_to_trait_card(json_card))
-        return PlayerState(name=name,
+        return PlayerState(Player,
+                           name=name,
                            food_bag=food_bag,
                            species=species,
                            hand=hand)

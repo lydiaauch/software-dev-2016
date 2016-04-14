@@ -96,7 +96,7 @@ class Species(object):
         """
         Metabolize fat food. ie move fat food onto food amount.
         """
-        can_move = min(self.population-self.food, self.fat_storage)
+        can_move = min(self.population - self.food, self.fat_storage)
         self.fat_storage -= can_move
         self.food += can_move
 

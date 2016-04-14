@@ -5,6 +5,7 @@ from species import Species
 from traitcard import TraitCard
 from player_state import PlayerState
 from actions import *
+from player import Player
 
 
 class TestPlayerState(unittest.TestCase):
@@ -33,7 +34,7 @@ class TestPlayerState(unittest.TestCase):
         hand = [TraitCard("long-neck", food_points=2),
                 TraitCard("climbing", food_points=-2),
                 TraitCard("scavenger", food_points=4)]
-        self.player = PlayerState(hand=hand, species=species)
+        self.player = PlayerState(Player, hand=hand, species=species)
 
     def test_create_new_boards_one(self):
         board_addition = BoardAddition(0, traits=[1, 2])

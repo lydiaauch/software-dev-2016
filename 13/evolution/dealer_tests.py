@@ -495,7 +495,7 @@ class TestDealer(unittest.TestCase):
         self.assertEqual(self.dealer.min_deck_size(), 17)
         self.dealer.players[0].species.append(Species())
         self.assertEqual(self.dealer.min_deck_size(), 18)
-        self.dealer.players.append(PlayerState())
+        self.dealer.players.append(PlayerState(Player))
         self.assertEqual(self.dealer.min_deck_size(), 21)
 
     def test_reduce_species_pop(self):
