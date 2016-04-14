@@ -17,17 +17,17 @@ class TestPlayerState(unittest.TestCase):
         species_0 = Species(population=1,
                             food=3,
                             body=4,
-                            traits=[TraitCard("carnivore")])
+                            traits=["carnivore"])
 
         species_1 = Species(population=1,
                             food=1,
                             body=1,
-                            traits=[TraitCard("burrowing")])
+                            traits=["burrowing"])
 
         species_2 = Species(population=1,
                             food=0,
                             body=1,
-                            traits=[TraitCard("fat-tissue")])
+                            traits=["fat-tissue"])
 
         species = [species_0, species_1, species_2]
 
@@ -48,8 +48,7 @@ class TestPlayerState(unittest.TestCase):
                 "food": 0,
                 "body": 0,
                 "fat_storage": 0,
-                "traits": [TraitCard("climbing", food_points=-2),
-                           TraitCard("scavenger", food_points=4)]}},
+                "traits": ["climbing", "scavenger"]}},
             "hand": []}
         self.check_player(before, self.player, changes)
 
@@ -88,7 +87,7 @@ class TestPlayerState(unittest.TestCase):
         self.player.remove_used_cards()
         changes = {
             "species":
-                {0: {"traits": [TraitCard("long-neck", food_points=2)]}},
+                {0: {"traits": ["long-neck"]}},
             "hand":
                 [TraitCard("climbing", food_points=-2),
                  TraitCard("scavenger", food_points=4)]
@@ -104,9 +103,9 @@ class TestPlayerState(unittest.TestCase):
         self.player.remove_used_cards()
         changes = {
             "species":
-                {0: {"traits": [TraitCard("long-neck", food_points=2)]},
-                 2: {"traits": [TraitCard("climbing", food_points=-2)]},
-                 1: {"traits": [TraitCard("scavenger", food_points=4)]}},
+                {0: {"traits": ["long-neck"]},
+                 2: {"traits": ["climbing"]},
+                 1: {"traits": ["scavenger"]}},
             "hand":
                 []
         }

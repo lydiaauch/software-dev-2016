@@ -63,7 +63,7 @@ class PlayerState(object):
             traits = []
             for trait_idx in addition.traits:
                 new_trait = self.hand[trait_idx]
-                traits.append(new_trait)
+                traits.append(new_trait.trait)
                 new_trait.used = True
             self.species.append(Species(traits=traits))
 
@@ -75,7 +75,7 @@ class PlayerState(object):
         for replace in trait_replacements:
             species = self.species[replace.species_index]
             new_trait = self.hand[replace.new_trait_index]
-            species.traits[replace.removed_trait_index] = new_trait
+            species.traits[replace.removed_trait_index] = new_trait.trait
             new_trait.used = True
 
     def increase_populations(self, pop_grows):
@@ -128,7 +128,7 @@ class PlayerState(object):
 
     def trait_trigger(self, traitname, effect):
         for species in self.species:
-            if traitname in species.trait_names():
+            if traitname in species.traits:
                 effect(species)
 
     def trigger_fertile(self):
@@ -136,7 +136,7 @@ class PlayerState(object):
 
     def trigger_trait_feeding(self, traitname, wh):
         for species in self.species:
-            if traitname in species.trait_names():
+            if traitname in species.traits:
                 wh = self.feed(species, wh)
         return wh
 
@@ -162,7 +162,7 @@ class PlayerState(object):
         before_eating = species.food
 
         wh = self.give_food(species, wh)
-        if "foraging" in species.trait_names():
+        if "foraging" in species.traits:
             wh = self.give_food(species, wh)
 
         tokens_eaten = species.food - before_eating
@@ -181,7 +181,7 @@ class PlayerState(object):
             species_index = self.species.index(species)
             right_neighbor = (False if species_index == len(self.species) - 1
                               else self.species[species_index + 1])
-            if "cooperation" in species.trait_names() and right_neighbor:
+            if "cooperation" in species.traits and right_neighbor:
                 wh = self.feed(right_neighbor, wh)
         return wh
 

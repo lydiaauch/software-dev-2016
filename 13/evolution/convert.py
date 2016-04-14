@@ -130,7 +130,7 @@ class Convert(object):
         species_pop = json_species[2][1]
         species_traits = []
         for trait in json_species[3][1]:
-            species_traits.append(cls.json_to_trait(trait))
+            species_traits.append(trait)
         species_obj = Species(species_pop, species_food, species_body, species_traits)
         if len(json_species) == 5:
             species_obj.fat_storage = json_species[4][1]
@@ -147,17 +147,14 @@ class Convert(object):
                     json_species[1][0] == "body",
                     json_species[1][1] >= 0,
                     json_species[2][0] == "population",
-                    json_species[2][1] >  0,
+                    json_species[2][1] > 0,
                     json_species[3][0] == "traits"])
 
     @classmethod
     def species_to_json(cls, species_obj):
         assert(all([species_obj.population >= 1, species_obj.food >= 0, species_obj.body >= 0]))
-        json_traits = []
-        for trait in species_obj.traits:
-            json_traits.append(cls.trait_to_json(trait))
         json_species = [["food", species_obj.food], ["body", species_obj.body],
-                        ["population", species_obj.population], ["traits", json_traits]]
+                        ["population", species_obj.population], ["traits", species_obj.traits]]
         if species_obj.fat_storage is not None and species_obj.fat_storage > 0:
             json_species.append(["fat-food", species_obj.fat_storage])
         return json_species
@@ -219,14 +216,6 @@ class Convert(object):
         bt_json = [bt.payment_index]
         bt_json.extend(bt.traits)
         return bt_json
-
-    @classmethod
-    def json_to_trait(cls, json_trait):
-        return TraitCard(json_trait)
-
-    @classmethod
-    def trait_to_json(cls, trait_card):
-        return trait_card.trait
 
     @classmethod
     def json_to_trait_card(cls, json_trait_card):

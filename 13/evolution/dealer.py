@@ -278,13 +278,13 @@ class Dealer(object):
         hungries = [species for species in player.species if species.can_eat()]
         non_feedable_carnivores = \
             [carnivore for carnivore in hungries if
-                "carnivore" in carnivore.trait_names() and
+                "carnivore" in carnivore.traits and
                 len(Dealer.carnivore_targets(carnivore, self.players)) == 0]
 
         non_feedable_carnivores = \
             [carnivore for carnivore in non_feedable_carnivores
-             if "fat-tissue" not in carnivore.trait_names() or
-             ("fat-tissue" in carnivore.trait_names() and
+             if "fat-tissue" not in carnivore.traits or
+             ("fat-tissue" in carnivore.traits and
               carnivore.fat_storage == carnivore.body)]
 
         return hungries > 0 and len(hungries) != len(non_feedable_carnivores)
@@ -321,9 +321,9 @@ class Dealer(object):
         cur_player_species = self.players[self.current_player_index].species
 
         hungry_herbivores = [species for species in cur_player_species
-                             if "carnivore" not in species.trait_names() and species.can_eat()]
+                             if "carnivore" not in species.traits and species.can_eat()]
         hungry_carnivores = [species for species in cur_player_species
-                             if "carnivore" in species.trait_names() and species.can_eat()]
+                             if "carnivore" in species.traits and species.can_eat()]
 
         if len(hungry_herbivores) == 1 and len(hungry_carnivores) == 0:
             eater = hungry_herbivores[0]
@@ -342,7 +342,7 @@ class Dealer(object):
         eater must be an element of this list.
         """
         herbivore_index = cur_player_species.index(eater)
-        if "fat-tissue" in eater.trait_names() and eater.fat_storage < eater.body:
+        if "fat-tissue" in eater.traits and eater.fat_storage < eater.body:
             max_food = eater.body - eater.fat_storage
             food_requested = min(self.watering_hole, max_food)
             return FatTissueFeeding(herbivore_index, food_requested)

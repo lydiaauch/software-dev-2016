@@ -60,34 +60,30 @@ class Species(object):
         :param right_neighbor: the Species to the right of this species (False if no left neighbor)
         :return: True if attackable, else false
         """
-        defender_traits = self.trait_names()
-        attacker_traits = attacker.trait_names()
-        left_traits = left_neighbor.trait_names() if left_neighbor else []
-        right_traits = right_neighbor.trait_names() if right_neighbor else []
-        attacker_body = attacker.body + (attacker.population if "pack-hunting" in attacker_traits else 0)
+        defender_traits = self.traits
+        attacker_traits = attacker.traits
+        left_traits = left_neighbor.traits if left_neighbor else []
+        right_traits = right_neighbor.traits if right_neighbor else []
+        attacker_body = attacker.body + (attacker.population if "pack-hunting" in attacker_traits
+                                         else 0)
 
         return not any(["carnivore" not in attacker_traits,
                         "burrowing" in defender_traits and self.food == self.population,
                         "climbing" in defender_traits and "climbing" not in attacker_traits,
-                        "hard-shell" in defender_traits and attacker_body - self.body < HARD_SHELL_DIFF,
+                        "hard-shell" in defender_traits and
+                        attacker_body - self.body < HARD_SHELL_DIFF,
                         "herding" in defender_traits and attacker.population <= self.population,
-                        "symbiosis" in defender_traits and right_neighbor and right_neighbor.body > self.body,
-                        (("warning-call" in right_traits) or ("warning-call" in left_traits))
-                        and "ambush" not in attacker_traits])
-
-    def trait_names(self):
-        """
-        Gives the names of the TraitCard(s) of this species
-        :return: a list of trait names
-        """
-        return map(lambda (x): x.trait, self.traits)
+                        "symbiosis" in defender_traits and
+                        right_neighbor and right_neighbor.body > self.body,
+                        (("warning-call" in right_traits) or ("warning-call" in left_traits)) and
+                        "ambush" not in attacker_traits])
 
     def can_eat(self):
         """
         Deternmines if a species can eat more food tokens.
         :return:  True if the species can eat, else false.
         """
-        if "fat-tissue" in self.trait_names():
+        if "fat-tissue" in self.traits:
             return self.fat_storage < self.body or self.food < self.population
         else:
             return self.food < self.population

@@ -65,20 +65,20 @@ class TestDealer(unittest.TestCase):
 
     def test_carnivore_targets(self):
         list_of_opponents = self.dealer.opponents()
-        self.species_3.traits = [TraitCard("carnivore")]
-        self.species_2.traits = [TraitCard("climbing")]
-        self.species_4.traits = [TraitCard("climbing")]
-        self.species_5.traits = [TraitCard("climbing")]
+        self.species_3.traits = ["carnivore"]
+        self.species_2.traits = ["climbing"]
+        self.species_4.traits = ["climbing"]
+        self.species_5.traits = ["climbing"]
 
         self.assertEqual(Dealer.carnivore_targets(self.species_3, list_of_opponents),
                          [self.species_1])
 
-        self.species_1.traits = [TraitCard("climbing")]
+        self.species_1.traits = ["climbing"]
         self.assertEqual(Dealer.carnivore_targets(self.species_3, list_of_opponents), [])
 
     def test_auto_eat_fat_tissue(self):
         self.dealer.current_player_index = 2
-        self.species_3.traits = [TraitCard("fat-tissue")]
+        self.species_3.traits = ["fat-tissue"]
         self.species_3.fat_storage = 0
         auto_eat = self.dealer.auto_eat()
         self.assertEqual(auto_eat.species_index, 0)
@@ -90,12 +90,12 @@ class TestDealer(unittest.TestCase):
         self.assertEqual(self.dealer.auto_eat().species_index, 0)
 
     def test_auto_eat_carnivore(self):
-        self.species_3.traits = [TraitCard("carnivore")]
+        self.species_3.traits = ["carnivore"]
         self.assertIsNone(self.dealer.auto_eat())
 
-        self.species_2.traits = [TraitCard("climbing")]
-        self.species_4.traits = [TraitCard("climbing")]
-        self.species_5.traits = [TraitCard("climbing")]
+        self.species_2.traits = ["climbing"]
+        self.species_4.traits = ["climbing"]
+        self.species_5.traits = ["climbing"]
 
         auto_eat = self.dealer.auto_eat()
         self.assertEqual(auto_eat.attacker_index, 0)
@@ -116,7 +116,7 @@ class TestDealer(unittest.TestCase):
 
     def test_feed_1_fatty(self):
         # current player is feeding fat-tissue species
-        self.species_3.traits = [TraitCard("fat-tissue")]
+        self.species_3.traits = ["fat-tissue"]
         changes = {
             "watering_hole": 7,
             "current_player_index": 3,
@@ -125,10 +125,10 @@ class TestDealer(unittest.TestCase):
         self.feed1(changes)
 
     def test_feed_1_carnivore(self):
-        self.species_3.traits = [TraitCard("carnivore")]
-        self.species_2.traits = [TraitCard("climbing")]
-        self.species_4.traits = [TraitCard("climbing")]
-        self.species_5.traits = [TraitCard("climbing")]
+        self.species_3.traits = ["carnivore"]
+        self.species_2.traits = ["climbing"]
+        self.species_4.traits = ["climbing"]
+        self.species_5.traits = ["climbing"]
 
         changes = {
             "watering_hole": 9,
@@ -155,11 +155,11 @@ class TestDealer(unittest.TestCase):
         self.feed1(changes)
 
     def test_feed_1_scavenger(self):
-        self.species_3.traits.append(TraitCard("carnivore"))
-        self.species_4.traits.append(TraitCard("scavenger"))
-        self.species_2.traits.append(TraitCard("climbing"))
-        self.species_4.traits.append(TraitCard("climbing"))
-        self.species_5.traits.append(TraitCard("climbing"))
+        self.species_3.traits.append("carnivore")
+        self.species_4.traits.append("scavenger")
+        self.species_2.traits.append("climbing")
+        self.species_4.traits.append("climbing")
+        self.species_5.traits.append("climbing")
 
         changes = {
             "watering_hole": 8,
@@ -171,7 +171,7 @@ class TestDealer(unittest.TestCase):
         self.feed1(changes)
 
     def test_feed_1_double_foraging(self):
-        self.species_3.traits.append(TraitCard("foraging"))
+        self.species_3.traits.append("foraging")
         self.species_3.food = 1
 
         changes = {
@@ -182,7 +182,7 @@ class TestDealer(unittest.TestCase):
         self.feed1(changes)
 
     def test_feed1_foraging_cooperator_food_run_out(self):
-        self.species_4.traits = [TraitCard("foraging"), TraitCard("cooperation")]
+        self.species_4.traits = ["foraging", "cooperation"]
         self.species_4.food = 0
         self.species_5.food = 0
         self.dealer.current_player_index = 3
@@ -196,7 +196,7 @@ class TestDealer(unittest.TestCase):
         self.feed1(changes)
 
     def test_feed1_foraging_cooperator_enough_food(self):
-        self.species_4.traits = [TraitCard("foraging"), TraitCard("cooperation")]
+        self.species_4.traits = ["foraging", "cooperation"]
         self.species_4.food = 0
         self.species_5.food = 0
         self.dealer.current_player_index = 3
@@ -210,7 +210,7 @@ class TestDealer(unittest.TestCase):
         self.feed1(changes)
 
     def test_feed_1_foraging(self):
-        self.species_3.traits.append(TraitCard("foraging"))
+        self.species_3.traits.append("foraging")
         self.species_3.food = 3
 
         changes = {
@@ -222,7 +222,7 @@ class TestDealer(unittest.TestCase):
 
     def test_feed_1_cooperation(self):
         self.dealer.current_player_index = 3
-        self.species_4.traits.append(TraitCard("cooperation"))
+        self.species_4.traits.append("cooperation")
         self.species_5.food = 1
 
         changes = {
@@ -234,12 +234,12 @@ class TestDealer(unittest.TestCase):
         self.feed1(changes)
 
     def test_feed_1_scavenger_cooperation(self):
-        self.species_3.traits.append(TraitCard("carnivore"))
-        self.species_4.traits.append(TraitCard("climbing"))
-        self.species_4.traits.append(TraitCard("cooperation"))
-        self.species_4.traits.append(TraitCard("scavenger"))
-        self.species_2.traits.append(TraitCard("climbing"))
-        self.species_5.traits.append(TraitCard("climbing"))
+        self.species_3.traits.append("carnivore")
+        self.species_4.traits.append("climbing")
+        self.species_4.traits.append("cooperation")
+        self.species_4.traits.append("scavenger")
+        self.species_2.traits.append("climbing")
+        self.species_5.traits.append("climbing")
         self.species_5.food = 2
 
         changes = {
@@ -255,8 +255,8 @@ class TestDealer(unittest.TestCase):
     def test_feed_1_cooperation_chain(self):
         self.dealer.players[3].species.append(self.species_3)
         self.dealer.current_player_index = 3
-        self.species_4.traits.append(TraitCard("cooperation"))
-        self.species_5.traits.append(TraitCard("cooperation"))
+        self.species_4.traits.append("cooperation")
+        self.species_5.traits.append("cooperation")
         self.species_5.food = 1
         self.species_3.food = 0
 
@@ -272,11 +272,11 @@ class TestDealer(unittest.TestCase):
 
     def test_feed_1_carnivore_foraging(self):
         self.species_3.food = 0
-        self.species_3.traits.append(TraitCard("carnivore"))
-        self.species_3.traits.append(TraitCard("foraging"))
-        self.species_2.traits.append(TraitCard("climbing"))
-        self.species_4.traits.append(TraitCard("climbing"))
-        self.species_5.traits.append(TraitCard("climbing"))
+        self.species_3.traits.append("carnivore")
+        self.species_3.traits.append("foraging")
+        self.species_2.traits.append("climbing")
+        self.species_4.traits.append("climbing")
+        self.species_5.traits.append("climbing")
 
         changes = {
             "watering_hole": 8,
@@ -288,11 +288,11 @@ class TestDealer(unittest.TestCase):
 
     def test_feed_1_horns(self):
         self.species_3.food = 0
-        self.species_3.traits.append(TraitCard("carnivore"))
-        self.species_1.traits.append(TraitCard("horns"))
-        self.species_2.traits.append(TraitCard("climbing"))
-        self.species_4.traits.append(TraitCard("climbing"))
-        self.species_5.traits.append(TraitCard("climbing"))
+        self.species_3.traits.append("carnivore")
+        self.species_1.traits.append("horns")
+        self.species_2.traits.append("climbing")
+        self.species_4.traits.append("climbing")
+        self.species_5.traits.append("climbing")
 
         changes = {
             "watering_hole": 9,
@@ -303,11 +303,11 @@ class TestDealer(unittest.TestCase):
         self.feed1(changes)
 
     def test_feed_1_horns_no_food(self):
-        self.species_3.traits.append(TraitCard("carnivore"))
-        self.species_1.traits.append(TraitCard("horns"))
-        self.species_2.traits.append(TraitCard("climbing"))
-        self.species_4.traits.append(TraitCard("climbing"))
-        self.species_5.traits.append(TraitCard("climbing"))
+        self.species_3.traits.append("carnivore")
+        self.species_1.traits.append("horns")
+        self.species_2.traits.append("climbing")
+        self.species_4.traits.append("climbing")
+        self.species_5.traits.append("climbing")
 
         changes = {
             "watering_hole": 10,
@@ -319,10 +319,10 @@ class TestDealer(unittest.TestCase):
 
     def test_extinction(self):
         self.dealer.deck.append(TraitCard("carnivore", -5))
-        self.species_3.traits.append(TraitCard("carnivore"))
-        self.species_2.traits.append(TraitCard("climbing"))
-        self.species_4.traits.append(TraitCard("climbing"))
-        self.species_5.traits.append(TraitCard("climbing"))
+        self.species_3.traits.append("carnivore")
+        self.species_2.traits.append("climbing")
+        self.species_4.traits.append("climbing")
+        self.species_5.traits.append("climbing")
         self.species_1.population = 1
         changes = {
             "watering_hole": 9,
@@ -338,11 +338,11 @@ class TestDealer(unittest.TestCase):
         self.assertFalse(self.dealer.player_can_feed(self.dealer.players[0]))
         self.assertTrue(self.dealer.player_can_feed(self.dealer.players[2]))
 
-        self.species_4.traits.append(TraitCard("carnivore"))
-        self.species_1.traits.append(TraitCard("climbing"))
-        self.species_2.traits.append(TraitCard("climbing"))
-        self.species_3.traits.append(TraitCard("climbing"))
-        self.species_5.traits.append(TraitCard("climbing"))
+        self.species_4.traits.append("carnivore")
+        self.species_1.traits.append("climbing")
+        self.species_2.traits.append("climbing")
+        self.species_3.traits.append("climbing")
+        self.species_5.traits.append("climbing")
         self.assertFalse(self.dealer.player_can_feed(self.dealer.players[3]))
 
     def test_step4_simple(self):
@@ -408,7 +408,7 @@ class TestDealer(unittest.TestCase):
         self.step4(changes, actions)
 
     def test_step4_RT(self):
-        self.species_1.traits.append(TraitCard("long-neck"))
+        self.species_1.traits.append("long-neck")
         self.dealer.players[0].hand = [TraitCard("burrowing", food_points=0),
                                        TraitCard("climbing", food_points=1)]
         self.dealer.players[1].hand = [TraitCard("burrowing", food_points=3)]
@@ -422,7 +422,7 @@ class TestDealer(unittest.TestCase):
             "watering_hole": 14,
             "current_player_index": 0,
             "players": {0: {"hand": [],
-                            "species": {0: {"traits": [TraitCard("climbing", food_points=1)]}}},
+                            "species": {0: {"traits": ["climbing"]}}},
                         1: {"hand": []},
                         2: {"hand": [], "species": {0: {"food": 4}}},
                         3: {"hand": [], "species": {0: {"food": 4}}}}
@@ -449,8 +449,7 @@ class TestDealer(unittest.TestCase):
                                             "food": 1,
                                             "fat_storage": 0,
                                             "population": 1,
-                                            "traits": [TraitCard("climbing", food_points=1),
-                                                       TraitCard("climbing", 2)]}}},
+                                            "traits": ["climbing", "climbing"]}}},
                         1: {"hand": []},
                         2: {"hand": [], "species": {0: {"food": 4}}},
                         3: {"hand": [], "species": {0: {"food": 4}}}}
@@ -517,14 +516,13 @@ class TestDealer(unittest.TestCase):
 
     def test_reduce_species_pop_extinct(self):
         self.dealer.players[0].species[0].food = 0
-        self.dealer.deck = [TraitCard("climbing"), TraitCard("burrowing"),
-                            TraitCard("long-neck")]
+        self.dealer.deck = ["climbing", "burrowing", "long-neck"]
         before = copy.deepcopy(self.dealer)
         self.dealer.reduce_species_pop()
         changes = {
-            "deck": [TraitCard("long-neck")],
+            "deck": ["long-neck"],
             "players": {
-                0: {"hand": [TraitCard("climbing"), TraitCard("burrowing")],
+                0: {"hand": ["climbing", "burrowing"],
                     "species": {0: "Extinct"}},
                 2: {"species": {0: {"population": 3}}},
                 3: {"species": {0: {"population": 3}}}}
