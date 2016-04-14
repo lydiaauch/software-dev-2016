@@ -1,12 +1,11 @@
 import copy
 import unittest
 import test_utils
+from species import Species
+from traitcard import TraitCard
+from player_state import PlayerState
+from actions import *
 
-from species       import Species
-from traitcard     import TraitCard
-from player_state  import PlayerState
-from convert_tests import TestConvert
-from actions       import *
 
 class TestPlayerState(unittest.TestCase):
     @classmethod
@@ -42,7 +41,8 @@ class TestPlayerState(unittest.TestCase):
         self.player.create_new_boards([board_addition])
         self.player.remove_used_cards()
 
-        changes = {"species":{ 3: {
+        changes = {
+            "species": {3: {
                 "population": 1,
                 "food": 0,
                 "body": 0,
@@ -62,15 +62,15 @@ class TestPlayerState(unittest.TestCase):
                                        board_addition_2])
         self.player.remove_used_cards()
         new_species = {
-                "population": 1,
-                "food": 0,
-                "body": 0,
-                "fat_storage": 0,
-                "traits": []
+            "population": 1,
+            "food": 0,
+            "body": 0,
+            "fat_storage": 0,
+            "traits": []
         }
 
         changes = {
-            "species":{
+            "species": {
                 3: new_species,
                 4: new_species,
                 5: new_species,
@@ -121,12 +121,12 @@ class TestPlayerState(unittest.TestCase):
                 {1: {"population": 2}},
             "hand":
                 [TraitCard("long-neck", food_points=2),
-                TraitCard("scavenger", food_points=4)]
+                 TraitCard("scavenger", food_points=4)]
         }
         self.check_player(before, self.player, changes)
 
     def test_increase_populations_many_same_species(self):
-        pop_grows = [PopGrow(1, 1),PopGrow(1, 0),PopGrow(1, 2),]
+        pop_grows = [PopGrow(1, 1), PopGrow(1, 0), PopGrow(1, 2)]
         before = copy.deepcopy(self.player)
         self.player.increase_populations(pop_grows)
         self.player.remove_used_cards()
@@ -139,7 +139,7 @@ class TestPlayerState(unittest.TestCase):
         self.check_player(before, self.player, changes)
 
     def test_increase_populations_many_different_species(self):
-        pop_grows = [PopGrow(1, 1),PopGrow(0, 0),PopGrow(2, 2),]
+        pop_grows = [PopGrow(1, 1), PopGrow(0, 0), PopGrow(2, 2)]
         before = copy.deepcopy(self.player)
         self.player.increase_populations(pop_grows)
         self.player.remove_used_cards()
@@ -163,25 +163,23 @@ class TestPlayerState(unittest.TestCase):
                 {1: {"body": 2}},
             "hand":
                 [TraitCard("long-neck", food_points=2),
-                TraitCard("scavenger", food_points=4)]
+                 TraitCard("scavenger", food_points=4)]
         }
         self.check_player(before, self.player, changes)
 
     def test_increase_body_sizes_many_same_species(self):
-        body_grows = [BodyGrow(1, 1),BodyGrow(1, 0),BodyGrow(1, 2),]
+        body_grows = [BodyGrow(1, 1), BodyGrow(1, 0), BodyGrow(1, 2)]
         before = copy.deepcopy(self.player)
         self.player.increase_body_sizes(body_grows)
         self.player.remove_used_cards()
         changes = {
-            "species":
-                {1: {"body": 4}},
-            "hand":
-                []
+            "species": {1: {"body": 4}},
+            "hand": []
         }
         self.check_player(before, self.player, changes)
 
     def test_increase_body_sizes_many_different_species(self):
-        body_grows = [BodyGrow(1, 1),BodyGrow(0, 0),BodyGrow(2, 2),]
+        body_grows = [BodyGrow(1, 1), BodyGrow(0, 0), BodyGrow(2, 2)]
         before = copy.deepcopy(self.player)
         self.player.increase_body_sizes(body_grows)
         self.player.remove_used_cards()

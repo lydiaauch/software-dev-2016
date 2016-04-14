@@ -7,6 +7,7 @@ from choice import Choice
 A Dealer Object.
 """
 
+
 class Dealer(object):
     """
     A representation of a game of Evolution containing both the state of the game,
@@ -35,7 +36,7 @@ class Dealer(object):
         self.wh_cards = []
         self.skipped_players = []
 
-        for index, player  in enumerate(player_interfaces):
+        for index, player in enumerate(player_interfaces):
             self.players.append(PlayerState(player, index+1))
 
     def __eq__(self, other):
@@ -216,7 +217,7 @@ class Dealer(object):
         for player in self.players:
             player.trigger_fertile()
         for player in self.players:
-            player.trigger_long_neck()
+            self.watering_hole = player.trigger_long_neck(self.watering_hole)
 
     def move_fat_food(self):
         """
@@ -236,13 +237,14 @@ class Dealer(object):
         if self.watering_hole <= 0:
             return
 
-        if self.current_player_index in self.skipped_players or not self.player_can_feed(current_player):
+        if self.current_player_index in self.skipped_players \
+                or not self.player_can_feed(current_player):
             self.skip_player(self.current_player_index)
             self.rotate_players()
             return
 
         feeding = self.next_feed()
-        #TODO validate given feeding
+        # TODO validate given feeding
         feeding.apply(self)
         self.rotate_players()
 
@@ -359,7 +361,7 @@ class Dealer(object):
 
         if len(targets) == 1:
             target_player = next(player for player in self.players
-                                if targets[0] in player.species)
+                                 if targets[0] in player.species)
             defender_index = target_player.species.index(targets[0])
             target_index = self.opponents().index(target_player)
             return CarnivoreFeeding(carnivore_index, target_index, defender_index)
@@ -369,10 +371,10 @@ class Dealer(object):
         Gives one food token to all species with the scavenger trait.
         """
         for player in self.players:
-            player.trigger_scavenging()
+            self.watering_hole = player.trigger_scavenging(self.watering_hole)
 
     def feed(self, player, species):
-        player.feed(species, self.watering_hole)
+        self.watering_hole = player.feed(species, self.watering_hole)
 
     def deal(self, num_cards, player):
         """

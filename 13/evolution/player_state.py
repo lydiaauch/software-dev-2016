@@ -122,7 +122,7 @@ class PlayerState(object):
         self.interface.choose(Choice(self, before, after))
 
     def next_feeding(self, wh, opponents):
-        self.interface.next_feeding(self, wh, opponents)
+        return self.interface.next_feeding(self, wh, opponents)
 
     def trait_trigger(self, traitname, effect):
         for species in self.species:
@@ -132,11 +132,17 @@ class PlayerState(object):
     def trigger_fertile(self):
         self.trait_trigger("fertile", lambda spec: spec.breed())
 
-    def trigger_long_neck(self):
-        self.trait_trigger("long-neck", lambda spec: self.feed(spec))
+    def trigger_trait_feeding(self, traitname, wh):
+        for species in self.species:
+            if traitname in species.trait_names():
+                wh = self.feed(species, wh)
+        return wh
 
-    def trigger_scavenging(self):
-        self.trait_trigger("scavenger", lambda spec: self.feed(spec))
+    def trigger_long_neck(self, wh):
+        return self.trigger_trait_feeding("long-neck", wh)
+
+    def trigger_scavenging(self, wh):
+        return self.trigger_trait_feeding("scavenger", wh)
 
     def trigger_fat_food(self):
         self.trait_trigger("fat-food", lambda spec: spec.digest_fat())
@@ -144,7 +150,7 @@ class PlayerState(object):
     def remove_species(self, species):
         self.species.remove(species)
 
-    def feed(self, species, wh=None):
+    def feed(self, species, wh):
         """
         Feeds the given species food tokens from the watering hole. Accounts for
         foraging food amounts as well as cooperation feeding.
@@ -153,13 +159,15 @@ class PlayerState(object):
         """
         before_eating = species.food
 
-        self.give_food(species, wh)
+        wh = self.give_food(species, wh)
         if "foraging" in species.trait_names():
-            self.give_food(species, wh)
+            wh = self.give_food(species, wh)
 
         tokens_eaten = species.food - before_eating
         for _ in range(tokens_eaten):
-            self.cooperate(species, wh)
+            wh = self.cooperate(species, wh)
+
+        return wh
 
     def cooperate(self, species, wh):
         """
@@ -167,12 +175,13 @@ class PlayerState(object):
         :param player: The owner of the species to cooperate.
         :param species: The species cooperating.
         """
-        if wh and wh >= 1:
+        if wh >= 1:
             species_index = self.species.index(species)
             right_neighbor = (False if species_index == len(self.species) - 1
                               else self.species[species_index + 1])
             if "cooperation" in species.trait_names() and right_neighbor:
-                self.feed(right_neighbor, wh)
+                wh = self.feed(right_neighbor, wh)
+        return wh
 
     def give_food(self, species, wh):
         """
@@ -180,7 +189,7 @@ class PlayerState(object):
         :param species: The Species to be fed.
         :param wh: Number of food tokens in the watering hole.
         """
-        if species.population - species.food >= 1 and (wh is None or wh >= 1):
+        if species.population - species.food >= 1 and wh >= 1:
             species.food += 1
-            if wh is not None:
-                wh -= 1
+            wh -= 1
+        return wh

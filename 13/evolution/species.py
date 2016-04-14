@@ -1,4 +1,4 @@
-from globals import MAX_POPULATION
+from globals import MAX_POPULATION, HARD_SHELL_DIFF
 
 
 class Species(object):
