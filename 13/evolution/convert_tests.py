@@ -3,6 +3,7 @@ from species import Species
 from traitcard import TraitCard
 from player_state import PlayerState
 from convert import Convert
+from player import Player
 
 
 class TestConvert(unittest.TestCase):
@@ -21,12 +22,12 @@ class TestConvert(unittest.TestCase):
         self.jt_3 = "burrowing"
         self.jt_4 = "climbing"
 
-        self.jtc_1 = [8,   "carnivore"]
-        self.jtc_2 = [-3,  "fat-tissue"]
-        self.jtc_3 = [0,   "burrowing"]
-        self.jtc_4 = [3,   "climbing"]
-        self.jtc_5 = [-8,  "carnivore"]
-        self.jtc_6 = [2,   "climbing"]
+        self.jtc_1 = [8, "carnivore"]
+        self.jtc_2 = [-3, "fat-tissue"]
+        self.jtc_3 = [0, "burrowing"]
+        self.jtc_4 = [3, "climbing"]
+        self.jtc_5 = [-8, "carnivore"]
+        self.jtc_6 = [2, "climbing"]
 
     def setUp_json_species(self):
         self.jSpecies_1 = [["food", 2],
@@ -65,10 +66,10 @@ class TestConvert(unittest.TestCase):
                           ["cards", [self.jtc_3, self.jtc_4]]]
 
     def setUp_traitcards(self):
-        self.t_1 = TraitCard("carnivore")
-        self.t_2 = TraitCard("fat-tissue")
-        self.t_3 = TraitCard("burrowing")
-        self.t_4 = TraitCard("climbing")
+        self.t_1 = "carnivore"
+        self.t_2 = "fat-tissue"
+        self.t_3 = "burrowing"
+        self.t_4 = "climbing"
 
         self.tc_1 = TraitCard("carnivore", 8)
         self.tc_2 = TraitCard("fat-tissue", -3)
@@ -84,16 +85,19 @@ class TestConvert(unittest.TestCase):
         self.species_4 = Species(2, 2, 2, [self.t_3, self.t_4])
 
     def setUp_players(self):
-        self.player_1 = PlayerState(name=1,
+        self.player_1 = PlayerState(Player,
+                                    name=1,
                                     food_bag=2,
                                     species=[self.species_1])
 
-        self.player_2 = PlayerState(name=2,
+        self.player_2 = PlayerState(Player,
+                                    name=2,
                                     food_bag=1,
                                     species=[self.species_2],
                                     hand=[self.tc_1, self.tc_2])
 
-        self.player_3 = PlayerState(name=3,
+        self.player_3 = PlayerState(Player,
+                                    name=3,
                                     food_bag=3,
                                     species=[self.species_3, self.species_4],
                                     hand=[self.tc_3, self.tc_4])
@@ -104,7 +108,7 @@ class TestConvert(unittest.TestCase):
 
     def test_json_to_dealer(self):
         dealer = Convert.json_to_dealer(self.jConfig_1)
-        self.assertEqual(len(dealer.player_sets), 3)
+        self.assertEqual(len(dealer.players), 3)
         self.assertEqual(dealer.watering_hole, 42)
         self.assertEqual(len(dealer.deck), 2)
         self.assertEqual(dealer.deck[0], self.tc_5)
@@ -126,14 +130,6 @@ class TestConvert(unittest.TestCase):
         self.assertEqual(Convert.json_to_trait_card(self.jtc_4), self.tc_4)
         self.assertEqual(Convert.json_to_trait_card(self.jtc_5), self.tc_5)
         self.assertEqual(Convert.json_to_trait_card(self.jtc_6), self.tc_6)
-
-    def test_json_to_trait(self):
-        self.assertEqual(Convert.json_to_trait(self.jt_1), self.t_1)
-        self.assertNotEqual(Convert.json_to_trait(self.jt_1), self.t_2)
-
-    def test_trait_to_json(self):
-        self.assertEqual(Convert.trait_to_json(self.t_1), self.jt_1)
-        self.assertNotEqual(Convert.trait_to_json(self.t_1), self.jt_2)
 
     def test_json_to_species(self):
         self.assertTrue(self.species_soft_eq(Convert.json_to_species(self.jSpecies_1),
@@ -169,7 +165,7 @@ class TestConvert(unittest.TestCase):
         bad_json = [["id", 1], ["speciess", [self.jSpecies_1]], ["bag", 2]]
         self.assertRaises(Exception, Convert.json_to_player, bad_json)
 
-    def test_bad_json_to_player(self):
+    def test_bad_json_to_player_ordering(self):
         bad_json = [["foood", 2], ["body", 2], ["population", 2], ["traits", [self.jt_1]]]
         self.assertRaises(Exception, Convert.json_to_player, bad_json)
 
@@ -183,7 +179,7 @@ class TestConvert(unittest.TestCase):
     @classmethod
     def species_list_eq(cls, los0, los1):
         return (len(los0) == len(los1) and
-                       all(cls.species_soft_eq(spec0, spec1) for spec0, spec1 in zip(los0, los1)))
+                all(cls.species_soft_eq(spec0, spec1) for spec0, spec1 in zip(los0, los1)))
 
     @classmethod
     def species_soft_eq(cls, spec0, spec1):

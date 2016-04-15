@@ -1,12 +1,12 @@
 import copy
 import unittest
 import test_utils
+from species import Species
+from traitcard import TraitCard
+from player_state import PlayerState
+from actions import *
+from player import Player
 
-from species       import Species
-from traitcard     import TraitCard
-from player_state  import PlayerState
-from convert_tests import TestConvert
-from actions       import *
 
 class TestPlayerState(unittest.TestCase):
     @classmethod
@@ -17,24 +17,24 @@ class TestPlayerState(unittest.TestCase):
         species_0 = Species(population=1,
                             food=3,
                             body=4,
-                            traits=[TraitCard("carnivore")])
+                            traits=["carnivore"])
 
         species_1 = Species(population=1,
                             food=1,
                             body=1,
-                            traits=[TraitCard("burrowing")])
+                            traits=["burrowing"])
 
         species_2 = Species(population=1,
                             food=0,
                             body=1,
-                            traits=[TraitCard("fat-tissue")])
+                            traits=["fat-tissue"])
 
         species = [species_0, species_1, species_2]
 
         hand = [TraitCard("long-neck", food_points=2),
                 TraitCard("climbing", food_points=-2),
                 TraitCard("scavenger", food_points=4)]
-        self.player = PlayerState(hand=hand, species=species)
+        self.player = PlayerState(Player, hand=hand, species=species)
 
     def test_create_new_boards_one(self):
         board_addition = BoardAddition(0, traits=[1, 2])
@@ -42,13 +42,13 @@ class TestPlayerState(unittest.TestCase):
         self.player.create_new_boards([board_addition])
         self.player.remove_used_cards()
 
-        changes = {"species":{ 3: {
+        changes = {
+            "species": {3: {
                 "population": 1,
                 "food": 0,
                 "body": 0,
                 "fat_storage": 0,
-                "traits": [TraitCard("climbing", food_points=-2),
-                           TraitCard("scavenger", food_points=4)]}},
+                "traits": ["climbing", "scavenger"]}},
             "hand": []}
         self.check_player(before, self.player, changes)
 
@@ -62,15 +62,15 @@ class TestPlayerState(unittest.TestCase):
                                        board_addition_2])
         self.player.remove_used_cards()
         new_species = {
-                "population": 1,
-                "food": 0,
-                "body": 0,
-                "fat_storage": 0,
-                "traits": []
+            "population": 1,
+            "food": 0,
+            "body": 0,
+            "fat_storage": 0,
+            "traits": []
         }
 
         changes = {
-            "species":{
+            "species": {
                 3: new_species,
                 4: new_species,
                 5: new_species,
@@ -87,7 +87,7 @@ class TestPlayerState(unittest.TestCase):
         self.player.remove_used_cards()
         changes = {
             "species":
-                {0: {"traits": [TraitCard("long-neck", food_points=2)]}},
+                {0: {"traits": ["long-neck"]}},
             "hand":
                 [TraitCard("climbing", food_points=-2),
                  TraitCard("scavenger", food_points=4)]
@@ -103,9 +103,9 @@ class TestPlayerState(unittest.TestCase):
         self.player.remove_used_cards()
         changes = {
             "species":
-                {0: {"traits": [TraitCard("long-neck", food_points=2)]},
-                 2: {"traits": [TraitCard("climbing", food_points=-2)]},
-                 1: {"traits": [TraitCard("scavenger", food_points=4)]}},
+                {0: {"traits": ["long-neck"]},
+                 2: {"traits": ["climbing"]},
+                 1: {"traits": ["scavenger"]}},
             "hand":
                 []
         }
@@ -121,12 +121,12 @@ class TestPlayerState(unittest.TestCase):
                 {1: {"population": 2}},
             "hand":
                 [TraitCard("long-neck", food_points=2),
-                TraitCard("scavenger", food_points=4)]
+                 TraitCard("scavenger", food_points=4)]
         }
         self.check_player(before, self.player, changes)
 
     def test_increase_populations_many_same_species(self):
-        pop_grows = [PopGrow(1, 1),PopGrow(1, 0),PopGrow(1, 2),]
+        pop_grows = [PopGrow(1, 1), PopGrow(1, 0), PopGrow(1, 2)]
         before = copy.deepcopy(self.player)
         self.player.increase_populations(pop_grows)
         self.player.remove_used_cards()
@@ -139,7 +139,7 @@ class TestPlayerState(unittest.TestCase):
         self.check_player(before, self.player, changes)
 
     def test_increase_populations_many_different_species(self):
-        pop_grows = [PopGrow(1, 1),PopGrow(0, 0),PopGrow(2, 2),]
+        pop_grows = [PopGrow(1, 1), PopGrow(0, 0), PopGrow(2, 2)]
         before = copy.deepcopy(self.player)
         self.player.increase_populations(pop_grows)
         self.player.remove_used_cards()
@@ -163,25 +163,23 @@ class TestPlayerState(unittest.TestCase):
                 {1: {"body": 2}},
             "hand":
                 [TraitCard("long-neck", food_points=2),
-                TraitCard("scavenger", food_points=4)]
+                 TraitCard("scavenger", food_points=4)]
         }
         self.check_player(before, self.player, changes)
 
     def test_increase_body_sizes_many_same_species(self):
-        body_grows = [BodyGrow(1, 1),BodyGrow(1, 0),BodyGrow(1, 2),]
+        body_grows = [BodyGrow(1, 1), BodyGrow(1, 0), BodyGrow(1, 2)]
         before = copy.deepcopy(self.player)
         self.player.increase_body_sizes(body_grows)
         self.player.remove_used_cards()
         changes = {
-            "species":
-                {1: {"body": 4}},
-            "hand":
-                []
+            "species": {1: {"body": 4}},
+            "hand": []
         }
         self.check_player(before, self.player, changes)
 
     def test_increase_body_sizes_many_different_species(self):
-        body_grows = [BodyGrow(1, 1),BodyGrow(0, 0),BodyGrow(2, 2),]
+        body_grows = [BodyGrow(1, 1), BodyGrow(0, 0), BodyGrow(2, 2)]
         before = copy.deepcopy(self.player)
         self.player.increase_body_sizes(body_grows)
         self.player.remove_used_cards()
@@ -194,6 +192,14 @@ class TestPlayerState(unittest.TestCase):
                 []
         }
         self.check_player(before, self.player, changes)
+
+    def test_can_feed(self):
+        self.assertTrue(self.player.can_feed([self.player]))
+        self.player.species[0].traits = ["carnivore"]
+        self.player.species[1].traits = ["carnivore"]
+        self.player.species[2].traits = ["carnivore"]
+        self.assertFalse(self.player.can_feed([]))
+
 
 if __name__ == '__main__':
     unittest.main()

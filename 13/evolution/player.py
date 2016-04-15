@@ -1,9 +1,10 @@
 from actions import *
-from species import Species
 from dealer import Dealer
 from feeding import *
-from choice import Choice
+from traitcard import TraitCard
+from helpers import *
 from globals import *
+
 
 class Player(object):
     """
@@ -28,7 +29,7 @@ class Player(object):
         cards = []
         for i, card in enumerate(player.hand):
             cards.append({"card": card, "index": i})
-        cards.sort(lambda c0, c1: Dealer.compare_cards(c0['card'], c1['card']))
+        cards.sort(lambda c0, c1: TraitCard.compare(c0['card'], c1['card']))
 
         food_card = cards[0]['index']
         action = Action(food_card, [], [], [], [])
@@ -54,14 +55,14 @@ class Player(object):
         :return: feeding action for the next species to feed
         """
         hungry_fatties = [species for species in player.species
-                          if "fat-tissue" in species.trait_names()
-                          and species.fat_storage < species.body]
+                          if "fat-tissue" in species.traits and
+                          species.fat_storage < species.body]
         if hungry_fatties:
             feeding = cls.feed_fatty(hungry_fatties, food_available)
             return FatTissueFeeding(player.species.index(feeding[0]), feeding[1])
 
         hungry_species = [species for species in player.species if species.can_eat()]
-        hungry_carnivores = [species for species in hungry_species if "carnivore" in species.trait_names()]
+        hungry_carnivores = [species for species in hungry_species if "carnivore" in species.traits]
 
         hungry_herbivores = cls.find_hungry_herbs(hungry_species, hungry_carnivores)
         if hungry_herbivores:
@@ -137,7 +138,7 @@ class Player(object):
         """
         sorted_carnivores = cls.sort_lex(hungry_carnivores)
         for carnivore in sorted_carnivores:
-            targets = Dealer.carnivore_targets(carnivore, opponents)
+            targets = carnivore_targets(carnivore, opponents)
             if targets:
                 sorted_targets = cls.sort_lex(targets)
                 target = sorted_targets[0]
@@ -156,9 +157,9 @@ class Player(object):
         sorted_species = cls.sort_lex(list_of_species)
         largest = sorted_species[0]
         largest_species = [species for species in sorted_species
-                           if species.population == largest.population
-                           and species.food == largest.food
-                           and species.body == largest.body]
+                           if species.population == largest.population and
+                           species.food == largest.food and
+                           species.body == largest.body]
         return largest_species
 
     @classmethod
@@ -169,7 +170,6 @@ class Player(object):
         :return: the largest Species
         """
         return sorted(list_of_species, cmp=cls.is_larger, reverse=True)
-
 
     @classmethod
     def is_larger(cls, species_1, species_2):
