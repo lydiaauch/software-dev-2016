@@ -1,3 +1,8 @@
+from functools import wraps
+import errno
+import os
+import signal
+
 def carnivore_targets(carnivore, list_of_player):
     """
     Creates a list of all possible targets for given carnivore from the list of
@@ -16,3 +21,24 @@ def carnivore_targets(carnivore, list_of_player):
                and defender != carnivore:
                 targets.append(defender)
     return targets
+
+class TimeoutError(Exception):
+    pass
+
+def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
+    def decorator(func):
+        def _handle_timeout(signum, frame):
+            raise TimeoutError(error_message)
+
+        def wrapper(*args, **kwargs):
+            signal.signal(signal.SIGALRM, _handle_timeout)
+            signal.alarm(seconds)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                signal.alarm(0)
+            return result
+
+        return wraps(func)(wrapper)
+
+    return decorator

@@ -78,6 +78,10 @@ class Convert(object):
         return True
 
     @classmethod
+    def list_of_species_to_json(cls, los):
+        return map(los, lambda spec: species_to_json(spec))
+
+    @classmethod
     def json_to_player(cls, json_player):
         assert(cls.validate_player_json(json_player))
         name = json_player[0][1]
@@ -216,6 +220,25 @@ class Convert(object):
         bt_json = [bt.payment_index]
         bt_json.extend(bt.traits)
         return bt_json
+
+
+    @classmethod
+    def json_to_feeding(cls, json_feeding):
+        assert(self.validate_json_feeding(json_feeding))
+        # Python sucks and we should feel bad
+        if json_feeding == False and type(json_feeding) is type(False):
+            return AbstainFeeding()
+        elif isinstance(json_feeding, (int, long)):
+            return HerbivoreFeeding(json_feeding)
+        elif len(json_feeding) == 2:
+            return FatTissueFeeding(json_feeding[0], json_feeding[1])
+        else:
+            return CarnivoreFeeding(json_feeding[0], json_feeding[1], json_feeding[2])
+
+    @classmethod
+    def validate_json_feeding(cls, json_feeding):
+        # TODO:
+        return True
 
     @classmethod
     def json_to_trait_card(cls, json_trait_card):

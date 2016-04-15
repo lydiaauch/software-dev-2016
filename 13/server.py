@@ -2,47 +2,59 @@ import os
 import socket
 import json
 import sys
+from evolution.helpers import TimeoutError, timeout
+from globals import *
+
 
 def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_addr = ('localhost', 10000)
+    server_addr = ('localhost', LISTENING_PORT)
     sock.bind(server_addr)
     sock.listen(1)
     while True:
         # Wait for a connection
-        print >>sys.stderr, 'waiting for a connection'
-        connection, client_address = sock.accept()
+        print >>sys.stderr, 'waiting players'
+        connections = []
         try:
-            print >>sys.stderr, 'connection from', client_address
-
-            # Receive the data in small chunks and retransmit it
-            while True:
-                data = connection.recv(16)
-                print >>sys.stderr, 'received "%s"' % data
-                if data:
-                    print >>sys.stderr, 'sending data back to the client'
-                    connection.sendall(data)
-                else:
-                    print >>sys.stderr, 'no more data from', client_address
-                    break
-
+            get_player_connections(sock, connections)
+        except TimeoutError:
+            pass
+        proxy_players = map(connections, lambda con: ProxyPlayer(con[0]))
+        dealer = Dealer(proxy_players)
+        dealer.run()
+        #
+        #
+        # try:
+        #     print >>sys.stderr, 'connection from', client_address
+        #     # Receive the data in small chunks and retransmit it
+        #     while True:
+        #         data = connection.recv(16)
+        #         print >>sys.stderr, 'received "%s"' % data
+        #         if data:
+        #             print >>sys.stderr, 'sending data back to the client'
+        #             connection.sendall(data)
+        #         else:
+        #             print >>sys.stderr, 'no more data from', client_address
+        #             break
+        #
         finally:
-            # Clean up the connection
             connection.close()
 
-    # sock = socket.create_connection((SERVER_ADDRESS, PORT))
-    # player = Player()
-    # try:
-    #     message = ""
-    #     while True:
-    #         message += sock.recv(BUFFSIZE)
-    #         complete_message = complete_json(message)
-    #         if complete_message:
-    #             response = handle_message(player, complete_message)
-    #             sock.sendall(response)
-    #             message = ""
-    # finally:
-    #     sock.close()
+@timeout(PLAYER_CONNECTION_TIME)
+def get_player_connections(socket, connections):
+    while(len(connections) < MAX_PLAYERS):
+        connection, client_addr = sock.accept()
+        if connection and client_addr:
+            connections.append([connection, client_addr])
+            print("player connected from {}" % client_addr)
+            connection.sendall("waiting")
+
+@timeout(1)
+def print_loop():
+    while(True):
+        print("1")
+        print("2")
+        print("3")
 
 
 def complete_json(message):
