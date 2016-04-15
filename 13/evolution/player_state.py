@@ -1,3 +1,4 @@
+from helpers import *
 from species import Species
 from actions import *
 from choice import Choice
@@ -251,9 +252,33 @@ class PlayerState(object):
     def kill(self, species):
         """
         Reduces the population of the given species by one.
+        :param species: The species whose population is being decreased.
+        :return: True if the species goes extinct, else false.
         """
         species.kill()
         if species.is_extinct():
             self.species.remove(species)
             return True
         return False
+
+    def can_feed(self, opponents):
+        """
+        Checks if any of this player's species can eat. Checks either for
+        herbivore species who can eat from the watering hole, or carnivores
+        which have valid targets.
+        :param opponents: The PlayerStates of all other players in the game.
+        :return: True if the player has at least one valid Feeding, otherwise false.
+        """
+        hungries = [species for species in self.species if species.can_eat()]
+        non_feedable_carnivores = \
+            [carnivore for carnivore in hungries if
+                "carnivore" in carnivore.traits and
+                len(carnivore_targets(carnivore, opponents)) == 0]
+
+        non_feedable_carnivores = \
+            [carnivore for carnivore in non_feedable_carnivores
+             if "fat-tissue" not in carnivore.traits or
+             ("fat-tissue" in carnivore.traits and
+              carnivore.fat_storage == carnivore.body)]
+
+        return hungries > 0 and len(hungries) != len(non_feedable_carnivores)

@@ -193,5 +193,13 @@ class TestPlayerState(unittest.TestCase):
         }
         self.check_player(before, self.player, changes)
 
+    def test_can_feed(self):
+        self.assertTrue(self.player.can_feed([self.player]))
+        self.player.species[0].traits = ["carnivore"]
+        self.player.species[1].traits = ["carnivore"]
+        self.player.species[2].traits = ["carnivore"]
+        self.assertFalse(self.player.can_feed([]))
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -63,19 +63,6 @@ class TestDealer(unittest.TestCase):
         opponents_name_2 = filter(lambda p: p.name == 2, opponents)
         self.assertEqual(0, len(opponents_name_2))
 
-    def test_carnivore_targets(self):
-        list_of_opponents = self.dealer.opponents()
-        self.species_3.traits = ["carnivore"]
-        self.species_2.traits = ["climbing"]
-        self.species_4.traits = ["climbing"]
-        self.species_5.traits = ["climbing"]
-
-        self.assertEqual(Dealer.carnivore_targets(self.species_3, list_of_opponents),
-                         [self.species_1])
-
-        self.species_1.traits = ["climbing"]
-        self.assertEqual(Dealer.carnivore_targets(self.species_3, list_of_opponents), [])
-
     def test_auto_eat_fat_tissue(self):
         self.dealer.current_player_index = 2
         self.species_3.traits = ["fat-tissue"]
@@ -333,17 +320,6 @@ class TestDealer(unittest.TestCase):
                             "hand": [TraitCard("carnivore", -5)]}}
         }
         self.feed1(changes)
-
-    def test_player_can_feed(self):
-        self.assertFalse(self.dealer.player_can_feed(self.dealer.players[0]))
-        self.assertTrue(self.dealer.player_can_feed(self.dealer.players[2]))
-
-        self.species_4.traits.append("carnivore")
-        self.species_1.traits.append("climbing")
-        self.species_2.traits.append("climbing")
-        self.species_3.traits.append("climbing")
-        self.species_5.traits.append("climbing")
-        self.assertFalse(self.dealer.player_can_feed(self.dealer.players[3]))
 
     def test_step4_simple(self):
         self.dealer.players[0].hand = [TraitCard("burrowing", food_points=0)]

@@ -1,3 +1,4 @@
+from helpers import *
 from player_state import PlayerState
 from species import Species
 from feeding import *
@@ -158,6 +159,7 @@ class Dealer(object):
         """
         Adds all food points from cards allocated for food in the given actions to
         the waterin' hole.
+        :param actions: List of Actions to get the food card selections from.
         """
         for action, player in zip(actions, self.players):
             food_card = player.hand[action.food_card]
@@ -186,16 +188,13 @@ class Dealer(object):
     def feed1(self):
         """
         Executes one step in the feeding cycle and updates the game state accordingly
-        :return: False if the current player cannot feed.
-        True if the player is auto fed or makes a feeding decision
-        :raises: Raises an exception if the watering hole starts at 0.
         """
         current_player = self.players[self.current_player_index]
         if self.watering_hole <= 0:
             return
 
         if self.current_player_index in self.skipped_players or \
-                not self.player_can_feed(current_player):
+                not current_player.can_feed(self.opponents()):
             self.skip_cur_player()
             self.rotate_players()
             return
@@ -221,28 +220,6 @@ class Dealer(object):
         extinct = player.kill(species)
         if extinct:
             self.deal(2, player)
-
-    def player_can_feed(self, player):
-        """
-        Checks if any of the given player's species can eat. Checks either for
-        herbivore species who can eat from the watering hole, or carnivores
-        which have valid targets.
-        :param player: The player whose options are being checked for valid Feedings.
-        :return: True if the player has at least one valid Feeding, otherwise false.
-        """
-        hungries = [species for species in player.species if species.can_eat()]
-        non_feedable_carnivores = \
-            [carnivore for carnivore in hungries if
-                "carnivore" in carnivore.traits and
-                len(Dealer.carnivore_targets(carnivore, self.players)) == 0]
-
-        non_feedable_carnivores = \
-            [carnivore for carnivore in non_feedable_carnivores
-             if "fat-tissue" not in carnivore.traits or
-             ("fat-tissue" in carnivore.traits and
-              carnivore.fat_storage == carnivore.body)]
-
-        return hungries > 0 and len(hungries) != len(non_feedable_carnivores)
 
     def skip_cur_player(self):
         """
@@ -312,7 +289,7 @@ class Dealer(object):
         eater must be an element of this list.
         """
         carnivore_index = cur_player_species.index(eater)
-        targets = Dealer.carnivore_targets(eater, self.opponents())
+        targets = carnivore_targets(eater, self.opponents())
 
         if len(targets) == 1:
             target_player = next(player for player in self.players
@@ -359,23 +336,3 @@ class Dealer(object):
         opponents = [plr for plr in self.players]
         opponents.pop(self.current_player_index)
         return opponents
-
-    @classmethod
-    def carnivore_targets(cls, carnivore, list_of_player):
-        """
-        Creates a list of all possible targets for given carnivore from the list of
-        players.
-        :param: carnivore The attacking carnivore.
-        :param: list_of_player All players to be considered for possible targets.
-        """
-        targets = []
-        for player in list_of_player:
-            for i in range(0, len(player.species)):
-                defender = player.species[i]
-                left_neighbor = (False if i == 0 else player.species[i - 1])
-                right_neighbor = (False if i == len(player.species) - 1
-                                  else player.species[i + 1])
-                if defender.is_attackable(carnivore, left_neighbor, right_neighbor) \
-                   and defender != carnivore:
-                    targets.append(defender)
-        return targets

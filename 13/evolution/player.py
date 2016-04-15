@@ -2,6 +2,7 @@ from actions import *
 from dealer import Dealer
 from feeding import *
 from traitcard import TraitCard
+from helpers import *
 from globals import *
 
 
@@ -137,7 +138,7 @@ class Player(object):
         """
         sorted_carnivores = cls.sort_lex(hungry_carnivores)
         for carnivore in sorted_carnivores:
-            targets = Dealer.carnivore_targets(carnivore, opponents)
+            targets = carnivore_targets(carnivore, opponents)
             if targets:
                 sorted_targets = cls.sort_lex(targets)
                 target = sorted_targets[0]
