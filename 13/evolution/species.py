@@ -54,10 +54,13 @@ class Species(object):
 
     def is_attackable(self, attacker, left_neighbor=False, right_neighbor=False):
         """
-        Determines if this species is attackable by the attacker species, given its two neighbors
+        Determines if this species is attackable by the attacker species,
+        given its two neighbors
         :param attacker: the Species attacking this species
-        :param left_neighbor: the Species to the left of this species (False if no left neighbor)
-        :param right_neighbor: the Species to the right of this species (False if no left neighbor)
+        :param left_neighbor: the Species to the left of this species
+                              (False if no left neighbor)
+        :param right_neighbor: the Species to the right of this species
+                               (False if no left neighbor)
         :return: True if attackable, else false
         """
         defender_traits = self.traits
@@ -99,3 +102,10 @@ class Species(object):
     def breed(self):
         if self.population < MAX_POPULATION:
             self.population += 1
+
+    def kill(self):
+        self.population -= 1
+        self.food = min(self.population, self.food)
+
+    def is_extinct(self):
+        return self.population == 0

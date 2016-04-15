@@ -1,5 +1,6 @@
 from species import Species
 from actions import *
+from choice import Choice
 
 
 class PlayerState(object):
@@ -121,7 +122,7 @@ class PlayerState(object):
                            species=self.species)
 
     def choose(self, before, after):
-        self.interface.choose(Choice(self, before, after))
+        return self.interface.choose(Choice(self, before, after))
 
     def next_feeding(self, wh, opponents):
         return self.interface.next_feeding(self, wh, opponents)
@@ -195,3 +196,15 @@ class PlayerState(object):
             species.food += 1
             wh -= 1
         return wh
+
+    def move_food_to_bag(self):
+        for species in self.species:
+            self.food_bag += species.food
+            species.food = 0
+
+    def kill(self, species):
+        species.kill()
+        if species.is_extinct():
+            self.species.remove(species)
+            return True
+        return False

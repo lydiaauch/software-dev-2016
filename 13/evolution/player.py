@@ -1,8 +1,7 @@
 from actions import *
-from species import Species
 from dealer import Dealer
 from feeding import *
-from choice import Choice
+from traitcard import TraitCard
 from globals import *
 
 
@@ -29,7 +28,7 @@ class Player(object):
         cards = []
         for i, card in enumerate(player.hand):
             cards.append({"card": card, "index": i})
-        cards.sort(lambda c0, c1: Dealer.compare_cards(c0['card'], c1['card']))
+        cards.sort(lambda c0, c1: TraitCard.compare(c0['card'], c1['card']))
 
         food_card = cards[0]['index']
         action = Action(food_card, [], [], [], [])
@@ -157,9 +156,9 @@ class Player(object):
         sorted_species = cls.sort_lex(list_of_species)
         largest = sorted_species[0]
         largest_species = [species for species in sorted_species
-                           if species.population == largest.population
-                           and species.food == largest.food
-                           and species.body == largest.body]
+                           if species.population == largest.population and
+                           species.food == largest.food and
+                           species.body == largest.body]
         return largest_species
 
     @classmethod
@@ -170,7 +169,6 @@ class Player(object):
         :return: the largest Species
         """
         return sorted(list_of_species, cmp=cls.is_larger, reverse=True)
-
 
     @classmethod
     def is_larger(cls, species_1, species_2):

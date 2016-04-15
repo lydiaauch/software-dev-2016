@@ -14,9 +14,9 @@ class TestDealer(unittest.TestCase):
     def setUpClass(cls):
         test_utils.setup()
 
-    def step4(self, changes, actions):
+    def apply_actions(self, changes, actions):
         before = copy.deepcopy(self.dealer)
-        self.dealer.step4(actions)
+        self.dealer.apply_actions(actions)
         self.check_dealer(before, self.dealer, changes)
 
     def feed1(self, changes):
@@ -363,7 +363,7 @@ class TestDealer(unittest.TestCase):
                         3: {"hand": [], "species": {0: {"food": 4}}}}
         }
 
-        self.step4(changes, actions)
+        self.apply_actions(changes, actions)
 
     def test_step4_GP(self):
         self.dealer.players[0].hand = [TraitCard("burrowing", food_points=0),
@@ -384,7 +384,7 @@ class TestDealer(unittest.TestCase):
                         3: {"hand": [], "species": {0: {"food": 4}}}}
         }
 
-        self.step4(changes, actions)
+        self.apply_actions(changes, actions)
 
     def test_step4_GB(self):
         self.dealer.players[0].hand = [TraitCard("burrowing", food_points=0),
@@ -405,7 +405,7 @@ class TestDealer(unittest.TestCase):
                         3: {"hand": [], "species": {0: {"food": 4}}}}
         }
 
-        self.step4(changes, actions)
+        self.apply_actions(changes, actions)
 
     def test_step4_RT(self):
         self.species_1.traits.append("long-neck")
@@ -428,7 +428,7 @@ class TestDealer(unittest.TestCase):
                         3: {"hand": [], "species": {0: {"food": 4}}}}
         }
 
-        self.step4(changes, actions)
+        self.apply_actions(changes, actions)
 
     def test_step4_BT(self):
         self.dealer.players[0].hand = [TraitCard("burrowing", food_points=0),
@@ -455,15 +455,7 @@ class TestDealer(unittest.TestCase):
                         3: {"hand": [], "species": {0: {"food": 4}}}}
         }
 
-        self.step4(changes, actions)
-
-    def test_print_results(self):
-        self.dealer.players[0].food_bag = 0
-        self.dealer.players[1].food_bag = 1
-        self.dealer.players[2].food_bag = 2
-        self.dealer.players[3].food_bag = 3
-        expected_str = "1 player id: 3 score: 3\n2 player id: 2 score: 2\n3 player id: 1 score: 1\n4 player id: 0 score: 0\n"
-        self.assertEqual(self.dealer.print_results(), expected_str)
+        self.apply_actions(changes, actions)
 
     def test_create_deck(self):
         self.dealer.create_deck()
@@ -480,11 +472,11 @@ class TestDealer(unittest.TestCase):
         card1 = TraitCard("burrowing", 3)
         card2 = TraitCard("climbing", -1)
         cards = [card0, card1, card2]
-        cards.sort(Dealer.compare_cards)
+        cards.sort(TraitCard.compare)
         self.assertEqual(cards, [card1, card2, card0])
-        self.assertEqual(Dealer.compare_cards(card0, card1), 1)
-        self.assertEqual(Dealer.compare_cards(card1, card2), -1)
-        self.assertEqual(Dealer.compare_cards(card0, card2), 1)
+        self.assertEqual(TraitCard.compare(card0, card1), 1)
+        self.assertEqual(TraitCard.compare(card1, card2), -1)
+        self.assertEqual(TraitCard.compare(card0, card2), 1)
 
     def test_make_initial_species(self):
         self.dealer.players[0].species = []

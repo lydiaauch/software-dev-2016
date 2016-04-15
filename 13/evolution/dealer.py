@@ -53,24 +53,14 @@ class Dealer(object):
         """
         self.create_deck()
         while len(self.deck) > self.min_deck_size():
+            self.skipped_players = []
             self.make_initial_species()
             self.deal_round()
             actions = self.get_player_actions()
-            self.step4(actions)
+            self.apply_actions(actions)
             self.reduce_species_pop()
             self.move_food()
         self.move_food()
-
-    def print_results(self):
-        """
-        Prints player ID's and scores in descending order.
-        """
-        results = ""
-        sorted_players = self.players
-        sorted_players.sort(cmp=lambda p1, p2: p2.food_bag - p1.food_bag)
-        for index, player in enumerate(sorted_players):
-            results += "%d player id: %d score: %d\n" % (index + 1, player.name, player.food_bag)
-        return results
 
     def create_deck(self):
         """
@@ -78,40 +68,10 @@ class Dealer(object):
         """
         for trait in TraitCard.traits:
             if trait == "carnivore":
-                self.deck.extend(self.gen_cards(17, "carnivore"))
+                self.deck.extend(TraitCard.gen_cards(17, "carnivore"))
             else:
-                self.deck.extend(self.gen_cards(7, trait))
-        self.deck.sort(Dealer.compare_cards)
-
-    def gen_cards(self, num_cards, trait_name):
-        """
-        Generates num_cards trait cards with the given trait_name and food points.
-        If the card generated is a carnivore, the range of food_points is (-8,8),
-        else the range of food_points is (-3, 3).
-        """
-        cards = []
-        cards.append(TraitCard(trait_name, 0))
-        for num in range(num_cards / 2):
-            cards.append(TraitCard(trait_name, num + 1))
-            cards.append(TraitCard(trait_name, -1 * (num + 1)))
-        return cards
-
-    @classmethod
-    def compare_cards(cls, c1, c2):
-        """
-        Compares two trait cards. Returns -1 if c1 is less than c2, or 1 if
-        c1 is larger than c2.
-        """
-        if c1.trait == c2.trait:
-            if c1.food_points < c2.food_points:
-                return -1
-            else:
-                return 1
-        else:
-            if c1.trait < c2.trait:
-                return -1
-            else:
-                return 1
+                self.deck.extend(TraitCard.gen_cards(7, trait))
+        self.deck.sort(TraitCard.compare)
 
     def make_initial_species(self):
         """
@@ -174,21 +134,19 @@ class Dealer(object):
         Moves all food tokens from each players species to their food_bags.
         """
         for player in self.players:
-            for species in player.species:
-                player.food_bag += species.food
-                species.food = 0
+            player.move_food_to_bag()
 
-    def step4(self, step4):
+    def apply_actions(self, actions):
         """
         Applies the given list of Actions and feeds the players' species until
         they cannot feed anymore.
-        :param step4: List-of Action where action i corresponds with the action
+        :param actions: List-of Action where action i corresponds with the action
         of the i'th player.
         """
-        self.reveal_cards(step4)
+        self.reveal_cards(actions)
         self.trigger_auto_traits()
 
-        for player, action in zip(self.players, step4):
+        for player, action in zip(self.players, actions):
             player.apply_action(action)
 
         self.move_fat_food()
@@ -196,12 +154,12 @@ class Dealer(object):
         while self.watering_hole > 0 and len(self.players) != len(self.skipped_players):
             self.feed1()
 
-    def reveal_cards(self, step4):
+    def reveal_cards(self, actions):
         """
-        Adds all food points from cards allocated for food in the given step4 to
+        Adds all food points from cards allocated for food in the given actions to
         the waterin' hole.
         """
-        for action, player in zip(step4, self.players):
+        for action, player in zip(actions, self.players):
             food_card = player.hand[action.food_card]
             self.watering_hole += food_card.food_points
             food_card.used = True
@@ -236,9 +194,9 @@ class Dealer(object):
         if self.watering_hole <= 0:
             return
 
-        if self.current_player_index in self.skipped_players \
-                or not self.player_can_feed(current_player):
-            self.skip_player(self.current_player_index)
+        if self.current_player_index in self.skipped_players or \
+                not self.player_can_feed(current_player):
+            self.skip_cur_player()
             self.rotate_players()
             return
 
@@ -260,11 +218,8 @@ class Dealer(object):
         :param player: The player whose species is being killed.
         :param species: The species who is being killed.
         """
-        species.population -= 1
-        species.food = min(species.food, species.population)
-
-        if species.population == 0:
-            player.remove_species(species)
+        extinct = player.kill(species)
+        if extinct:
             self.deal(2, player)
 
     def player_can_feed(self, player):
@@ -289,14 +244,14 @@ class Dealer(object):
 
         return hungries > 0 and len(hungries) != len(non_feedable_carnivores)
 
-    def skip_player(self, player_index):
+    def skip_cur_player(self):
         """
         Removes the player at the given index from the player feeding order.
         :param player_index: The index of the player to remove in the player_sets
         array.
         """
-        if player_index not in self.skipped_players:
-            self.skipped_players.append(player_index)
+        if self.current_player_index not in self.skipped_players:
+            self.skipped_players.append(self.current_player_index)
 
     def next_feed(self):
         """
@@ -380,7 +335,8 @@ class Dealer(object):
         """
         Gives num_cards to the player from the deck.
         """
-        for i in range(min(num_cards, len(self.deck))):
+        to_deal = min(num_cards, len(self.deck))
+        for i in range(to_deal):
             card = self.deck.pop(0)
             player.hand.append(card)
 
@@ -417,7 +373,8 @@ class Dealer(object):
             for i in range(0, len(player.species)):
                 defender = player.species[i]
                 left_neighbor = (False if i == 0 else player.species[i - 1])
-                right_neighbor = (False if i == len(player.species) - 1 else player.species[i + 1])
+                right_neighbor = (False if i == len(player.species) - 1
+                                  else player.species[i + 1])
                 if defender.is_attackable(carnivore, left_neighbor, right_neighbor) \
                    and defender != carnivore:
                     targets.append(defender)

@@ -160,7 +160,7 @@ class Convert(object):
         return json_species
 
     @classmethod
-    def json_to_step4(cls, json_step4):
+    def json_to_actions(cls, json_step4):
         actions = []
         for action in json_step4:
             actions.append(cls.json_to_action(action))

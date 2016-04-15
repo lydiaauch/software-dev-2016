@@ -4,7 +4,7 @@ class AbstainFeeding(object):
         Applies the consequences of this feeding to the given dealer.
         :param dealer: The game this Feeding effects.
         """
-        dealer.skip_player(dealer.current_player_index)
+        dealer.skip_cur_player()
 
 
 class HerbivoreFeeding(object):
