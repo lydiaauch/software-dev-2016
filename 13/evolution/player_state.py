@@ -120,43 +120,88 @@ class PlayerState(object):
                            species=self.species)
 
     def choose(self, before, after):
+        """
+        Asks this player's strategy interface for their actions given
+        the list of species of player's before and after them.
+        :param before: List of List of Species where each list of Species
+        represents the species boards owned by one player before this one.
+        :param after: List of List of Species where each list of Species
+        represents the species boards owned by one player after this one.
+        :return: An Action representing all actions thie player will make
+        this round.
+        """
         return self.interface.choose(Choice(self, before, after))
 
     def next_feeding(self, wh, opponents):
+        """
+        Asks this player's strategy interface for the feeding choice they
+        would like to make.
+        :param wh: The number of food tokens in the watering hole.
+        :param opponents: list of PlayerState containing all other players.
+        :return: A Feeding representing the player's desired feeding choice.
+        """
         return self.interface.next_feeding(self, wh, opponents)
 
     def trait_trigger(self, traitname, effect):
+        """
+        Applies effect to each species this player owns with the given traitname.
+        :param traitname: A String trait name.
+        :param effect: Function which takes in a species and modifies it accordingly.
+        """
         for species in self.species:
             if traitname in species.traits:
                 effect(species)
 
     def trigger_trait_feeding(self, traitname, wh):
+        """
+        Feeds all of this player's species with the given trait
+        :param traitname: The trait to trigger the feeding.
+        :param wh: The number of food tokens in the watering hole.
+        """
         for species in self.species:
             if traitname in species.traits:
                 wh = self.feed(species, wh)
         return wh
 
     def trigger_fertile(self):
+        """
+        Increases the population of all fertile species this player owns.
+        """
         self.trait_trigger("fertile", lambda spec: spec.breed())
 
     def trigger_long_neck(self, wh):
+        """
+        Feeds all long-neck species this player owns one food token.
+        :param wh: The number of food tokens in the watering hole.
+        """
         return self.trigger_trait_feeding("long-neck", wh)
 
     def trigger_scavenging(self, wh):
+        """
+        Feeds all scavenging species this player owns one food token.
+        :param wh: The number of food tokens in the watering hole.
+        """
         return self.trigger_trait_feeding("scavenger", wh)
 
     def trigger_fat_food(self):
+        """
+        Moves fat_storage food to the food value for all of this player's
+        species with the fat-tissue trait.
+        """
         self.trait_trigger("fat-tissue", lambda spec: spec.digest_fat())
 
     def remove_species(self, species):
+        """
+        Removes the given species from this player's list of species.
+        """
         self.species.remove(species)
 
     def feed(self, species, wh):
         """
         Feeds the given species food tokens from the watering hole. Accounts for
         foraging food amounts as well as cooperation feeding.
-        :param player: The player who owns the given species.
-        :sparam species: The species to be fed.
+        :param species: The species to be fed.
+        :param wh: The number of food tokens in the watering hole.
         """
         before_eating = species.food
 
@@ -173,8 +218,8 @@ class PlayerState(object):
     def cooperate(self, species, wh):
         """
         Triggers cooperation for the given species if it has the cooperation trait.
-        :param player: The owner of the species to cooperate.
         :param species: The species cooperating.
+        :param wh: The number of food tokens in the watering hole.
         """
         if wh >= 1:
             species_index = self.species.index(species)
@@ -196,11 +241,17 @@ class PlayerState(object):
         return wh
 
     def move_food_to_bag(self):
+        """
+        Moves food tokens from all of this player's species to the food bag.
+        """
         for species in self.species:
             self.food_bag += species.food
             species.food = 0
 
     def kill(self, species):
+        """
+        Reduces the population of the given species by one.
+        """
         species.kill()
         if species.is_extinct():
             self.species.remove(species)
