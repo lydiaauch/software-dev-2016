@@ -21,7 +21,7 @@ class Player(object):
         player is not stateful this method does nothing.
         :param player_state: The PlayerState representing this player.
         """
-        pass
+        # TODO: Set this player's state to be the same as the given player's
 
     @classmethod
     def choose(cls, choice):

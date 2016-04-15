@@ -82,6 +82,19 @@ class Convert(object):
         return map(los, lambda spec: species_to_json(spec))
 
     @classmethod
+    def json_to_player_state(cls, json_player):
+        # [Natural,[Species+, ..., Species+], Cards]
+        assert(cls.validate_player_state_json(json_player))
+        species = cls.json_to_listof_species(json_player[1])
+        cards = map(lambda c: cls.json_to_trait_card(c), json_player[2])
+        return PlayerState(None, name=None, food_bag=json_player[0], hand=cards, species=species)
+
+    @classmethod
+    def validate_player_state_json(cls, json_player):
+        # TODO
+        return True
+
+    @classmethod
     def json_to_player(cls, json_player):
         assert(cls.validate_player_json(json_player))
         name = json_player[0][1]

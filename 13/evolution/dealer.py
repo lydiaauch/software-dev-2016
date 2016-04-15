@@ -53,7 +53,7 @@ class Dealer(object):
         Runs a complete instance of the Evolution game.
         """
         self.create_deck()
-        while len(self.deck) > self.min_deck_size():
+        while len(self.deck) > self.min_deck_size() and self.players:
             self.skipped_players = []
             self.make_initial_species()
             self.deal_round()
@@ -115,9 +115,21 @@ class Dealer(object):
         after = map(lambda plr: plr.species, self.players)
         for player in self.players:
             after = after[1:]
-            actions.append(player.choose(before, after))
+            choice = player.choose(before, after)
+            if choice:
+                actions.append(choice)
+            else:
+                self.remove_player(player)
             before.append(player.species)
         return actions
+
+    def remove_player(self, player):
+        """
+        Removes the given player from the game permenantly.
+        """
+        self.players.remove(player)
+        if self.current_player_index == len(self.players):
+            self.current_player_index = 0
 
     def reduce_species_pop(self):
         """
@@ -201,8 +213,9 @@ class Dealer(object):
 
         feeding = self.next_feed()
         # TODO validate given feeding
-        feeding.apply(self)
-        self.rotate_players()
+        if feeding:
+            feeding.apply(self)
+            self.rotate_players()
 
     def rotate_players(self):
         """
@@ -240,7 +253,12 @@ class Dealer(object):
         if auto_eat is None:
             current_player = self.players[self.current_player_index]
             opponents = map(lambda plr: plr.public_state(), self.opponents())
-            return current_player.next_feeding(self.watering_hole, opponents)
+            next_feeding = current_player.next_feeding(self.watering_hole, opponents)
+            if next_feeding:
+                return next_feeding
+            else:
+                self.remove_player(current_player)
+                return False
         else:
             return auto_eat
 

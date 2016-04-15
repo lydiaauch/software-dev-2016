@@ -1,3 +1,8 @@
+import json
+from helpers import timeout, TimeoutError
+from globals import *
+
+
 class ProxyPlayer(object):
     """
     ProxyPlayer is a Player that communicates requests over TCP to the socket
@@ -8,14 +13,14 @@ class ProxyPlayer(object):
         self.socket = socket
 
     @timeout(TIMEOUT)
-    def get_response(cls):
+    def get_response(self):
         while(True):
-            data = connection.recv(MAX_MSG_SIZE)
+            data = self.socket.recv(MAX_MSG_SIZE)
             if data:
                 return data
 
 
-    def start(cls, player_state):
+    def start(self, player_state):
         """
         Gives the player its state at the beginning of a round. This would allow
         a stateful player to begin to compute possible moves, but since this
@@ -25,26 +30,26 @@ class ProxyPlayer(object):
         species = map(player_state.species, lambda spec: Convert.species_to_json(spec))
         cards = map(player_state.hand, lambda card: Convert.trait_card_to_json(card))
         msg = [player_state.bag, species, cards]
-        socket.sendall(Json.dumps(msg))
+        self.socket.sendall(json.dumps(msg))
 
-    def choose(cls, choice):
+    def choose(self, choice):
         """
         TODO:
         :return: Player's Action choice or False if no actions was selected in
         the timeout period.
         """
 
-        before = map(choice.before, lambda los: Convert.list_of_species_to_json(los))
-        after = map(choice.after, lambda los: Convert.list_of_species_to_json(los))
+        before = map(lambda los: Convert.list_of_species_to_json(los), choice.before)
+        after = map(lambda los: Convert.list_of_species_to_json(los), choice.after)
         msg = [before, after]
-        socket.sendall(Json.dumps(msg))
+        self.socket.sendall(json.dumps(msg))
         try:
             data = self.get_response()
             return Convert.json_to_action(data)
         except (TimeoutError, AssertionError):
             return False
 
-    def next_feeding(cls, player, food_available, opponents):
+    def next_feeding(self, player, food_available, opponents):
         """
         Determines a players next feeding species
         :param player: the PlayerState of the player who is feeding
@@ -57,7 +62,7 @@ class ProxyPlayer(object):
         opponents_species = map(opponents, lambda plr: Convert.list_of_species_to_json(plr.species))
         cards = map(player.hand, lambda card: Convert.trait_card_to_json(card))
         msg = [player.bag, species, cards, food_available, opponents_species]
-        socket.sendall(Json.dumps(msg))
+        self.socket.sendall(json.dumps(msg))
         try:
             data = self.get_response()
             return Convert.json_to_feeding(data)
