@@ -67,10 +67,10 @@ class Dealer(object):
         Creates a deck of TraitCards.
         """
         for trait in TraitCard.traits:
+            num_cards = 7
             if trait == "carnivore":
-                self.deck.extend(TraitCard.gen_cards(17, "carnivore"))
-            else:
-                self.deck.extend(TraitCard.gen_cards(7, trait))
+                num_cards = 17
+            self.deck.extend(TraitCard.gen_cards(num_cards, trait))
         self.deck.sort(TraitCard.compare)
 
     def make_initial_species(self):

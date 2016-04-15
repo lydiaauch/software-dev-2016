@@ -42,7 +42,7 @@ class FatTissueFeeding(object):
         """
         Applies the consequences of this feeding to the given dealer.
         :param dealer: The game this Feeding effects.
-    """
+        """
         species = dealer.players[dealer.current_player_index].species[self.species_index]
         dealer.watering_hole -= self.food_requested
         species.fat_storage += self.food_requested
