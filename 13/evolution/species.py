@@ -17,6 +17,9 @@ class Species(object):
 
     @classmethod
     def gen_id(cls):
+        """
+        Generates a unique id using an incremental counter.
+        """
         cls.uuid += 1
         return cls.uuid
 
@@ -100,19 +103,36 @@ class Species(object):
         self.food += can_move
 
     def breed(self):
+        """
+        Increases the population of this species by one if possible.
+        """
         if self.population < MAX_POPULATION:
             self.population += 1
 
     def grow_body(self):
+        """
+        Increases the body size of this species by one if possible.
+        """
         if self.body < MAX_BODY_SIZE:
             self.body += 1
 
     def kill(self):
+        """
+        Decreases the population of this species by one, reducing food if necessary.
+        """
         self.population -= 1
         self.food = min(self.population, self.food)
 
     def is_extinct(self):
+        """
+        Checks if this species is extinct, ie. population = 0.
+        """
         return self.population == 0
 
     def replace_trait(self, trait_index, trait):
+        """
+        Removes the trait at the given index, replacing it with the given trait.
+        :param trait_index: Index of the trait to be replaced. Must be < len(self.traits)
+        :param trait: String of the new trait's name.
+        """
         self.traits[trait_index] = trait
