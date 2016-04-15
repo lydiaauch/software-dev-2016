@@ -1,4 +1,4 @@
-from globals import MAX_POPULATION, HARD_SHELL_DIFF
+from globals import *
 
 
 class Species(object):
@@ -103,9 +103,16 @@ class Species(object):
         if self.population < MAX_POPULATION:
             self.population += 1
 
+    def grow_body(self):
+        if self.body < MAX_BODY_SIZE:
+            self.body += 1
+
     def kill(self):
         self.population -= 1
         self.food = min(self.population, self.food)
 
     def is_extinct(self):
         return self.population == 0
+
+    def replace_trait(self, trait_index, trait):
+        self.traits[trait_index] = trait

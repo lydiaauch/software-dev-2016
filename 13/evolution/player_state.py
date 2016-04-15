@@ -76,7 +76,7 @@ class PlayerState(object):
         for replace in trait_replacements:
             species = self.species[replace.species_index]
             new_trait = self.hand[replace.new_trait_index]
-            species.traits[replace.removed_trait_index] = new_trait.trait
+            species.replace_trait(replace.removed_trait_index, new_trait.trait)
             new_trait.used = True
 
     def increase_populations(self, pop_grows):
@@ -87,8 +87,7 @@ class PlayerState(object):
         should be increased.
         """
         for grow in pop_grows:
-            species = self.species[grow.species_index]
-            species.population += 1
+            self.species[grow.species_index].breed()
             self.hand[grow.payment_index].used = True
 
     def increase_body_sizes(self, body_grows):
@@ -99,8 +98,7 @@ class PlayerState(object):
         should be increased.
         """
         for grow in body_grows:
-            species = self.species[grow.species_index]
-            species.body += 1
+            self.species[grow.species_index].grow_body()
             self.hand[grow.payment_index].used = True
 
     def remove_used_cards(self):
@@ -115,7 +113,7 @@ class PlayerState(object):
         :return: A new PlayerState object with the same information as this
         player state, but with private information set to defaults.
         """
-        return PlayerState(self.interface,
+        return PlayerState(None,
                            name=self.name,
                            food_bag=None,
                            hand=None,
@@ -132,14 +130,14 @@ class PlayerState(object):
             if traitname in species.traits:
                 effect(species)
 
-    def trigger_fertile(self):
-        self.trait_trigger("fertile", lambda spec: spec.breed())
-
     def trigger_trait_feeding(self, traitname, wh):
         for species in self.species:
             if traitname in species.traits:
                 wh = self.feed(species, wh)
         return wh
+
+    def trigger_fertile(self):
+        self.trait_trigger("fertile", lambda spec: spec.breed())
 
     def trigger_long_neck(self, wh):
         return self.trigger_trait_feeding("long-neck", wh)
