@@ -59,6 +59,7 @@ class Dealer(object):
             self.deal_round()
             self.players_start()
             actions = self.get_player_actions()
+            self.validate_actions(actions)
             self.apply_actions(actions)
             print("Done applying actions")
             self.reduce_species_pop()
@@ -130,6 +131,24 @@ class Dealer(object):
                 self.remove_player(player)
             before.append(player.species)
         return actions
+
+    def validate_actions(self, actions):
+        """
+        Ensures that the list of actions contains valid actions for each player
+        in the game. Removes any players whose actions are not valid.
+        Effect: removes players from the self.players whose actions are invalid.
+        """
+        to_remove = []
+        for i in range(len(self.players)):
+            if not self.players[i].is_valid_action(actions[i]):
+                print("Player " + str(i) + " sent invalid action")
+                to_remove.append(i)
+        for i in to_remove:
+            self.remove_player(self.players[i])
+            remaining_actions = []
+            for index, action in enumerate(actions):
+                if index not in to_remove:
+                    remaining_actions.append(action)
 
     def remove_player(self, player):
         """

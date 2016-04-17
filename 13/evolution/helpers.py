@@ -47,6 +47,21 @@ def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
     return decorator
 
 
+def is_unique_list(li):
+    """
+    Checks that no two elements in the list are the same.
+    :param li: The List of anything to check.
+    :return: True if the list has only unique elements, False if there are any duplicates.
+    """
+    remaining = [elem for elem in li]
+    while remaining:
+        if remaining[0] in remaining[1:]:
+            return False
+        else:
+            remaining = remaining[1:]
+    return True
+
+
 def print_results(dealer):
     """
     Prints player ID's and scores in descending order.

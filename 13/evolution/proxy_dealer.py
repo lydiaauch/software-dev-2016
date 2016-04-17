@@ -44,7 +44,7 @@ class ProxyDealer(object):
         return (json_obj, buffer)
 
     def decode(self, msg):
-        if msg == "waiting":
+        if msg == "ok":
             return
         decode_start = self.decode_start(msg)
         if "feeding" in possible_next_states[self.state] and len(msg) == 5:

@@ -41,8 +41,9 @@ def get_player_connections(socket, connections):
         connection, client_addr = socket.accept()
         if connection and client_addr:
             connections.append([connection, client_addr])
-            print("player connected")
-            connection.sendall("\"waiting\"")
+            msg = connection.recv(MAX_MSG_SIZE)
+            print("player connected with message:" + msg)
+            connection.sendall("\"ok\"")
 
 if __name__ == "__main__":
     main()

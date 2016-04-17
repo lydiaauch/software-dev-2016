@@ -19,6 +19,12 @@ class TestHelpers(unittest.TestCase):
         self.species_1.traits = ["climbing"]
         # self.assertEqual(carnivore_targets(self.species_0, list_of_opponents), [])
 
+    def test_is_unique_list(self):
+        self.assertTrue(is_unique_list([1, 2, 3]))
+        self.assertTrue(is_unique_list([1]))
+        self.assertTrue(is_unique_list([]))
+        self.assertFalse(is_unique_list([1, 1]))
+        self.assertFalse(is_unique_list([1, 0, 1]))
 
 if __name__ == '__main__':
     unittest.main()

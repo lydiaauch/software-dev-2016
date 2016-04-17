@@ -1,10 +1,13 @@
+from helpers import is_unique_list
+
+
 class Action(object):
     """
     Describes a Player's action during step 3 of Evolution.
     """
 
     def __init__(self, food_card, pop_grows, body_grows,
-                       species_additions, trait_replacements):
+                 species_additions, trait_replacements):
         self.food_card = food_card
         self.pop_grows = pop_grows
         self.body_grows = body_grows
@@ -14,19 +17,46 @@ class Action(object):
     def __eq__(self, other):
         """Compares two action objects"""
         return all([isinstance(other, Action),
-            self.food_card == other.food_card,
-            self.pop_grows == other.pop_grows,
-            self.body_grows == other.body_grows,
-            self.species_additions == other.species_additions,
-            self.trait_replacements == other.trait_replacements])
+                    self.food_card == other.food_card,
+                    self.pop_grows == other.pop_grows,
+                    self.body_grows == other.body_grows,
+                    self.species_additions == other.species_additions,
+                    self.trait_replacements == other.trait_replacements])
 
     def __str__(self):
         return "food: %d, pop_grows: %s, body_grows: %s, species_additions: %s, trait_replacements: %s" % \
-                    (self.food_card,
-                    str(map(lambda x: str(x), self.pop_grows)),
-                    str(map(lambda x: str(x), self.body_grows)),
-                    str(map(lambda x: str(x), self.species_additions)),
-                    str(map(lambda x: str(x), self.trait_replacements)))
+            (self.food_card,
+             str(map(lambda x: str(x), self.pop_grows)),
+             str(map(lambda x: str(x), self.body_grows)),
+             str(map(lambda x: str(x), self.species_additions)),
+             str(map(lambda x: str(x), self.trait_replacements)))
+
+    def has_unique_indices(self):
+        """
+        Checks that the trait card indices used in this action are all unique.
+        :return: True if all indices are unique, else False.
+        """
+        print(self.get_indices())
+        if is_unique_list(self.get_indices()):
+            print("indices are valid")
+            return True
+        else:
+            return False
+
+    def get_indices(self):
+        """
+        Creates a list of all trait card indices used in this action.
+        :return: List of numbers representing the indices of trait cards used by this Action.
+        """
+        card_indices = [self.food_card]
+        card_indices.extend(map(lambda gp: gp.payment_index, self.pop_grows))
+        card_indices.extend(map(lambda gb: gb.payment_index, self.body_grows))
+        card_indices.extend(map(lambda rt: rt.new_trait_index, self.trait_replacements))
+        for board_addition in self.species_additions:
+            card_indices.append(board_addition.payment_index)
+            card_indices.extend(board_addition.traits)
+        return card_indices
+
 
 class PopGrow(object):
     """
@@ -45,13 +75,14 @@ class PopGrow(object):
 
     def __eq__(self, other):
         return all([isinstance(other, PopGrow),
-            self.species_index == other.species_index,
-            self.payment_index == other.payment_index])
+                    self.species_index == other.species_index,
+                    self.payment_index == other.payment_index])
 
     def __str__(self):
         return "species_index: %d, payment: %d" % \
-                    (self.species_index,
-                    self.payment_index)
+            (self.species_index,
+             self.payment_index)
+
 
 class BodyGrow(object):
     """
@@ -70,13 +101,14 @@ class BodyGrow(object):
 
     def __eq__(self, other):
         return all([isinstance(other, BodyGrow),
-            self.species_index == other.species_index,
-            self.payment_index == other.payment_index])
+                    self.species_index == other.species_index,
+                    self.payment_index == other.payment_index])
 
     def __str__(self):
         return "species_index: %d, payment: %d" %\
-                    (self.species_index,
-                    self.payment_index)
+            (self.species_index,
+             self.payment_index)
+
 
 class BoardAddition(object):
     """
@@ -98,12 +130,13 @@ class BoardAddition(object):
 
     def __eq__(self, other):
         return all([isinstance(other, BoardAddition),
-            self.traits == other.traits,
-            self.payment_index == other.payment_index])
+                    self.traits == other.traits,
+                    self.payment_index == other.payment_index])
 
     def __str__(self):
         return "payment: %d, traits: %s" % \
-                    (self.payment_index, str(self.traits))
+            (self.payment_index, str(self.traits))
+
 
 class ReplaceTrait(object):
     """
@@ -126,12 +159,12 @@ class ReplaceTrait(object):
 
     def __eq__(self, other):
         return all([isinstance(other, ReplaceTrait),
-            self.species_index == other.species_index,
-            self.removed_trait_index == other.removed_trait_index,
-            self.new_trait_index == other.new_trait_index])
+                    self.species_index == other.species_index,
+                    self.removed_trait_index == other.removed_trait_index,
+                    self.new_trait_index == other.new_trait_index])
 
     def __str__(self):
         return "species_index: %d, removed_trait: %d, new_trait: %d" % \
-                    (self.species_index,
-                     self.removed_trait_index,
-                     self.new_trait_index)
+            (self.species_index,
+             self.removed_trait_index,
+             self.new_trait_index)

@@ -2,6 +2,7 @@ from helpers import *
 from species import Species
 from actions import *
 from choice import Choice
+from globals import *
 
 
 class PlayerState(object):
@@ -145,6 +146,114 @@ class PlayerState(object):
         :return: A Feeding representing the player's desired feeding choice.
         """
         return self.interface.next_feeding(self, wh, opponents)
+
+    def is_valid_action(self, action):
+        """
+        Checks to make sure the given action is valid to apply on this player.
+        :param action: An Action to validate.
+        :return: True if the given Action is valid to apply, else False.
+        """
+        return all([action.has_unique_indices(),
+                    self.are_actions_in_range(action),
+                    self.validate_pop_grows(action),
+                    self.validate_body_grows(action),
+                    self.validate_board_additions(action),
+                    self.validate_trait_replacements(action)])
+
+    def validate_pop_grows(self, action):
+        """
+        Ensures all PopGrow in the Action are valid to apply to this player.
+        :param action: The Action to validate.
+        :return: True if the Action's pop_grows are valid to apply.
+        """
+        species_pops = {}
+        for pop_grow in action.pop_grows:
+            spec_idx = pop_grow.species_index
+            if spec_idx >= len(self.species) + len(action.species_additions):
+                return False
+            if spec_idx in species_pops:
+                species_pops[spec_idx] += 1
+            else:
+                species_pop = 1
+                if spec_idx < len(self.species):
+                    species_pop = self.species[spec_idx].population + 1
+                species_pops[spec_idx] = species_pop
+        for pop in species_pops:
+            if pop > MAX_POPULATION:
+                return False
+        print("Pop grows are valid")
+        return True
+
+    def validate_body_grows(self, action):
+        """
+        Ensures all BodyGrow in the action are valid to apply to this player.
+        :param action: The Action to validate.
+        :return: True if the Action's body_grows are valid to apply.
+        """
+        species_bodys = {}
+        for body_grow in action.body_grows:
+            spec_idx = body_grow.species_index
+            if spec_idx >= len(self.species) + len(action.species_additions):
+                return False
+            if spec_idx in species_bodys:
+                species_bodys[spec_idx] += 1
+            else:
+                species_body = 0
+                if spec_idx < len(self.species):
+                    species_body = self.species[spec_idx].body_size + 1
+                species_bodys[spec_idx] = species_body
+        for body in species_bodys:
+            if species_body > MAX_BODY_SIZE:
+                return False
+        print("Body grows are valid")
+        return True
+
+    def validate_board_additions(self, action):
+        """
+        Ensures all BoardAddition in the action are valid to apply to this player.
+        :param action: The Action to validate.
+        :return True if the Action's board_additions are valid to apply.
+        """
+        for board_addition in action.species_additions:
+            traits = map(lambda idx: self.hand[idx].trait, board_addition.traits)
+            if not is_unique_list(traits):
+                print(traits)
+                return False
+        print("board additions are valid")
+        return True
+
+    def validate_trait_replacements(self, action):
+        """
+        Ensures all ReplaceTrait in the action are valid to apply to this player.
+        :param action: The Action to validate.
+        :return True if the Action's trait_replacements are valid to apply.
+        """
+        for replacement in action.trait_replacements:
+            spec_idx = replacement.species_index
+            if spec_idx < len(self.species):
+                spec = self.species[spec_idx]
+            elif spec_idx < len(self.species) + len(action.species_additions):
+                board_addition = action.species_additions[spec_idx - len(self.species)]
+                spec_traits = map(lambda idx: self.hand[idx].trait, board_addition.traits)
+                spec = Species(traits=spec_traits)
+            else:
+                return False
+
+            if replacement.removed_trait_index >= len(spec.traits):
+                return False
+            new_trait = self.hand[replacement.new_trait_index].trait
+            traits = [trait for trait in spec.traits]
+            traits.pop(replacement.removed_trait_index)
+            if new_trait in traits:
+                return False
+        print("trait replacements are valid")
+        return True
+
+    def are_actions_in_range(self, actions):
+        for idx in actions.get_indices():
+            if idx >= len(self.hand):
+                return False
+        return True
 
     def trait_trigger(self, traitname, effect):
         """
