@@ -1,5 +1,7 @@
 import json
 from convert import Convert
+from helpers import timeout
+
 
 possible_next_states = {
     "waiting": ["start"],
@@ -15,25 +17,35 @@ class ProxyDealer(object):
         self.player = player
         self.connection = connection
 
+    @timeout(20)
     def listen_for_messages(self):
         while True:
-            try:
-                while True:
-                    data = self.connection.recv(1024)
-                    if data is not None:
-                        print("Got data: " + str(data))
-                        to_send = self.decode(data)
-                        if to_send is not None:
-                            self.connection.sendall(json.dumps(to_send))
-                    else:
-                        break
-            finally:
-                self.connection.close()
+            data = self.connection.recv(1024)
+            print("Got data: " + str(data))
+            while data is not None:
+                (msg, data) = self.json_parser(data)
+                print("Parsed message: " + str(msg))
+                to_send = self.decode(msg)
+                print("Remaining msg in buffer: " + str(data))
+                if to_send is not None:
+                    self.connection.sendall(json.dumps(to_send))
+
+    def json_parser(self, buffer):
+        """
+        Searches for full JSON messages and adds incomplete messages to a buffer
+        :param buffer: the JSON messages
+        :return: a tuple of (JSON_message, current buffer) where the message is the
+        first complete JSON element in the buffer
+        """
+        (json_obj, end_index) = json.JSONDecoder().raw_decode(buffer)
+        buffer = buffer[end_index:]
+        if buffer == "":
+            buffer = None
+        return (json_obj, buffer)
 
     def decode(self, msg):
         if msg == "waiting":
             return
-        msg = json.loads(msg)
         decode_start = self.decode_start(msg)
         if "feeding" in possible_next_states[self.state] and len(msg) == 5:
             # TODO make Feeding class and change Player to take it.

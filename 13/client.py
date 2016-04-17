@@ -15,5 +15,7 @@ sock.connect(server_address)
 try:
     proxy_dealer = ProxyDealer(Player(), sock)
     proxy_dealer.listen_for_messages()
-finally:
+except Exception:
+    print("Closing connection")
+    sock.shutdown(socket.SHUT_RDWR)
     sock.close()

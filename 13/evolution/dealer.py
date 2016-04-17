@@ -1,4 +1,3 @@
-import time
 from helpers import *
 from player_state import PlayerState
 from species import Species
@@ -111,7 +110,6 @@ class Dealer(object):
     def players_start(self):
         for player in self.players:
             player.start()
-        time.sleep(1)
 
     def get_player_actions(self):
         """
@@ -131,7 +129,6 @@ class Dealer(object):
                 print("removing player from game")
                 self.remove_player(player)
             before.append(player.species)
-        time.sleep(1)
         return actions
 
     def remove_player(self, player):
