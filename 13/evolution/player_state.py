@@ -120,6 +120,9 @@ class PlayerState(object):
                            hand=None,
                            species=self.species)
 
+    def start(self):
+        self.interface.start(self)
+
     def choose(self, before, after):
         """
         Asks this player's strategy interface for their actions given
@@ -131,7 +134,7 @@ class PlayerState(object):
         :return: An Action representing all actions thie player will make
         this round.
         """
-        return self.interface.choose(Choice(self, before, after))
+        return self.interface.choose(Choice(before, after))
 
     def next_feeding(self, wh, opponents):
         """

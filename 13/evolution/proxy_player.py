@@ -1,6 +1,7 @@
 import json
 from helpers import timeout, TimeoutError
 from globals import *
+from convert import *
 
 
 class ProxyPlayer(object):
@@ -16,9 +17,9 @@ class ProxyPlayer(object):
     def get_response(self):
         while(True):
             data = self.socket.recv(MAX_MSG_SIZE)
-            if data:
-                return data
-
+            if data is not None:
+                print("dealer got data: " + str(data))
+                return json.loads(data)
 
     def start(self, player_state):
         """
@@ -27,9 +28,10 @@ class ProxyPlayer(object):
         player is not stateful this method does nothing.
         :param player_state: The PlayerState representing this player.
         """
-        species = map(player_state.species, lambda spec: Convert.species_to_json(spec))
-        cards = map(player_state.hand, lambda card: Convert.trait_card_to_json(card))
-        msg = [player_state.bag, species, cards]
+        species = map(lambda spec: Convert.species_to_json(spec), player_state.species)
+        cards = map(lambda card: Convert.trait_card_to_json(card), player_state.hand)
+        msg = [player_state.food_bag, species, cards]
+        print("seding message: " + str(msg))
         self.socket.sendall(json.dumps(msg))
 
     def choose(self, choice):
@@ -38,7 +40,6 @@ class ProxyPlayer(object):
         :return: Player's Action choice or False if no actions was selected in
         the timeout period.
         """
-
         before = map(lambda los: Convert.list_of_species_to_json(los), choice.before)
         after = map(lambda los: Convert.list_of_species_to_json(los), choice.after)
         msg = [before, after]
@@ -46,7 +47,7 @@ class ProxyPlayer(object):
         try:
             data = self.get_response()
             return Convert.json_to_action(data)
-        except (TimeoutError, AssertionError):
+        except Exception:
             return False
 
     def next_feeding(self, player, food_available, opponents):
@@ -59,12 +60,13 @@ class ProxyPlayer(object):
         Feeding was selected in the timeout period.
         """
         species = Convert.list_of_species_to_json(player.species)
-        opponents_species = map(opponents, lambda plr: Convert.list_of_species_to_json(plr.species))
-        cards = map(player.hand, lambda card: Convert.trait_card_to_json(card))
-        msg = [player.bag, species, cards, food_available, opponents_species]
+        opponents_species = map(lambda plr: Convert.list_of_species_to_json(plr.species), opponents)
+        cards = map(lambda card: Convert.trait_card_to_json(card), player.hand)
+        msg = [player.food_bag, species, cards, food_available, opponents_species]
+        print("Sending message:" + str(msg))
         self.socket.sendall(json.dumps(msg))
         try:
             data = self.get_response()
             return Convert.json_to_feeding(data)
-        except (TimeoutError, AssertionError):
+        except Exception:
             return False

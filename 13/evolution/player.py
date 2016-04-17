@@ -1,5 +1,4 @@
 from actions import *
-from dealer import Dealer
 from feeding import *
 from traitcard import TraitCard
 from helpers import *
@@ -11,42 +10,38 @@ class Player(object):
     A data representation of a Player in the Evolution game
     """
     def __init__(self):
-        pass
+        self.player_state = None
 
-    @classmethod
-    def start(cls, player_state):
+    def start(self, player_state):
         """
         Gives the player its state at the beginning of a round. This would allow
         a stateful player to begin to compute possible moves, but since this
         player is not stateful this method does nothing.
         :param player_state: The PlayerState representing this player.
         """
-        # TODO: Set this player's state to be the same as the given player's
+        self.player_state = player_state
 
-    @classmethod
-    def choose(cls, choice):
-        player = choice.player
+    def choose(self, choice):
         cards = []
-        for i, card in enumerate(player.hand):
+        for i, card in enumerate(self.player_state.hand):
             cards.append({"card": card, "index": i})
         cards.sort(lambda c0, c1: TraitCard.compare(c0['card'], c1['card']))
 
         food_card = cards[0]['index']
         action = Action(food_card, [], [], [], [])
         action.species_additions.append(BoardAddition(cards[1]['index'],
-                                                     [cards[2]['index']]))
-        if len(player.hand) > 3:
-            action.pop_grows.append(PopGrow(len(player.species), cards[3]['index']))
-        if len(player.hand) > 4:
-            action.body_grows.append(BodyGrow(len(player.species), cards[4]['index']))
-        if len(player.hand) > 5:
-            action.trait_replacements.append(ReplaceTrait(len(player.species),
+                                                      [cards[2]['index']]))
+        if len(self.player_state.hand) > 3:
+            action.pop_grows.append(PopGrow(len(self.player_state.species), cards[3]['index']))
+        if len(self.player_state.hand) > 4:
+            action.body_grows.append(BodyGrow(len(self.player_state.species), cards[4]['index']))
+        if len(self.player_state.hand) > 5:
+            action.trait_replacements.append(ReplaceTrait(len(self.player_state.species),
                                                           0,
                                                           cards[5]['index']))
         return action
 
-    @classmethod
-    def next_feeding(cls, player, food_available, opponents):
+    def next_feeding(self, player, food_available, opponents):
         """
         Determines a players next feeding species
         :param player: the PlayerState of the player who is feeding
@@ -58,20 +53,23 @@ class Player(object):
                           if "fat-tissue" in species.traits and
                           species.fat_storage < species.body]
         if hungry_fatties:
-            feeding = cls.feed_fatty(hungry_fatties, food_available)
+            feeding = Player.feed_fatty(hungry_fatties, food_available)
             return FatTissueFeeding(player.species.index(feeding[0]), feeding[1])
 
         hungry_species = [species for species in player.species if species.can_eat()]
-        hungry_carnivores = [species for species in hungry_species if "carnivore" in species.traits]
+        hungry_carnivores = [species for species in hungry_species
+                             if "carnivore" in species.traits]
 
-        hungry_herbivores = cls.find_hungry_herbs(hungry_species, hungry_carnivores)
+        hungry_herbivores = Player.find_hungry_herbs(hungry_species, hungry_carnivores)
         if hungry_herbivores:
-            feeding = cls.feed_herbivores(hungry_herbivores)
+            print("Found hungry herbs")
+            feeding = Player.feed_herbivores(hungry_herbivores)
+            print("Done with hungry herbs")
             return HerbivoreFeeding(player.species.index(feeding))
         if hungry_carnivores:
-            feeding = cls.feed_carnivore(hungry_carnivores, player, opponents)
+            feeding = Player.feed_carnivore(hungry_carnivores, player, opponents)
             if feeding:
-                return cls.species_to_index(feeding, player, opponents)
+                return Player.species_to_index(feeding, player, opponents)
         return AbstainFeeding()
 
     @classmethod

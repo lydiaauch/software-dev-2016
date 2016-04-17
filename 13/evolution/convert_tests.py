@@ -7,7 +7,6 @@ from player import Player
 
 
 class TestConvert(unittest.TestCase):
-
     def setUp(self):
         self.setUp_cards()
         self.setUp_json_species()
@@ -168,6 +167,13 @@ class TestConvert(unittest.TestCase):
     def test_bad_json_to_player_ordering(self):
         bad_json = [["foood", 2], ["body", 2], ["population", 2], ["traits", [self.jt_1]]]
         self.assertRaises(Exception, Convert.json_to_player, bad_json)
+
+    def test_json_to_listof_species(self):
+        json = [self.jSpecies_1, self.jSpecies_2]
+        actual = Convert.json_to_listof_species(json)
+        expected = [self.species_1, self.species_2]
+        for (act, exp) in zip(actual, expected):
+            TestConvert.species_soft_eq(act, exp)
 
     @classmethod
     def player_soft_eq(cls, player0, player1):

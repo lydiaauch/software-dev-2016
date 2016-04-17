@@ -3,6 +3,7 @@ import errno
 import os
 import signal
 
+
 def carnivore_targets(carnivore, list_of_player):
     """
     Creates a list of all possible targets for given carnivore from the list of
@@ -22,8 +23,10 @@ def carnivore_targets(carnivore, list_of_player):
                 targets.append(defender)
     return targets
 
+
 class TimeoutError(Exception):
     pass
+
 
 def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
     def decorator(func):
@@ -42,3 +45,15 @@ def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
         return wraps(func)(wrapper)
 
     return decorator
+
+
+def print_results(dealer):
+    """
+    Prints player ID's and scores in descending order.
+    """
+    results = ""
+    sorted_players = dealer.players
+    sorted_players.sort(cmp=lambda p1, p2: p2.food_bag - p1.food_bag)
+    for index, player in enumerate(sorted_players):
+        results += "%d player id: %d score: %d\n" % (index + 1, player.name, player.food_bag)
+    return results

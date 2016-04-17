@@ -1,3 +1,4 @@
+import time
 from helpers import *
 from player_state import PlayerState
 from species import Species
@@ -57,8 +58,10 @@ class Dealer(object):
             self.skipped_players = []
             self.make_initial_species()
             self.deal_round()
+            self.players_start()
             actions = self.get_player_actions()
             self.apply_actions(actions)
+            print("Done applying actions")
             self.reduce_species_pop()
             self.move_food()
         self.move_food()
@@ -105,6 +108,11 @@ class Dealer(object):
             num_cards = 3 + len(player.species)
             self.deal(num_cards, player)
 
+    def players_start(self):
+        for player in self.players:
+            player.start()
+        time.sleep(1)
+
     def get_player_actions(self):
         """
         Gets player actions for each player using the choose method.
@@ -117,10 +125,13 @@ class Dealer(object):
             after = after[1:]
             choice = player.choose(before, after)
             if choice:
+                print("Requesting player action")
                 actions.append(choice)
             else:
+                print("removing player from game")
                 self.remove_player(player)
             before.append(player.species)
+        time.sleep(1)
         return actions
 
     def remove_player(self, player):
@@ -166,6 +177,7 @@ class Dealer(object):
 
         while self.watering_hole > 0 and len(self.players) != len(self.skipped_players):
             self.feed1()
+            print("Feeding 1")
 
     def reveal_cards(self, actions):
         """
@@ -251,6 +263,7 @@ class Dealer(object):
         """
         auto_eat = self.auto_eat()
         if auto_eat is None:
+            print("Querying player for feeding")
             current_player = self.players[self.current_player_index]
             opponents = map(lambda plr: plr.public_state(), self.opponents())
             next_feeding = current_player.next_feeding(self.watering_hole, opponents)
@@ -260,6 +273,7 @@ class Dealer(object):
                 self.remove_player(current_player)
                 return False
         else:
+            print("Autofed")
             return auto_eat
 
     def auto_eat(self):

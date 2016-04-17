@@ -1,15 +1,17 @@
+import json
 from convert import Convert
+
+possible_next_states = {
+    "waiting": ["start"],
+    "start": ["choose"],
+    "choose": ["feeding", "start"],
+    "feeding": ["feeding", "start"]
+}
 
 
 class ProxyDealer(object):
-    possible_next_states = {
-        "start": ["choose"],
-        "choose": ["feeding", "start"],
-        "feeding": ["feeding", "start"]
-    }
-
     def __init__(self, player, connection):
-        self.state = "start"
+        self.state = "waiting"
         self.player = player
         self.connection = connection
 
@@ -17,33 +19,42 @@ class ProxyDealer(object):
         while True:
             try:
                 while True:
-                    data = self.connection.recv(32)
-                    if data:
+                    data = self.connection.recv(1024)
+                    if data is not None:
+                        print("Got data: " + str(data))
                         to_send = self.decode(data)
-                        if to_send:
-                            self.connection.sendall(to_send)
+                        if to_send is not None:
+                            self.connection.sendall(json.dumps(to_send))
                     else:
                         break
             finally:
                 self.connection.close()
 
     def decode(self, msg):
+        if msg == "waiting":
+            return
+        msg = json.loads(msg)
         decode_start = self.decode_start(msg)
+        if "feeding" in possible_next_states[self.state] and len(msg) == 5:
+            # TODO make Feeding class and change Player to take it.
+            player = Convert.json_to_player_state(msg[0:3])
+            print("Choosing feeding")
+            opponents = Convert.json_to_listof_listof_species(msg[4])
+            feeding = self.player.next_feeding(player, msg[3], opponents)
+            self.state = "feeding"
+            print(Convert.feeding_to_json(feeding))
+            return Convert.feeding_to_json(feeding)
         if decode_start and "start" in possible_next_states[self.state]:
+            print("Got start message")
             self.player.start(decode_start)
             self.state = "start"
             return
         decode_choose = self.decode_choose(msg)
         if decode_choose and "choose" in possible_next_states[self.state]:
+            print("Choosing action")
             choice = self.player.choose(decode_choose)
             self.state = "choose"
             return Convert.action_to_json(choice)
-        decode_feeding = self.validate_feeding(msg)
-        if decode_feeding and "feeding" in possible_next_states[self.state]:
-            # TODO make Feeding class and change Player to take it.
-            feeding = self.player.next_feeding(decode_feeding)
-            self.state = "feeding"
-            return Convert.feeding_to_json(feeding)
         raise Exception
 
     def decode_start(self, msg):
@@ -51,18 +62,22 @@ class ProxyDealer(object):
         # [LOB,LOB] choose
         # [Natural, [Species+, ..., Species+], Cards, Natural+, LOB] feeding
         try:
-            new_state = Convert.json_to_player_state(msg)
-        except AssertionError:
+            return Convert.json_to_player_state(msg)
+        except Exception:
             return False
 
     def decode_choose(self, msg):
         try:
-            Convert.json_to_choice(msg)
-        except AssertionError:
+            return Convert.json_to_choice(msg)
+        except Exception:
             return False
 
     def decode_feeding(self, msg):
         try:
-            Convert.json_to_feeding(msg)
-        except AssertionError:
+            return Convert.json_to_feeding(msg)
+        except Exception:
             return False
+
+    def validate_feeding(self, msg):
+        # TODO
+        return True

@@ -1,8 +1,8 @@
 import socket
 import sys
-from globals import *
-from proxy_dealer import ProxyDealer
-from player import Player
+from evolution.globals import *
+from evolution.proxy_dealer import ProxyDealer
+from evolution.player import Player
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -16,5 +16,4 @@ try:
     proxy_dealer = ProxyDealer(Player(), sock)
     proxy_dealer.listen_for_messages()
 finally:
-    print >>sys.stderr, 'closing socket'
     sock.close()

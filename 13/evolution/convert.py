@@ -5,6 +5,7 @@ from player import Player
 from dealer import Dealer
 from actions import *
 from choice import Choice
+from feeding import *
 
 
 class Convert(object):
@@ -63,14 +64,17 @@ class Convert(object):
     @classmethod
     def json_to_choice(cls, json_choice):
         assert(cls.validate_choice_json(json_choice))
-        player = cls.json_to_player(json_choice[0])
-        before = cls.json_to_listof_species(json_choice[1])
-        after = cls.json_to_listof_species(json_choice[2])
-        return Choice(player, before, after)
+        before = cls.json_to_listof_listof_species(json_choice[0])
+        after = cls.json_to_listof_listof_species(json_choice[1])
+        return Choice(before, after)
+
+    @classmethod
+    def json_to_listof_listof_species(cls, json_list):
+        return map(lambda loc: cls.json_to_listof_species(loc), json_list)
 
     @classmethod
     def json_to_listof_species(cls, json_species_list):
-        return map(lambda los: map(lambda spec: cls.json_to_species(spec), los), json_species_list)
+        return map(lambda spec: cls.json_to_species(spec), json_species_list)
 
     @classmethod
     def validate_choice_json(cls, json_choice):
@@ -79,7 +83,7 @@ class Convert(object):
 
     @classmethod
     def list_of_species_to_json(cls, los):
-        return map(los, lambda spec: species_to_json(spec))
+        return map(lambda spec: cls.species_to_json(spec), los)
 
     @classmethod
     def json_to_player_state(cls, json_player):
@@ -87,7 +91,8 @@ class Convert(object):
         assert(cls.validate_player_state_json(json_player))
         species = cls.json_to_listof_species(json_player[1])
         cards = map(lambda c: cls.json_to_trait_card(c), json_player[2])
-        return PlayerState(None, name=None, food_bag=json_player[0], hand=cards, species=species)
+        return PlayerState(None, name=None, food_bag=json_player[0],
+                           hand=cards, species=species)
 
     @classmethod
     def validate_player_state_json(cls, json_player):
@@ -107,7 +112,7 @@ class Convert(object):
         if len(json_player) == 4:
             for json_card in json_player[3][1]:
                 hand.append(cls.json_to_trait_card(json_card))
-        return PlayerState(Player,
+        return PlayerState(Player(),
                            name=name,
                            food_bag=food_bag,
                            species=species,
@@ -169,7 +174,9 @@ class Convert(object):
 
     @classmethod
     def species_to_json(cls, species_obj):
-        assert(all([species_obj.population >= 1, species_obj.food >= 0, species_obj.body >= 0]))
+        assert(all([species_obj.population >= 1,
+                    species_obj.food >= 0,
+                    species_obj.body >= 0]))
         json_species = [["food", species_obj.food], ["body", species_obj.body],
                         ["population", species_obj.population], ["traits", species_obj.traits]]
         if species_obj.fat_storage is not None and species_obj.fat_storage > 0:
@@ -188,6 +195,7 @@ class Convert(object):
         """
         [Natural, [GP, ...], [GB, ...], [BT, ...], [RT, ...]]
         """
+        print(json_action)
         assert(cls.validate_action_json(json_action))
         species_index = json_action[0]
         pop_grows = []
@@ -218,14 +226,14 @@ class Convert(object):
     @classmethod
     def action_to_json(cls, action):
         gps = map(lambda gp: ["population", gp.species_index, gp.payment_index],
-                 action.pop_grows)
+                  action.pop_grows)
         gbs = map(lambda gb: ["body", gb.species_index, gb.payment_index],
-                 action.body_grows)
+                  action.body_grows)
         bts = map(lambda bt: cls.bt_to_json(bt), action.species_additions)
         rts = map(lambda rt: [rt.species_index,
                               rt.removed_trait_index,
                               rt.new_trait_index],
-                 action.trait_replacements)
+                  action.trait_replacements)
         return [action.food_card, gps, gbs, bts, rts]
 
     @classmethod
@@ -234,10 +242,9 @@ class Convert(object):
         bt_json.extend(bt.traits)
         return bt_json
 
-
     @classmethod
     def json_to_feeding(cls, json_feeding):
-        assert(self.validate_json_feeding(json_feeding))
+        assert(cls.validate_json_feeding(json_feeding))
         # Python sucks and we should feel bad
         if json_feeding == False and type(json_feeding) is type(False):
             return AbstainFeeding()
@@ -252,6 +259,17 @@ class Convert(object):
     def validate_json_feeding(cls, json_feeding):
         # TODO:
         return True
+
+    @classmethod
+    def feeding_to_json(cls, feeding):
+        if isinstance(feeding, AbstainFeeding):
+            return False
+        if isinstance(feeding, HerbivoreFeeding):
+            return feeding.species_index
+        if isinstance(feeding, FatTissueFeeding):
+            return [feeding.species_index, feeding.food_requested]
+        if isinstance(feeding, CarnivoreFeeding):
+            return [feeding.attacker_index, feeding.target_index, feeding.defender_index]
 
     @classmethod
     def json_to_trait_card(cls, json_trait_card):
