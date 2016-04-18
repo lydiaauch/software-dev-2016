@@ -4,6 +4,9 @@ from traitcard import TraitCard
 from player_state import PlayerState
 from convert import Convert
 from player import Player
+from choice import Choice
+from feeding import *
+from actions import *
 
 
 class TestConvert(unittest.TestCase):
@@ -174,6 +177,115 @@ class TestConvert(unittest.TestCase):
         expected = [self.species_1, self.species_2]
         for (act, exp) in zip(actual, expected):
             TestConvert.species_soft_eq(act, exp)
+
+    def test_json_to_choice_good(self):
+        good_json = [[[self.jSpecies_1, self.jSpecies_2]],
+                     [[self.jSpecies_3, self.jSpecies_4]]]
+        expected = Choice([[self.species_1, self.species_2]],
+                          [[self.species_3, self.species_4]])
+        actual = Convert.json_to_choice(good_json)
+        for i in range(len(expected.before)):
+            self.assertTrue(TestConvert.species_list_eq(expected.before[i], actual.before[i]))
+        for i in range(len(expected.after)):
+            self.assertTrue(TestConvert.species_list_eq(expected.after[i], actual.after[i]))
+
+    def test_json_to_choice_bad(self):
+        json = [[[self.jSpecies_1, self.jSpecies_2]],
+                [[self.jSpecies_3, "not a species"]]]
+        with self.assertRaises(AssertionError):
+            Convert.json_to_choice(json)
+        json = [[[self.jSpecies_1, self.jSpecies_2]]]
+        with self.assertRaises(AssertionError):
+            Convert.json_to_choice(json)
+        json = 42
+        with self.assertRaises(AssertionError):
+            Convert.json_to_choice(json)
+
+    def test_json_to_feeding_good(self):
+        # :(
+        json_abstain = False
+        self.assertEqual(Convert.json_to_feeding(json_abstain), AbstainFeeding())
+        json_herbivore = 0
+        self.assertEqual(Convert.json_to_feeding(json_herbivore), HerbivoreFeeding(0))
+        json_fat_tissue = [3, 1]
+        self.assertEqual(Convert.json_to_feeding(json_fat_tissue), FatTissueFeeding(3, 1))
+        json_carnivore = [3, 2, 1]
+        self.assertEqual(Convert.json_to_feeding(json_carnivore), CarnivoreFeeding(3, 2, 1))
+
+    def test_json_to_feeding_bad(self):
+        # :)
+        bad_json = True
+        with self.assertRaises(AssertionError):
+            Convert.json_to_feeding(bad_json)
+        bad_json = -1
+        with self.assertRaises(AssertionError):
+            Convert.json_to_feeding(bad_json)
+        bad_json = [1, 2, 3, 4, 5]
+        with self.assertRaises(AssertionError):
+            Convert.json_to_feeding(bad_json)
+        bad_json = "HELLO"
+        with self.assertRaises(AssertionError):
+            Convert.json_to_feeding(bad_json)
+        bad_json = [1, 2, -1]
+        with self.assertRaises(AssertionError):
+            Convert.json_to_feeding(bad_json)
+
+    def test_json_to_player_state_good(self):
+        # [Natural,[Species+, ..., Species+], Cards]
+        json = [5, [self.jSpecies_1], [self.jtc_1]]
+        expected = PlayerState(None, food_bag=5, species=[self.species_1], hand=[self.tc_1])
+        self.assertTrue(TestConvert.player_soft_eq(Convert.json_to_player_state(json), expected))
+        json = [5, [self.jSpecies_1, self.jSpecies_2], []]
+        expected = PlayerState(None, food_bag=5, species=[self.species_1, self.species_2])
+        self.assertTrue(TestConvert.player_soft_eq(Convert.json_to_player_state(json), expected))
+
+    def test_json_to_player_state_bad(self):
+        json = [5, [self.jSpecies_1], [self.jtc_1], 2]
+        with self.assertRaises(AssertionError):
+            Convert.json_to_player_state(json)
+        json = [[self.jSpecies_1], [self.jtc_1], 2]
+        with self.assertRaises(AssertionError):
+            Convert.json_to_player_state(json)
+        json = [5, [self.jSpecies_1], [self.jtc_1, 2]]
+        with self.assertRaises(AssertionError):
+            Convert.json_to_player_state(json)
+        json = [[self.jSpecies_1, "not a species"], [self.jtc_1]]
+        with self.assertRaises(AssertionError):
+            Convert.json_to_player_state(json)
+        json = "CRASH.. please?"
+        with self.assertRaises(AssertionError):
+            Convert.json_to_player_state(json)
+
+    def test_validate_action_json_good(self):
+        json = [1, [], [], [], []]
+        expect = Action(1, [], [], [], [])
+        self.assertEqual(Convert.json_to_action(json), expect)
+        json = [1, [[0, 0]], [[1, 2]], [[1, 2, 3], [2]], [[4, 5, 6]]]
+        expect = Action(1, [PopGrow(0, 0)],
+                        [BodyGrow(1, 2)],
+                        [BoardAddition(1, [2, 3]), BoardAddition(2)],
+                        [ReplaceTrait(4, 5, 6)])
+        self.assertEqual(Convert.json_to_action(json), expect)
+
+    def test_validate_action_json_bad(self):
+        json = 42
+        with self.assertRaises(AssertionError):
+            Convert.json_to_action(json)
+        json = ["food!", [], [], [], []]
+        with self.assertRaises(AssertionError):
+            Convert.json_to_action(json)
+        json = [3, [[2, 3, 4]], [], [], []]
+        with self.assertRaises(AssertionError):
+            Convert.json_to_action(json)
+        json = [2, [], [[2]], [], []]
+        with self.assertRaises(AssertionError):
+            Convert.json_to_action(json)
+        json = [2, [], [[2, 3]], [[2, -1]], []]
+        with self.assertRaises(AssertionError):
+            Convert.json_to_action(json)
+        json = [2, [], [[2, 3]], [[2, -1]], [[1, 2, -1]]]
+        with self.assertRaises(AssertionError):
+            Convert.json_to_action(json)
 
     @classmethod
     def player_soft_eq(cls, player0, player1):

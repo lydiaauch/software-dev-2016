@@ -73,13 +73,25 @@ class Convert(object):
         return map(lambda loc: cls.json_to_listof_species(loc), json_list)
 
     @classmethod
+    def validate_listof_listof_species_json(cls, json_list):
+        return isinstance(json_list, list) and \
+            all(map(lambda los: cls.validate_listof_species_json(los), json_list))
+
+    @classmethod
     def json_to_listof_species(cls, json_species_list):
         return map(lambda spec: cls.json_to_species(spec), json_species_list)
 
     @classmethod
+    def validate_listof_species_json(cls, json_list):
+        return isinstance(json_list, list) and \
+            all(map(lambda spec: cls.validate_species_json(spec), json_list))
+
+    @classmethod
     def validate_choice_json(cls, json_choice):
-        # TODO
-        return True
+        return isinstance(json_choice, list) and \
+            all([len(json_choice) == 2,
+                 cls.validate_listof_listof_species_json(json_choice[0]),
+                 cls.validate_listof_listof_species_json(json_choice[0])])
 
     @classmethod
     def list_of_species_to_json(cls, los):
@@ -87,7 +99,6 @@ class Convert(object):
 
     @classmethod
     def json_to_player_state(cls, json_player):
-        # [Natural,[Species+, ..., Species+], Cards]
         assert(cls.validate_player_state_json(json_player))
         species = cls.json_to_listof_species(json_player[1])
         cards = map(lambda c: cls.json_to_trait_card(c), json_player[2])
@@ -96,8 +107,11 @@ class Convert(object):
 
     @classmethod
     def validate_player_state_json(cls, json_player):
-        # TODO
-        return True
+        return isinstance(json_player, list) and \
+            isinstance(json_player[0], int) and \
+            all([len(json_player) == 3,
+                 cls.validate_listof_species_json(json_player[1]),
+                 cls.validate_listof_trait_card_json(json_player[2])])
 
     @classmethod
     def json_to_player(cls, json_player):
@@ -160,17 +174,18 @@ class Convert(object):
 
     @classmethod
     def validate_species_json(cls, json_species):
-        return all([len(json_species) == 4 or
-                    (len(json_species) == 5 and
-                        json_species[4][0] == "fat-food" and
-                        json_species[4][1] >= 0),
-                    json_species[0][0] == "food",
-                    json_species[0][1] >= 0,
-                    json_species[1][0] == "body",
-                    json_species[1][1] >= 0,
-                    json_species[2][0] == "population",
-                    json_species[2][1] > 0,
-                    json_species[3][0] == "traits"])
+        return isinstance(json_species, list) and \
+            all([len(json_species) == 4 or
+                 (len(json_species) == 5 and
+                  json_species[4][0] == "fat-food" and
+                  json_species[4][1] >= 0),
+                 json_species[0][0] == "food",
+                 json_species[0][1] >= 0,
+                 json_species[1][0] == "body",
+                 json_species[1][1] >= 0,
+                 json_species[2][0] == "population",
+                 json_species[2][1] > 0,
+                 json_species[3][0] == "traits"])
 
     @classmethod
     def species_to_json(cls, species_obj):
@@ -195,17 +210,16 @@ class Convert(object):
         """
         [Natural, [GP, ...], [GB, ...], [BT, ...], [RT, ...]]
         """
-        print(json_action)
         assert(cls.validate_action_json(json_action))
         species_index = json_action[0]
         pop_grows = []
         for i in range(len(json_action[1])):
             gp = json_action[1][i]
-            pop_grows.append(PopGrow(gp[1], gp[2]))
+            pop_grows.append(PopGrow(gp[0], gp[1]))
         body_grows = []
         for i in range(len(json_action[2])):
             gb = json_action[2][i]
-            body_grows.append(BodyGrow(gb[1], gb[2]))
+            body_grows.append(BodyGrow(gb[0], gb[1]))
         new_boards = []
         for i in range(len(json_action[3])):
             bt = json_action[3][i]
@@ -220,14 +234,48 @@ class Convert(object):
 
     @classmethod
     def validate_action_json(cls, json_action):
-        # TODO
-        return True
+        return isinstance(json_action, list) and \
+            isinstance(json_action[0], int) and \
+            all([len(json_action) == 5,
+                 json_action[0] >= 0,
+                 cls.validate_grows_json(json_action[1]),
+                 cls.validate_grows_json(json_action[2]),
+                 cls.validate_board_addition_json(json_action[3]),
+                 cls.validate_trait_replacement_json(json_action[4])])
+
+    @classmethod
+    def validate_grows_json(cls, json_list):
+        return isinstance(json_list, list) and \
+            all(map(lambda gp: isinstance(gp, list) and
+                    len(gp) == 2 and
+                    isinstance(gp[0], int) and
+                    isinstance(gp[1], int) and
+                    gp[0] >= 0 and
+                    gp[1] >= 0, json_list))
+
+    @classmethod
+    def validate_board_addition_json(cls, json_list):
+        return isinstance(json_list, list) and \
+            all(map(lambda ba: isinstance(ba, list) and
+                    cls.validate_lon(ba, 4), json_list))
+
+    @classmethod
+    def validate_lon(cls, json_list, max_length):
+        return isinstance(json_list, list) and \
+            len(json_list) <= max_length and \
+            all(map(lambda num: isinstance(num, int) and num >= 0, json_list))
+
+    @classmethod
+    def validate_trait_replacement_json(cls, json_list):
+        return isinstance(json_list, list) and \
+            all(map(lambda rt: all([cls.validate_lon(rt, 3),
+                                    len(rt) == 3]), json_list))
 
     @classmethod
     def action_to_json(cls, action):
-        gps = map(lambda gp: ["population", gp.species_index, gp.payment_index],
+        gps = map(lambda gp: [gp.species_index, gp.payment_index],
                   action.pop_grows)
-        gbs = map(lambda gb: ["body", gb.species_index, gb.payment_index],
+        gbs = map(lambda gb: [gb.species_index, gb.payment_index],
                   action.body_grows)
         bts = map(lambda bt: cls.bt_to_json(bt), action.species_additions)
         rts = map(lambda rt: [rt.species_index,
@@ -257,8 +305,15 @@ class Convert(object):
 
     @classmethod
     def validate_json_feeding(cls, json_feeding):
-        # TODO:
-        return True
+        if type(json_feeding) is type(False):
+            return not json_feeding
+        elif isinstance(json_feeding, (int, long)):
+            return json_feeding >= 0
+        elif isinstance(json_feeding, list):
+            return cls.validate_lon(json_feeding, 3) and \
+                (len(json_feeding) == 2 or len(json_feeding) == 3)
+        else:
+            return False
 
     @classmethod
     def feeding_to_json(cls, feeding):
@@ -282,9 +337,15 @@ class Convert(object):
 
     @classmethod
     def validate_trait_card_json(cls, json_trait_card):
-        return any([(json_trait_card[1] == "carnivore" and
-                     json_trait_card[0] <= 8 and
-                     json_trait_card[0] >= -8),
-                    (json_trait_card[1] != "carnivore" and
-                     json_trait_card[0] <= 3 and
-                     json_trait_card[0] >= -3)])
+        return isinstance(json_trait_card, list) and \
+            any([(json_trait_card[1] == "carnivore" and
+                  json_trait_card[0] <= 8 and
+                  json_trait_card[0] >= -8),
+                 (json_trait_card[1] != "carnivore" and
+                  json_trait_card[0] <= 3 and
+                  json_trait_card[0] >= -3)])
+
+    @classmethod
+    def validate_listof_trait_card_json(cls, json_list):
+        return isinstance(json_list, list) and \
+            all(map(lambda card: cls.validate_trait_card_json(card), json_list))

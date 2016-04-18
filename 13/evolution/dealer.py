@@ -61,7 +61,6 @@ class Dealer(object):
             actions = self.get_player_actions()
             self.validate_actions(actions)
             self.apply_actions(actions)
-            print("Done applying actions")
             self.reduce_species_pop()
             self.move_food()
         self.move_food()
@@ -124,10 +123,8 @@ class Dealer(object):
             after = after[1:]
             choice = player.choose(before, after)
             if choice:
-                print("Requesting player action")
                 actions.append(choice)
             else:
-                print("removing player from game")
                 self.remove_player(player)
             before.append(player.species)
         return actions
@@ -141,7 +138,6 @@ class Dealer(object):
         to_remove = []
         for i in range(len(self.players)):
             if not self.players[i].is_valid_action(actions[i]):
-                print("Player " + str(i) + " sent invalid action")
                 to_remove.append(i)
         for i in to_remove:
             self.remove_player(self.players[i])
@@ -193,7 +189,6 @@ class Dealer(object):
 
         while self.watering_hole > 0 and len(self.players) != len(self.skipped_players):
             self.feed1()
-            print("Feeding 1")
 
     def reveal_cards(self, actions):
         """
@@ -279,7 +274,6 @@ class Dealer(object):
         """
         auto_eat = self.auto_eat()
         if auto_eat is None:
-            print("Querying player for feeding")
             current_player = self.players[self.current_player_index]
             opponents = map(lambda plr: plr.public_state(), self.opponents())
             next_feeding = current_player.next_feeding(self.watering_hole, opponents)
@@ -289,7 +283,6 @@ class Dealer(object):
                 self.remove_player(current_player)
                 return False
         else:
-            print("Autofed")
             return auto_eat
 
     def auto_eat(self):

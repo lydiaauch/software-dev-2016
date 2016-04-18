@@ -6,6 +6,7 @@ from traitcard import TraitCard
 from player_state import PlayerState
 from actions import *
 from player import Player
+from globals import *
 
 
 class TestPlayerState(unittest.TestCase):
@@ -199,6 +200,58 @@ class TestPlayerState(unittest.TestCase):
         self.player.species[1].traits = ["carnivore"]
         self.player.species[2].traits = ["carnivore"]
         self.assertFalse(self.player.can_feed([]))
+
+    def test_are_actions_in_range_valid(self):
+        good_action_gp_gb = Action(2, [PopGrow(0, 1)], [BodyGrow(1, 0)], [], [])
+        good_action_board = Action(2, [], [], [BoardAddition(0, [1])], [])
+        good_action_ba_rt = Action(2, [], [], [BoardAddition(0, [])], [ReplaceTrait(0, 0, 1)])
+        self.assertTrue(self.player.are_actions_in_range(good_action_gp_gb))
+        self.assertTrue(self.player.are_actions_in_range(good_action_board))
+        self.assertTrue(self.player.are_actions_in_range(good_action_ba_rt))
+
+    def test_are_actions_in_range_invalid(self):
+        good_action_gp_gb = Action(3, [PopGrow(0, 1)], [BodyGrow(1, 0)], [], [])
+        good_action_board = Action(2, [], [], [BoardAddition(0, [3])], [])
+        good_action_ba_rt = Action(2, [], [], [BoardAddition(0, [])], [ReplaceTrait(0, 0, 3)])
+        self.assertFalse(self.player.are_actions_in_range(good_action_gp_gb))
+        self.assertFalse(self.player.are_actions_in_range(good_action_board))
+        self.assertFalse(self.player.are_actions_in_range(good_action_ba_rt))
+
+    def test_validate_pop_grows(self):
+        good_action = Action(3, [PopGrow(0, 1), PopGrow(0, 0)], [], [], [])
+        self.assertTrue(self.player.validate_pop_grows(good_action))
+        self.player.species[0].population = MAX_POPULATION
+        bad_action = Action(3, [PopGrow(0, 1)], [], [], [])
+        self.assertFalse(self.player.validate_pop_grows(bad_action))
+        self.player.species[0].population = MAX_POPULATION - 1
+        bad_action = Action(3, [PopGrow(0, 1), PopGrow(0, 0)], [], [], [])
+        self.assertFalse(self.player.validate_pop_grows(bad_action))
+
+    def test_validate_body_grows(self):
+        good_action = Action(3, [], [BodyGrow(0, 1), BodyGrow(0, 0)], [], [])
+        self.assertTrue(self.player.validate_body_grows(good_action))
+        self.player.species[0].body = MAX_BODY_SIZE
+        bad_action = Action(3, [], [BodyGrow(0, 1)], [], [])
+        self.assertFalse(self.player.validate_body_grows(bad_action))
+        self.player.species[0].body = MAX_BODY_SIZE - 1
+        bad_action = Action(3, [], [BodyGrow(0, 1), BodyGrow(0, 0)], [], [])
+        self.assertFalse(self.player.validate_body_grows(bad_action))
+
+    def test_validate_board_additions(self):
+        good_action = Action(3, [], [], [BoardAddition(0, [1])], [])
+        self.assertTrue(self.player.validate_board_additions(good_action))
+        self.player.hand.append(TraitCard("long-neck"))
+        bad_action = Action(3, [], [], [BoardAddition(0, [0, 3])], [])
+        self.assertFalse(self.player.validate_board_additions(bad_action))
+
+    def test_validate_trait_replacements(self):
+        good_action = Action(3, [], [], [], [ReplaceTrait(0, 0, 1)])
+        self.assertTrue(self.player.validate_trait_replacements(good_action))
+        bad_action = Action(3, [], [], [], [ReplaceTrait(0, 1, 1)])
+        self.assertFalse(self.player.validate_trait_replacements(bad_action))
+        self.player.species[0].traits.append("long-neck")
+        bad_action = Action(3, [], [], [], [ReplaceTrait(0, 0, 0)])
+        self.assertFalse(self.player.validate_trait_replacements(bad_action))
 
 
 if __name__ == '__main__':

@@ -11,7 +11,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = ('localhost', LISTENING_PORT)
 print >>sys.stderr, 'connecting to %s port %s' % server_address
 sock.connect(server_address)
-sock.sendall("\"Hello World\"")
+sock.sendall("\"Lydia and Alex are going to WIN\"")
 
 try:
     proxy_dealer = ProxyDealer(Player(), sock)

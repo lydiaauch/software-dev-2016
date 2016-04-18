@@ -171,6 +171,7 @@ class PlayerState(object):
             spec_idx = pop_grow.species_index
             if spec_idx >= len(self.species) + len(action.species_additions):
                 return False
+
             if spec_idx in species_pops:
                 species_pops[spec_idx] += 1
             else:
@@ -179,9 +180,8 @@ class PlayerState(object):
                     species_pop = self.species[spec_idx].population + 1
                 species_pops[spec_idx] = species_pop
         for pop in species_pops:
-            if pop > MAX_POPULATION:
+            if species_pops[pop] > MAX_POPULATION:
                 return False
-        print("Pop grows are valid")
         return True
 
     def validate_body_grows(self, action):
@@ -200,12 +200,12 @@ class PlayerState(object):
             else:
                 species_body = 0
                 if spec_idx < len(self.species):
-                    species_body = self.species[spec_idx].body_size + 1
+                    species_body = self.species[spec_idx].body + 1
                 species_bodys[spec_idx] = species_body
         for body in species_bodys:
-            if species_body > MAX_BODY_SIZE:
+            if species_bodys[body] > MAX_BODY_SIZE:
                 return False
-        print("Body grows are valid")
+
         return True
 
     def validate_board_additions(self, action):
@@ -217,9 +217,7 @@ class PlayerState(object):
         for board_addition in action.species_additions:
             traits = map(lambda idx: self.hand[idx].trait, board_addition.traits)
             if not is_unique_list(traits):
-                print(traits)
                 return False
-        print("board additions are valid")
         return True
 
     def validate_trait_replacements(self, action):
@@ -246,7 +244,7 @@ class PlayerState(object):
             traits.pop(replacement.removed_trait_index)
             if new_trait in traits:
                 return False
-        print("trait replacements are valid")
+
         return True
 
     def are_actions_in_range(self, actions):

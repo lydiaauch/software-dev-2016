@@ -36,12 +36,7 @@ class Action(object):
         Checks that the trait card indices used in this action are all unique.
         :return: True if all indices are unique, else False.
         """
-        print(self.get_indices())
-        if is_unique_list(self.get_indices()):
-            print("indices are valid")
-            return True
-        else:
-            return False
+        return is_unique_list(self.get_indices())
 
     def get_indices(self):
         """

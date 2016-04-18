@@ -62,9 +62,7 @@ class Player(object):
 
         hungry_herbivores = Player.find_hungry_herbs(hungry_species, hungry_carnivores)
         if hungry_herbivores:
-            print("Found hungry herbs")
             feeding = Player.feed_herbivores(hungry_herbivores)
-            print("Done with hungry herbs")
             return HerbivoreFeeding(player.species.index(feeding))
         if hungry_carnivores:
             feeding = Player.feed_carnivore(hungry_carnivores, player, opponents)

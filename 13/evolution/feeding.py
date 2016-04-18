@@ -6,6 +6,9 @@ class AbstainFeeding(object):
         """
         dealer.skip_cur_player()
 
+    def __eq__(self, other):
+        return isinstance(other, AbstainFeeding)
+
 
 class HerbivoreFeeding(object):
     def __init__(self, species_index):
@@ -24,6 +27,9 @@ class HerbivoreFeeding(object):
         current_player = dealer.players[dealer.current_player_index]
         species = current_player.species[self.species_index]
         dealer.feed(current_player, species)
+
+    def __eq__(self, other):
+        return isinstance(other, HerbivoreFeeding) and self.species_index == other.species_index
 
 
 class FatTissueFeeding(object):
@@ -46,6 +52,11 @@ class FatTissueFeeding(object):
         species = dealer.players[dealer.current_player_index].species[self.species_index]
         dealer.watering_hole -= self.food_requested
         species.fat_storage += self.food_requested
+
+    def __eq__(self, other):
+        return isinstance(other, FatTissueFeeding) and \
+            all([self.species_index == other.species_index,
+                 self.food_requested == other.food_requested])
 
 
 class CarnivoreFeeding(object):
@@ -83,3 +94,9 @@ class CarnivoreFeeding(object):
         if attacker.population != 0:
             dealer.feed(current_player, attacker)
             dealer.feed_scavengers()
+
+    def __eq__(self, other):
+        return isinstance(other, CarnivoreFeeding) and \
+            all([self.attacker_index == other.attacker_index,
+                 self.target_index == other.target_index,
+                 self.defender_index == other.defender_index])
