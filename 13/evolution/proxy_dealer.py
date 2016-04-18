@@ -24,7 +24,6 @@ class ProxyDealer(object):
             print("Got data: " + str(data))
             while data is not None:
                 (msg, data) = self.json_parser(data)
-                print("Parsed message: " + str(msg))
                 to_send = self.decode(msg)
                 print("Remaining msg in buffer: " + str(data))
                 if to_send is not None:
