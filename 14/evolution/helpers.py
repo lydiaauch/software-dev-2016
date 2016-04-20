@@ -62,13 +62,17 @@ def is_unique_list(li):
     return True
 
 
-def print_results(dealer):
+def print_results(dealer, messages):
     """
-    Prints player ID's and scores in descending order.
+    Prints player ID's and scores in descending order. Each player in the dealer
+    has an associated message in the messages list to print along with their score.
+    :param dealer: A Dealer object representing the game to print.
+    :param messages: A list of Strings representing each player's tag line.
     """
     results = ""
-    sorted_players = dealer.players
-    sorted_players.sort(cmp=lambda p1, p2: p2.food_bag - p1.food_bag)
-    for index, player in enumerate(sorted_players):
-        results += "%d player id: %d score: %d\n" % (index + 1, player.name, player.food_bag)
+    players = zip(dealer.players, messages)
+    players.sort(cmp=lambda p1, p2: p2[0].food_bag - p1[0].food_bag)
+    for index, player in enumerate(players):
+        results += "%d player id: %d tag: %s score: %d\n" % \
+            (index + 1, player[0].name, player[1], player[0].food_bag)
     return results

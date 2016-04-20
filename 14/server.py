@@ -24,7 +24,8 @@ def main():
         proxy_players = map(lambda con: ProxyPlayer(con[0]), connections)
         dealer = Dealer(proxy_players)
         dealer.run()
-        print(print_results(dealer))
+        messages = map(lambda connection: connection[2], connections)
+        print(print_results(dealer, messages))
     finally:
         for connection in connections:
             print("Closing connection to" + str(connection[1]))
@@ -40,8 +41,8 @@ def get_player_connections(socket, connections):
     while(len(connections) < MAX_PLAYERS):
         connection, client_addr = socket.accept()
         if connection and client_addr:
-            connections.append([connection, client_addr])
             msg = connection.recv(MAX_MSG_SIZE)
+            connections.append([connection, client_addr, msg])
             print("player connected with message:" + msg)
             connection.sendall("\"ok\"")
 
