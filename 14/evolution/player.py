@@ -12,7 +12,7 @@ class Player(object):
     def __init__(self):
         self.player_state = None
 
-    def start(self, player_state):
+    def start(self, player_state, wh):
         """
         Gives the player its state at the beginning of a round. This would allow
         a stateful player to begin to compute possible moves, but since this
@@ -20,6 +20,7 @@ class Player(object):
         :param player_state: The PlayerState representing this player.
         """
         self.player_state = player_state
+        self.watering_hole = wh
 
     def choose(self, choice):
         cards = []

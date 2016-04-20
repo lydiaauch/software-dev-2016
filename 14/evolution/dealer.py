@@ -109,7 +109,7 @@ class Dealer(object):
 
     def players_start(self):
         for player in self.players:
-            player.start()
+            player.start(self.watering_hole)
 
     def get_player_actions(self):
         """

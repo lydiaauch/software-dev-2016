@@ -121,8 +121,8 @@ class PlayerState(object):
                            hand=None,
                            species=self.species)
 
-    def start(self):
-        self.interface.start(self)
+    def start(self, wh):
+        self.interface.start(self, wh)
 
     def choose(self, before, after):
         """

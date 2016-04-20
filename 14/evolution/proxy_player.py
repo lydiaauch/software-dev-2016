@@ -21,7 +21,7 @@ class ProxyPlayer(object):
                 print("dealer got data: " + str(data))
                 return json.loads(data)
 
-    def start(self, player_state):
+    def start(self, player_state, wh):
         """
         Gives the player its state at the beginning of a round. This would allow
         a stateful player to begin to compute possible moves, but since this
@@ -30,7 +30,7 @@ class ProxyPlayer(object):
         """
         species = map(lambda spec: Convert.species_to_json(spec), player_state.species)
         cards = map(lambda card: Convert.trait_card_to_json(card), player_state.hand)
-        msg = [player_state.food_bag, species, cards]
+        msg = [wh, player_state.food_bag, species, cards]
         print("seding message: " + str(msg))
         self.socket.sendall(json.dumps(msg))
 

@@ -45,7 +45,6 @@ class ProxyDealer(object):
     def decode(self, msg):
         if msg == "ok":
             return
-        decode_start = self.decode_start(msg)
         if "feeding" in possible_next_states[self.state] and len(msg) == 5:
             # TODO make Feeding class and change Player to take it.
             player = Convert.json_to_player_state(msg[0:3])
@@ -53,9 +52,10 @@ class ProxyDealer(object):
             feeding = self.player.next_feeding(player, msg[3], opponents)
             self.state = "feeding"
             return Convert.feeding_to_json(feeding)
-        if decode_start and "start" in possible_next_states[self.state]:
+        (player, wh) = self.decode_start(msg)
+        if player and "start" in possible_next_states[self.state]:
             print("Got start message")
-            self.player.start(decode_start)
+            self.player.start(player, wh)
             self.state = "start"
             return
         decode_choose = self.decode_choose(msg)
@@ -68,9 +68,10 @@ class ProxyDealer(object):
 
     def decode_start(self, msg):
         try:
-            return Convert.json_to_player_state(msg)
+            assert(isinstance(msg[0], int))
+            return (Convert.json_to_player_state(msg[1:]), msg[0])
         except Exception:
-            return False
+            return (False, False)
 
     def decode_choose(self, msg):
         try:
