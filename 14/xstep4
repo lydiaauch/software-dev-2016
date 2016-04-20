@@ -1,0 +1,24 @@
+#! /usr/bin/env python
+
+"""
+A test harness for the Dealer apply_actions method
+"""
+
+import sys
+import json
+from evolution.convert import Convert
+from evolution.dealer  import Dealer
+
+def main():
+    message = sys.stdin.readlines()
+    json_message = ""
+    for line in message:
+        json_message += line.rstrip('\n')
+    json_message = json.loads(json_message)
+    dealer = Convert.json_to_dealer(json_message[0])
+    actions  = Convert.json_to_actions(json_message[1])
+    dealer.apply_actions(actions)
+    print json.dumps(Convert.dealer_to_json(dealer))
+
+if __name__ == "__main__":
+    main()

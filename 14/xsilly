@@ -1,0 +1,31 @@
+#! /usr/bin/env python
+
+"""
+A test harness for the Dealer feed1 method
+"""
+
+import sys
+import json
+from evolution.convert import Convert
+from evolution.choice  import Choice
+from evolution.player  import Player
+
+def main():
+    message = sys.stdin.readlines()
+    json_choice = ""
+    for line in message:
+        json_choice += line.rstrip('\n')
+    json_choice = json.loads(json_choice)
+    try:
+        player = Convert.json_to_player(json_choice[0])
+        choice = Convert.json_to_choice(json_choice[1:])
+        strategy = Player()
+        strategy.start(player)
+        action = strategy.choose(choice)
+        print json.dumps(Convert.action_to_json(action))
+    except AssertionError:
+        pass
+
+
+if __name__ == "__main__":
+    main()
