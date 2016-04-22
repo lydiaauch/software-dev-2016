@@ -75,6 +75,10 @@ def print_results(dealer, messages=None):
     players = zip(dealer.players, messages)
     players.sort(cmp=lambda p1, p2: p2[0].food_bag - p1[0].food_bag)
     for index, player in enumerate(players):
+        score = player[0].food_bag
+        for species in player[0].species:
+            score += species.population
+            score += len(species.traits)
         results += "%d player id: %d tag: %s score: %d\n" % \
-            (index + 1, player[0].name, player[1], player[0].food_bag)
+            (index + 1, player[0].name, player[1], score)
     return results

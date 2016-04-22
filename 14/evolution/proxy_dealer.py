@@ -1,6 +1,7 @@
 import json
 from convert import Convert
 from helpers import timeout
+from globals import *
 
 
 possible_next_states = {
@@ -17,7 +18,7 @@ class ProxyDealer(object):
         self.player = player
         self.connection = connection
 
-    @timeout(20)
+    @timeout(CLIENT_WAIT_TIME)
     def listen_for_messages(self):
         while True:
             data = self.connection.recv(1024)

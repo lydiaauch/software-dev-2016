@@ -36,15 +36,47 @@ def main():
         sock.close()
 
 
-@timeout(PLAYER_CONNECTION_TIME)
 def get_player_connections(socket, connections):
+    """
+    Waits for at least MIN_PLAYERS to connect and then stops when either
+    MAX_PLAYERS are connected or there are more than MIN_PLAYERS connections
+    and the timeout has been reached.
+    :param socket: TCP socket to listen on.
+    :param connections: The list of connections to append the new connection to.
+    """
     while(len(connections) < MAX_PLAYERS):
-        connection, client_addr = socket.accept()
-        if connection and client_addr:
-            msg = connection.recv(MAX_MSG_SIZE)
-            connections.append([connection, client_addr, msg])
-            print("player connected with message:" + msg)
-            connection.sendall("\"ok\"")
+        if len(connections) >= MIN_PLAYERS:
+            try:
+                connection_with_timout(socket, connections)
+            except TimeoutError:
+                return
+        else:
+            connection_no_timeout(socket, connections)
+
+
+@timeout(PLAYER_CONNECTION_TIME)
+def connection_with_timout(socket, connections):
+    """
+    Adds one connection to the connections list, waiting at most
+    PLAYER_CONNECTION_TIME seconds.
+    :param socket: TCP socket to listen on.
+    :param connections: The list of connections to append the new connection to.
+    """
+    connection_no_timeout(socket, connections)
+
+
+def connection_no_timeout(socket, connections):
+    """
+    Adds one connection to the connections list, waiting as long as needed.
+    :param socket: TCP socket to listen on.
+    :param connections: The list of connections to append the new connection to.
+    """
+    connection, client_addr = socket.accept()
+    if connection and client_addr:
+        msg = connection.recv(MAX_MSG_SIZE)
+        connections.append([connection, client_addr, msg])
+        print("player connected with message:" + msg)
+        connection.sendall("\"ok\"")
 
 if __name__ == "__main__":
     main()

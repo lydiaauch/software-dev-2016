@@ -118,6 +118,7 @@ class Dealer(object):
         """
         actions = []
         before = []
+        to_remove = []
         after = map(lambda plr: plr.species, self.players)
         for player in self.players:
             after = after[1:]
@@ -125,8 +126,10 @@ class Dealer(object):
             if choice:
                 actions.append(choice)
             else:
-                self.remove_player(player)
+                to_remove.append(player)
             before.append(player.species)
+        for player in to_remove:
+            self.remove_player(player)
         return actions
 
     def validate_actions(self, actions):
@@ -151,7 +154,6 @@ class Dealer(object):
         Removes the given player from the game permenantly.
         """
         self.players.remove(player)
-        # player.leave_game()
         if self.current_player_index == len(self.players):
             self.current_player_index = 0
 
