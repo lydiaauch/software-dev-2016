@@ -240,7 +240,6 @@ class Dealer(object):
             feeding.apply(self)
             self.rotate_players()
         else:
-            print(":{")
             self.remove_player(current_player)
 
     def validate_feeding(self, feeding):

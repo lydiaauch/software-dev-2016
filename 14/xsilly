@@ -20,7 +20,7 @@ def main():
         player = Convert.json_to_player(json_choice[0])
         choice = Convert.json_to_choice(json_choice[1:])
         strategy = Player()
-        strategy.start(player)
+        strategy.start(player, 0)
         action = strategy.choose(choice)
         print json.dumps(Convert.action_to_json(action))
     except AssertionError:

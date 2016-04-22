@@ -206,7 +206,7 @@ class TestPlayer(unittest.TestCase):
         expected = Action(0, [], [], [BoardAddition(1, [2])], [])
         choice = Choice([self.species_list], [])
         strategy = Player()
-        strategy.start(self.player_1)
+        strategy.start(self.player_1, 10)
         self.assertEqual(expected, strategy.choose(choice))
 
     def test_choose_gp(self):
@@ -215,7 +215,7 @@ class TestPlayer(unittest.TestCase):
         expected = Action(1, [PopGrow(3, 0)], [], [BoardAddition(2, [3])], [])
         choice = Choice([self.species_list], [])
         strategy = Player()
-        strategy.start(self.player_1)
+        strategy.start(self.player_1, 10)
         actual = strategy.choose(choice)
         self.assertEqual(expected, actual)
 
@@ -226,7 +226,7 @@ class TestPlayer(unittest.TestCase):
         expected = Action(1, [PopGrow(3, 4)], [BodyGrow(3, 0)], [BoardAddition(2, [3])], [])
         choice = Choice([self.species_list], [])
         strategy = Player()
-        strategy.start(self.player_1)
+        strategy.start(self.player_1, 10)
         actual = strategy.choose(choice)
         self.assertEqual(expected, actual)
 
@@ -238,7 +238,7 @@ class TestPlayer(unittest.TestCase):
                           [BoardAddition(3, [4])], [ReplaceTrait(3, 0, 1)])
         choice = Choice([self.species_list], [])
         strategy = Player()
-        strategy.start(self.player_1)
+        strategy.start(self.player_1, 10)
         actual = strategy.choose(choice)
         self.assertEqual(expected, actual)
 
@@ -251,7 +251,7 @@ class TestPlayer(unittest.TestCase):
                           [ReplaceTrait(3, 0, 1)])
         choice = Choice([self.species_list], [])
         strategy = Player()
-        strategy.start(self.player_1)
+        strategy.start(self.player_1, 10)
         actual = strategy.choose(choice)
         player_expected = copy.deepcopy(self.player_1)
         player_expected.apply_action(expected)
