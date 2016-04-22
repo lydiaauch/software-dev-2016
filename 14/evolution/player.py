@@ -131,7 +131,8 @@ class Player(object):
         :param hungry_carnivores: list of hungry carnivores
         :param player: the current player's state
         :param opponents: list of all other player's states
-        :return:
+        :return: An array of [attacking_species, def_player, def_species] or
+        False if not possible.
         """
         sorted_carnivores = cls.sort_lex(hungry_carnivores)
         for carnivore in sorted_carnivores:

@@ -111,6 +111,15 @@ class CarnivoreFeeding(object):
         self.target_index = target_index
         self.defender_index = defender_index
 
+    def __str__(self):
+        return "attacker: %d, target player: %d, defender: %d" % (self.attacker_index, self.target_index, self.defender_index)
+
+    def __eq__(self, other):
+        return isinstance(other, CarnivoreFeeding) and \
+            all([self.attacker_index == other.attacker_index,
+                 self.target_index == other.target_index,
+                 self.defender_index == other.defender_index])
+
     def apply(self, dealer):
         """
         Applies the consequences of this feeding to the given dealer.
@@ -130,12 +139,6 @@ class CarnivoreFeeding(object):
             dealer.feed(current_player, attacker)
             dealer.feed_scavengers()
 
-    def __eq__(self, other):
-        return isinstance(other, CarnivoreFeeding) and \
-            all([self.attacker_index == other.attacker_index,
-                 self.target_index == other.target_index,
-                 self.defender_index == other.defender_index])
-
     def validate(self, dealer):
         """
         Ensures that this Feeding is valid to apply to the given Dealer.
@@ -144,14 +147,14 @@ class CarnivoreFeeding(object):
         """
         if self.target_index < len(dealer.players):
             attacking_player = dealer.players[dealer.current_player_index]
-            defending_player = dealer.players[self.target_index]
+            defending_player = dealer.opponents()[self.target_index]
             if len(attacking_player.species) > self.attacker_index and \
                     len(defending_player.species) > self.defender_index:
                 attacker = attacking_player.species[self.attacker_index]
                 defender = defending_player.species[self.defender_index]
-                left = (None if self.defender_index == 0
+                left = (False if self.defender_index == 0
                              else defending_player.species[self.defender_index - 1])
-                right = (None if self.defender_index == len(defending_player.species) - 1
+                right = (False if self.defender_index == len(defending_player.species) - 1
                               else defending_player.species[self.defender_index + 1])
                 return defender.is_attackable(attacker, left, right)
             else:
