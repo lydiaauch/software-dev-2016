@@ -151,6 +151,7 @@ class Dealer(object):
         Removes the given player from the game permenantly.
         """
         self.players.remove(player)
+        # player.leave_game()
         if self.current_player_index == len(self.players):
             self.current_player_index = 0
 
@@ -186,7 +187,6 @@ class Dealer(object):
             player.apply_action(action)
 
         self.move_fat_food()
-
         while self.watering_hole > 0 and len(self.players) != len(self.skipped_players):
             self.feed1()
 
@@ -235,10 +235,21 @@ class Dealer(object):
             return
 
         feeding = self.next_feed()
-        # TODO validate given feeding
-        if feeding:
+
+        if feeding and self.validate_feeding(feeding):
             feeding.apply(self)
             self.rotate_players()
+        else:
+            print(":{")
+            self.remove_player(current_player)
+
+    def validate_feeding(self, feeding):
+        """
+        Ensures that the given Feeding is valid to apply to the current player.
+        :param feeding: The Feeding to validate.
+        :return: True if it is a valid Feeding, else False.
+        """
+        return feeding.validate(self)
 
     def rotate_players(self):
         """

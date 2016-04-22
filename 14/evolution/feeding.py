@@ -9,6 +9,14 @@ class AbstainFeeding(object):
     def __eq__(self, other):
         return isinstance(other, AbstainFeeding)
 
+    def validate(self, dealer):
+        """
+        Ensures that this Feeding is valid to apply to the given Dealer.
+        :param dealer: The Dealer whose feeding is being validated.
+        :return: True if it is a valid Feeding, else False.
+        """
+        return True
+
 
 class HerbivoreFeeding(object):
     def __init__(self, species_index):
@@ -30,6 +38,19 @@ class HerbivoreFeeding(object):
 
     def __eq__(self, other):
         return isinstance(other, HerbivoreFeeding) and self.species_index == other.species_index
+
+    def validate(self, dealer):
+        """
+        Ensures that this Feeding is valid to apply to the given Dealer.
+        :param dealer: The Dealer whose feeding is being validated.
+        :return: True if it is a valid Feeding, else False.
+        """
+        player = dealer.players[dealer.current_player_index]
+        if len(player.species) > self.species_index:
+            spec = player.species[self.species_index]
+            return spec.population > spec.food
+        else:
+            return False
 
 
 class FatTissueFeeding(object):
@@ -57,6 +78,20 @@ class FatTissueFeeding(object):
         return isinstance(other, FatTissueFeeding) and \
             all([self.species_index == other.species_index,
                  self.food_requested == other.food_requested])
+
+    def validate(self, dealer):
+        """
+        Ensures that this Feeding is valid to apply to the given Dealer.
+        :param dealer: The Dealer whose feeding is being validated.
+        :return: True if it is a valid Feeding, else False.
+        """
+        player = dealer.players[dealer.current_player_index]
+        if len(player.species) > self.species_index:
+            spec = player.species[self.species_index]
+            return spec.body >= (spec.fat_storage + self.food_requested) and \
+                "fat-tissue" in spec.traits
+        else:
+            return False
 
 
 class CarnivoreFeeding(object):
@@ -100,3 +135,26 @@ class CarnivoreFeeding(object):
             all([self.attacker_index == other.attacker_index,
                  self.target_index == other.target_index,
                  self.defender_index == other.defender_index])
+
+    def validate(self, dealer):
+        """
+        Ensures that this Feeding is valid to apply to the given Dealer.
+        :param dealer: The Dealer whose feeding is being validated.
+        :return: True if it is a valid Feeding, else False.
+        """
+        if self.target_index < len(dealer.players):
+            attacking_player = dealer.players[dealer.current_player_index]
+            defending_player = dealer.players[self.target_index]
+            if len(attacking_player.species) > self.attacker_index and \
+                    len(defending_player.species) > self.defender_index:
+                attacker = attacking_player.species[self.attacker_index]
+                defender = defending_player.species[self.defender_index]
+                left = (None if self.defender_index == 0
+                             else defending_player.species[self.defender_index - 1])
+                right = (None if self.defender_index == len(defending_player.species) - 1
+                              else defending_player.species[self.defender_index + 1])
+                return defender.is_attackable(attacker, left, right)
+            else:
+                return False
+        else:
+            return False
