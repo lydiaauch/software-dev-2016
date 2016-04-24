@@ -1,2 +1,40 @@
-#! /bin/bash
-python client.py
+#! /usr/bin/env python
+
+import socket
+import sys
+from evolution.globals import *
+from evolution.proxy_dealer import ProxyDealer
+from evolution.player import Player
+
+
+def main(adr, port):
+    # Create a TCP/IP socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Connect the socket to the port where the server is listening
+    server_address = (adr, port)
+    print >>sys.stderr, 'connecting to %s port %s' % server_address
+    sock.connect(server_address)
+    sock.sendall("\"Lydia and Alex are going to WIN\"")
+
+    try:
+        proxy_dealer = ProxyDealer(Player(), sock)
+        proxy_dealer.listen_for_messages()
+    except Exception:
+        print("Closing connection")
+        sock.shutdown(socket.SHUT_RDWR)
+        sock.close()
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        main("127.0.0.1", LISTENING_PORT)
+    elif len(sys.argv) == 3:
+        main(sys.argv[1], int(sys.argv[2]))
+    else:
+        print("""
+Wrong number of arguments given to xclient
+Usage:
+    ./xclient             -- Connect to server on localhost via default port number.
+    ./xclient <adr> <prt> -- connect to server at adr on port prt.
+        """)
