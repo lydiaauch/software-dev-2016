@@ -7,7 +7,7 @@ from evolution.proxy_dealer import ProxyDealer
 from evolution.player import Player
 
 
-def main(adr, port):
+def main(adr, port, msg):
     # Create a TCP/IP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -15,7 +15,7 @@ def main(adr, port):
     server_address = (adr, port)
     print >>sys.stderr, 'connecting to %s port %s' % server_address
     sock.connect(server_address)
-    sock.sendall("\"Lydia and Alex are going to WIN\"")
+    sock.sendall(msg)
 
     try:
         proxy_dealer = ProxyDealer(Player(), sock)
@@ -26,15 +26,29 @@ def main(adr, port):
         sock.close()
 
 
-if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        main("127.0.0.1", LISTENING_PORT)
-    elif len(sys.argv) == 3:
-        main(sys.argv[1], int(sys.argv[2]))
-    else:
-        print("""
-Wrong number of arguments given to xclient
+
+help_message = """
 Usage:
-    ./xclient             -- Connect to server on localhost via default port number.
-    ./xclient <adr> <prt> -- connect to server at adr on port prt.
-        """)
+    ./xclient                   -- Connect to server on localhost via default port number.
+    ./xclient <adr> <prt>       -- Connect to server at adr on port prt.
+    ./xclient <adr> <prt> <tag> -- Connect to server at adr on port prt and player tagline tag.
+
+Example:
+    ./xclient 127.0.0.1 10000 "Blue Team"
+        - Starts a player connection to localhost on port 10000 with the tagline "Blue Team"
+"""
+
+
+if __name__ == "__main__":
+    args_len = len(sys.argv)
+    if args_len == 1:
+        main("127.0.0.1", LISTENING_PORT, PLAYER_TAG_LINE)
+    elif args_len == 2 and sys.argv[1] == "-H":
+        print(help_message)
+    elif args_len == 3:
+        main(sys.argv[1], int(sys.argv[2]), PLAYER_TAG_LINE)
+    elif args_len == 4:
+        main(sys.argv[1], int(sys.argv[2]), "\"" + sys.argv[3] + "\"")
+    else:
+        print("Wrong number of arguments given to xclient")
+        print(help_message)

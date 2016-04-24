@@ -86,15 +86,26 @@ def connection_no_timeout(socket, connections):
         print("player connected with message:" + msg)
         connection.sendall("\"ok\"")
 
-if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        main(LISTENING_PORT)
-    elif len(sys.argv) == 2:
-        main(sys.argv[1])
-    else:
-        print("""
-Wrong number of arguments given to xserver
+
+help_message = """
 Usage:
     ./xserver               -- Start a server on localhost via default port number.
     ./xserver <port_number> -- start a server on port port_number.
-        """)
+
+Example:
+    ./xserver 12345
+        - Starts an Evolution server listening on port 12345.
+"""
+
+
+if __name__ == "__main__":
+    num_args = len(sys.argv)
+    if num_args == 1:
+        main(LISTENING_PORT)
+    elif num_args == 2 and sys.argv[1] == "-H":
+        print(help_message)
+    elif num_args == 2:
+        main(sys.argv[1])
+    else:
+        print("Wrong number of arguments given to xserver.")
+        print(help_message)

@@ -45,13 +45,11 @@ tests/xsilly/*: Test files for xsilly.
 
 ________________________________________________________________________________
 
-to start an Evolution server:
-./xserver
+for  information on starting servers:
+./xserver -H
 
-to start an Evolution client:
-./xclient
-
-To configure the port these use to play the game modify globals.py LISTENING_PORT.
+for information on starting clients:
+./xclient -H
 
 to run a game of Evolution with n players:
 ./main n
