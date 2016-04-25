@@ -17,14 +17,6 @@ class Convert(object):
 
     @classmethod
     def json_to_dealer(cls, json_config):
-        """
-        Converts a Configuration json input into a dealer with the game as
-        described in the Configuration object.
-        :param json_config: A Configuration [LOP, Natural, LOC], where LOP is a
-        list of Players, the Natural represents food in the watering hole,
-        and the LOC is the deck of cards in the order they will appear.
-        :return: A Dealer with the game configured to the given json_config.
-        """
         assert(cls.validate_configuration_json(json_config))
         players_interfaces = []
         num_players = len(json_config[0])
@@ -207,9 +199,6 @@ class Convert(object):
 
     @classmethod
     def json_to_action(cls, json_action):
-        """
-        [Natural, [GP, ...], [GB, ...], [BT, ...], [RT, ...]]
-        """
         assert(cls.validate_action_json(json_action))
         species_index = json_action[0]
         pop_grows = []

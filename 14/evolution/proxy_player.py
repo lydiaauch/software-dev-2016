@@ -9,12 +9,15 @@ class ProxyPlayer(object):
     ProxyPlayer is a Player that communicates requests over TCP to the socket
     given to the init method.
     """
-
     def __init__(self, socket):
         self.socket = socket
 
     @timeout(TIMEOUT)
     def get_response(self):
+        """
+        Waits for TIMEOUT seconds for a response from the client.
+        :return: JSON data received from the client.
+        """
         while(True):
             data = self.socket.recv(MAX_MSG_SIZE)
             if data is not None:
@@ -27,6 +30,7 @@ class ProxyPlayer(object):
         a stateful player to begin to compute possible moves, but since this
         player is not stateful this method does nothing.
         :param player_state: The PlayerState representing this player.
+        :param wh: the current state of the watering hole.
         """
         species = map(lambda spec: Convert.species_to_json(spec), player_state.species)
         cards = map(lambda card: Convert.trait_card_to_json(card), player_state.hand)
@@ -36,7 +40,9 @@ class ProxyPlayer(object):
 
     def choose(self, choice):
         """
-        TODO:
+        Converts the given choice to a JSON representation and send the JSON
+        message to the client, returning the clients response.
+        :param choice: The choice object to send to the client.
         :return: Player's Action choice or False if no actions was selected in
         the timeout period.
         """

@@ -15,7 +15,7 @@ def main(argv):
         players.append(Player())
     dealer = Dealer(players)
     dealer.run()
-    print(print_results(dealer))
+    print(print_results(dealer.get_scores()))
 
 if __name__ == '__main__':
     main(sys.argv[1])

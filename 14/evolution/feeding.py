@@ -1,4 +1,8 @@
 class AbstainFeeding(object):
+    """
+    An AbstainFeeding is a Feeding where the player chooses to not feed any
+    species for the remainder of the round.
+    """
     def apply(self, dealer):
         """
         Applies the consequences of this feeding to the given dealer.
@@ -19,13 +23,20 @@ class AbstainFeeding(object):
 
 
 class HerbivoreFeeding(object):
+    """
+    A HerbivoreFeeding is a Feeding where a player is choosing to feed a
+    non-carnivore species.
+    """
     def __init__(self, species_index):
         """
-        Creates a new VegitarianFeeding given the index of the species to feed.
+        Creates a new HerbivoreFeeding given the index of the species to feed.
         :param species_index: The index of the species to feed in the player's
         list of species
         """
         self.species_index = species_index
+
+    def __eq__(self, other):
+        return isinstance(other, HerbivoreFeeding) and self.species_index == other.species_index
 
     def apply(self, dealer):
         """
@@ -36,9 +47,6 @@ class HerbivoreFeeding(object):
         species = current_player.species[self.species_index]
         dealer.feed(current_player, species)
 
-    def __eq__(self, other):
-        return isinstance(other, HerbivoreFeeding) and self.species_index == other.species_index
-
     def validate(self, dealer):
         """
         Ensures that this Feeding is valid to apply to the given Dealer.
@@ -48,12 +56,17 @@ class HerbivoreFeeding(object):
         player = dealer.players[dealer.current_player_index]
         if len(player.species) > self.species_index:
             spec = player.species[self.species_index]
-            return spec.population > spec.food
+            carnivore = "carnivore" in spec.traits
+            return spec.population > spec.food and not carnivore
         else:
             return False
 
 
 class FatTissueFeeding(object):
+    """
+    A FatTissueFeeding is a Feeding where a player is choosing to feed a species
+    with the "fat-tissue" trait.
+    """
     def __init__(self, species_index, food_requested):
         """
         Creates a new FatTissueFeeding given the index of the species to fill up
@@ -65,6 +78,11 @@ class FatTissueFeeding(object):
         self.species_index = species_index
         self.food_requested = food_requested
 
+    def __eq__(self, other):
+        return isinstance(other, FatTissueFeeding) and \
+            all([self.species_index == other.species_index,
+                 self.food_requested == other.food_requested])
+
     def apply(self, dealer):
         """
         Applies the consequences of this feeding to the given dealer.
@@ -73,11 +91,6 @@ class FatTissueFeeding(object):
         species = dealer.players[dealer.current_player_index].species[self.species_index]
         dealer.watering_hole -= self.food_requested
         species.fat_storage += self.food_requested
-
-    def __eq__(self, other):
-        return isinstance(other, FatTissueFeeding) and \
-            all([self.species_index == other.species_index,
-                 self.food_requested == other.food_requested])
 
     def validate(self, dealer):
         """
@@ -95,6 +108,10 @@ class FatTissueFeeding(object):
 
 
 class CarnivoreFeeding(object):
+    """
+    A CarnivoreFeeding is a Feeding where a player chooses to feed a species with
+    the "carnivore" trait and attack another players' species.
+    """
     def __init__(self, attacker_index, target_index, defender_index):
         """
         Creates a new CarnivoreFeeding given the index of the attacking species,

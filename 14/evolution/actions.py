@@ -108,14 +108,14 @@ class BodyGrow(object):
 class BoardAddition(object):
     """
     Describes a Player action to add a species board to their list to the
-    right? of their list.
+    right of their list.
     """
 
     def __init__(self, payment_index, traits=None):
         """
         Constructs a player BoardAddition where the card in the player's hand
         at index payment_index is used to pay for the species and the indices for
-        trait cards to be placed on the species are in te traits list.
+        trait cards to be placed on the species are in the traits list.
         """
         self.payment_index = payment_index
         if not traits:

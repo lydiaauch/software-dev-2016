@@ -14,26 +14,23 @@ class Dealer(object):
     and the API to progress though it.
 
     Attributes:
-        player_sets: List of Dicts for each player's 'interface' and 'state'.
-            Ex. self.player_sets[self.current_player_index]['state'] would get
-            the state of the current player.
+        players: List of each players' PlayerState
         deck: List of TraitCards representing the game's deck. Where the beginning
             of the list is the top of the deck, and the end of the list is the bottom.
         watering_hole: Integer representing the board's number of available food tokens.
         current_player_index: Index of player_sets for the player whose turn it is.
-        wh_cards: The face down cards whose food value will be added to the waterin' hole.
+        skipped_players: List of players who are no longer feeding in the current round.
     """
 
     def __init__(self, player_interfaces):
         """
         create a Dealer object
-        :param player_interfaces: list of player interfaces
+        :param player_interfaces: list of player interface
         """
         self.players = []
         self.deck = []
         self.watering_hole = 0
         self.current_player_index = 0
-        self.wh_cards = []
         self.skipped_players = []
 
         for index, player in enumerate(player_interfaces):
@@ -68,6 +65,8 @@ class Dealer(object):
     def create_deck(self):
         """
         Creates a deck of TraitCards.
+        Creates 7 cards of each Trait with a value of [-3,3] except for carnivore
+        where there are 17 cards created with a value of [-8,8].
         """
         for trait in TraitCard.traits:
             num_cards = 7
@@ -108,13 +107,16 @@ class Dealer(object):
             self.deal(num_cards, player)
 
     def players_start(self):
+        """
+        Calls start on each player with the current amount of food in the WH.
+        """
         for player in self.players:
             player.start(self.watering_hole)
 
     def get_player_actions(self):
         """
         Gets player actions for each player using the choose method.
-        :return: List-of-Action, on for each player in the game.
+        :return: List-of-Action, for each player in the game.
         """
         actions = []
         before = []
@@ -137,6 +139,8 @@ class Dealer(object):
         Ensures that the list of actions contains valid actions for each player
         in the game. Removes any players whose actions are not valid.
         Effect: removes players from the self.players whose actions are invalid.
+        :param actions: The list of Actions containing the requested Action of
+        each player.
         """
         to_remove = []
         for i in range(len(self.players)):
@@ -152,6 +156,7 @@ class Dealer(object):
     def remove_player(self, player):
         """
         Removes the given player from the game permenantly.
+        :param player: the player to remove from the game.
         """
         self.players.remove(player)
         if self.current_player_index == len(self.players):
@@ -225,6 +230,8 @@ class Dealer(object):
     def feed1(self):
         """
         Executes one step in the feeding cycle and updates the game state accordingly
+        Effect: Feeds one species of the current player, potentially triggerring
+        other feedings.
         """
         current_player = self.players[self.current_player_index]
         if self.watering_hole <= 0:
@@ -271,18 +278,16 @@ class Dealer(object):
 
     def skip_cur_player(self):
         """
-        Removes the player at the given index from the player feeding order.
-        :param player_index: The index of the player to remove in the player_sets
-        array.
+        Removes the current player from the player feeding order.
         """
         if self.current_player_index not in self.skipped_players:
             self.skipped_players.append(self.current_player_index)
 
     def next_feed(self):
         """
-        gets the next species to feed for the current player.
-        :return: a Feeding, either decided automatically if only one obvious choice
-        is present, or by asking the interface of the current player
+        Gets the next species to feed for the current player.
+        :return: a Feeding, either decided automatically if only one choice
+        is present, or by asking the current player
         """
         auto_eat = self.auto_eat()
         if auto_eat is None:
@@ -299,8 +304,8 @@ class Dealer(object):
 
     def auto_eat(self):
         """
-        feeds a species when there is only one herbivore or one carnivore with one defender
-        :param list_of_species: the current players species
+        Feeds a species when there is only one herbivore or one carnivore with
+        one attackable species.
         :return: A Feeding, or None if a feeding choice cannot be automatic.
         """
         cur_player_species = self.players[self.current_player_index].species
@@ -359,11 +364,18 @@ class Dealer(object):
             self.watering_hole = player.trigger_scavenging(self.watering_hole)
 
     def feed(self, player, species):
+        """
+        Updates the watering hole after a players feeding has been applied.
+        :param player: The player currently feeding.
+        :param species: The species the player is feeding.
+        """
         self.watering_hole = player.feed(species, self.watering_hole)
 
     def deal(self, num_cards, player):
         """
         Gives num_cards to the player from the deck.
+        :param num_cards: The number of cards to deal to the player.
+        :param player: The player receiving the cards.
         """
         to_deal = min(num_cards, len(self.deck))
         for i in range(to_deal):
@@ -372,8 +384,9 @@ class Dealer(object):
 
     def check_for_hungries(self, list_of_species):
         """
-        looks for hungry species in a players list of species
-        :return: list of hungry species
+        Finds the hungry species in a players list of species
+        :param list_of_species: The players list of species.
+        :return: List of hungry species.
         """
         hungries = []
         for species in list_of_species:
@@ -389,3 +402,20 @@ class Dealer(object):
         opponents = [plr for plr in self.players]
         opponents.pop(self.current_player_index)
         return opponents
+
+    def get_scores(self):
+        """
+        Creates a List of Lists of player id to the associated player's score.
+        Score is calculated by the sum of the food in the food bag, the sum of the
+        population of each of that player's species, and the sum of the number
+        of trait cards on each of their species.
+        :return: A dictionary [[id, score], ...] for each player left in the game.
+        """
+        scores = []
+        for player in self.players:
+            score = player.food_bag
+            for species in player.species:
+                score += species.population
+                score += len(species.traits)
+            scores.append([player.name, score])
+        return scores

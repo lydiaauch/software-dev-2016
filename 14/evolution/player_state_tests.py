@@ -80,7 +80,6 @@ class TestPlayerState(unittest.TestCase):
         }
         self.check_player(before, self.player, changes)
 
-    # TODO: Species don't need whole trait cards, just their traits.
     def test_replace_traits_one(self):
         replacements = [ReplaceTrait(0, 0, 0)]
         before = copy.deepcopy(self.player)

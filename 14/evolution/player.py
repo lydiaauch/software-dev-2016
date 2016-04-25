@@ -23,6 +23,14 @@ class Player(object):
         self.watering_hole = wh
 
     def choose(self, choice):
+        """
+        Returns the players Action representing how this player wants to use their
+        cards for the current round.
+        :param choice: A Choice object representing the state of the species before
+        and after the current player.
+        :return: An Action representing how the player is using their cards for
+        the round.
+        """
         cards = []
         for i, card in enumerate(self.player_state.hand):
             cards.append({"card": card, "index": i})

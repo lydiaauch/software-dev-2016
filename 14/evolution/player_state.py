@@ -122,6 +122,9 @@ class PlayerState(object):
                            species=self.species)
 
     def start(self, wh):
+        """
+        Sends the start message to this players interface.
+        """
         self.interface.start(self, wh)
 
     def choose(self, before, after):
@@ -248,6 +251,10 @@ class PlayerState(object):
         return True
 
     def are_actions_in_range(self, actions):
+        """
+        Checks to make sure the cards in the given Action are in the players hand.
+        :param actions: the action to perform the check on.
+        """
         for idx in actions.get_indices():
             if idx >= len(self.hand):
                 return False

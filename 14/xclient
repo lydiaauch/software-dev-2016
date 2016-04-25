@@ -8,12 +8,16 @@ from evolution.player import Player
 
 
 def main(adr, port, msg):
-    # Create a TCP/IP socket
+    """
+    Starts an Evolution client using the Player class strategy connecting
+    to a server at adr:port. Uses the given msg in the signup phase.
+    :param adr: The address to connect to the server at.
+    :param port: The port number the server is listening on.
+    :param msg: This player's tagline to use in the signup phase of the game.
+    """
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    # Connect the socket to the port where the server is listening
     server_address = (adr, port)
-    print >>sys.stderr, 'connecting to %s port %s' % server_address
+    print('connecting to %s port %s' % server_address)
     sock.connect(server_address)
     sock.sendall(msg)
 
@@ -24,7 +28,6 @@ def main(adr, port, msg):
         print("Closing connection")
         sock.shutdown(socket.SHUT_RDWR)
         sock.close()
-
 
 
 help_message = """

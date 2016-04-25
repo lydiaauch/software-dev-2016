@@ -16,18 +16,19 @@ def main(port):
         server_addr = ("localhost", int(port))
         sock.bind(server_addr)
         sock.listen(1)
-        # Wait for a connection
-        print >> sys.stderr, "waiting for players"
+
+        print("waiting for players")
         try:
             get_player_connections(sock, connections)
         except TimeoutError:
             pass
         print("connections made")
+
         proxy_players = map(lambda con: ProxyPlayer(con[0]), connections)
         dealer = Dealer(proxy_players)
         dealer.run()
         messages = map(lambda connection: connection[2], connections)
-        print(print_results(dealer, messages))
+        print(print_results(dealer.get_scores(), messages))
     finally:
         for connection in connections:
             print("Closing connection to" + str(connection[1]))
@@ -37,6 +38,9 @@ def main(port):
 
 
 def close_connection(connection):
+    """
+    Closes the given connection.
+    """
     try:
         connection.shutdown(socket.SHUT_RDWR)
         connection.close()

@@ -10,3 +10,4 @@ TIMEOUT = 10
 MAX_MSG_SIZE = 512
 CLIENT_WAIT_TIME = 120
 PLAYER_TAG_LINE = "\"Lydia and Alex are going to WIN\""
+TIMEOUT = 10

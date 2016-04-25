@@ -2,7 +2,7 @@ from functools import wraps
 import errno
 import os
 import signal
-
+from globals import TIMEOUT
 
 def carnivore_targets(carnivore, list_of_player):
     """
@@ -24,11 +24,21 @@ def carnivore_targets(carnivore, list_of_player):
     return targets
 
 
-class TimeoutError(Exception):
-    pass
-
-
-def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
+def timeout(seconds=TIMEOUT, error_message=os.strerror(errno.ETIME)):
+    """
+    Defines a function decorator to define functions with a timeout.
+    Starts a signal with its time set to the timeout amount which raises a
+    TimeoutError if the time limit is reached, otherwise the functions value
+    is returned and no error is raised.
+    Usage:
+    @timeout(20)
+    def func(self):
+        ...
+    Defines the function func with a timeout of 20 seconds before the error is
+    raised.
+    :param seconds: The number of seconds to run the function for.
+    :param error_message: The message to run in the event of a timeout.
+    """
     def decorator(func):
         def _handle_timeout(signum, frame):
             raise TimeoutError(error_message)
@@ -47,6 +57,10 @@ def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
     return decorator
 
 
+class TimeoutError(Exception):
+    pass
+
+
 def is_unique_list(li):
     """
     Checks that no two elements in the list are the same.
@@ -62,23 +76,23 @@ def is_unique_list(li):
     return True
 
 
-def print_results(dealer, messages=None):
+def print_results(scores, messages=None):
     """
     Prints player ID's and scores in descending order. Each player in the dealer
     has an associated message in the messages list to print along with their score.
-    :param dealer: A Dealer object representing the game to print.
+    :param scores: A list of lists of player id and player score.
     :param messages: A list of Strings representing each player's tag line.
     """
     if not messages:
-        messages = map(lambda x: "", dealer.players)
+        messages = map(lambda x: "", scores)
+
+    scores.sort(cmp=lambda l1, l2: l2[1] - l1[1])
     results = ""
-    players = zip(dealer.players, messages)
-    players.sort(cmp=lambda p1, p2: p2[0].food_bag - p1[0].food_bag)
-    for index, player in enumerate(players):
-        score = player[0].food_bag
-        for species in player[0].species:
-            score += species.population
-            score += len(species.traits)
+    index = 1
+    for elem in scores:
+        id = elem[0]
+        score = elem[1]
         results += "%d player id: %d tag: %s score: %d\n" % \
-            (index + 1, player[0].name, player[1], score)
+            (index, id, messages[id - 1], score)
+        index += 1
     return results

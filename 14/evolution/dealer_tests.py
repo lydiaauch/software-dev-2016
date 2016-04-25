@@ -134,8 +134,6 @@ class TestDealer(unittest.TestCase):
         self.feed1(changes)
 
     def test_feed_1_no_wh_food(self):
-        # TODO: should the player index remain the same or change even when there
-        # is no food to eat
         self.dealer.watering_hole = 0
         changes = {"current_player_index": 2}
 

@@ -24,7 +24,6 @@ def check_dealer(self, before, after, changes):
                                                 describing the changes to the
                                                 player state at the given index
     }
-    #TODO: index players by id.
     """
     self.check_attribute(before, after, changes, "watering_hole")
     self.check_attribute(before, after, changes, "current_player_index")
