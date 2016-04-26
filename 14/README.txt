@@ -1,5 +1,6 @@
-The porpoise of this assignment is to extend our game of Evolution from a local
-player/dealer interaction to a remote server/client interaction.
+The purpose of this assignment was to integrate the signup message from a player
+into the printed results and to include the watering hole value when the dealer
+sends the start message to the external player.
 ________________________________________________________________________________
 
 xserver: Starts an Evolution game server listening on port 10001
